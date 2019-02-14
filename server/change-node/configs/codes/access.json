@@ -1,0 +1,23 @@
+[
+    {
+        "errcode": 20000,
+        "errmsg": {
+            "cn": "用户名或者密码错误",
+            "en": "username or password error"
+        }
+    },
+    {
+        "errcode": 20001,
+        "errmsg": {
+            "cn": "用户不存在",
+            "en": "user dose not exist"
+        }
+    },
+    {
+        "errcode": 20002,
+        "errmsg": {
+            "cn": "用户状态不正常",
+            "en": "user status exception"
+        }
+    }
+]

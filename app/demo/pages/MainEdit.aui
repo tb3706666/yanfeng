@@ -1,0 +1,136 @@
+<ui>
+   <aui-header>
+        <aui-titlebar class="titlebar">
+            <left-area>
+                <aui-action type="back" id="backIcon"><i class="icon auicon icon-arrowleft" ></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>烟台备料更换校验系统</aui-text>
+            </caption-area>
+        </aui-titlebar>
+    </aui-header>
+
+
+    <aui-scroller id="addscroller"  class="content " style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;text-align: center; background-color:#FFFFFF;">
+        <p class="type-p">整椅信息</p>
+        <div class="edit-area">
+            <div class="line-div">
+                <font>车号:</font>
+                <input type="text" placeholder="请输入车号" />
+                <a>
+                    <i class="icon auicon icon-cbook"></i>
+                </a>
+            </div>
+            <div class="line-div">
+                <font>车型配置:</font>
+                <input type="text" placeholder="请扫描整椅条码" />
+                <a>
+                    <i class="icon auicon icon-qrcode"></i>
+                </a>
+            </div>
+        </div>
+        <p class="type-p">备料信息</p>
+        <div class="edit-area">
+            <div class="line-div" style="margin-bottom:0">
+                <font>车型配置:</font>
+                <input type="text" placeholder="请扫描备料条码" />
+                <a>
+                    <i class="icon auicon icon-qrcode"></i>
+                </a>
+            </div>
+        </div>
+        <aui-button  class="btn btn-primary sub-btn" >确认更换</aui-button>
+    </aui-scroller>
+
+</ui>
+
+
+<script>
+import '@auicomp/header/Header.aui';
+import '@auicomp/button/Button.aui';
+import '@auicomp/scroller/Scroller.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+
+import Alert from '@auicomp/alert/Alert.aui';
+import Confirm from '@auicomp/confirm/Confirm.aui';
+import fetch from '@comm/utils/xfetch';
+
+import auiLoading from '@auicomp/loading/Loading.aui';
+import './Frame.aui';
+import router from '../routers';
+import Toast from '@auicomp/toast/Toast.aui';
+
+export default class MainEdit{
+    static get tag(){
+        return 'mainEdit';
+    }
+
+    created () {
+        
+
+
+
+    
+    }
+}
+
+</script>
+
+<style type="less">
+.titlebar{
+    background:#4E93F7 ;
+    i{
+        color: #ffffff !important;
+    }
+    aui-text{
+        color: #ffffff ;
+    }
+}
+
+@defaultborder:1px solid #ddd;
+.sub-btn{
+    width:85%;
+    margin: 10px 0;
+}
+.type-p{
+    text-align: left;
+    color: #4E93F7;
+    font-size: 16px;
+    margin: 10px;
+}
+.edit-area{
+    border-top: @defaultborder;
+    border-bottom: @defaultborder;
+    padding: 10px;
+}
+.line-div{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    &:first-child{
+        margin-bottom: 10px;
+    }
+    font{
+        flex: 2;
+        text-align: left;
+    }
+    input[type='text']{
+        border:0;
+        height: 26px;
+        flex: 8;
+        text-align: right;
+        padding: 0 10px;
+    }
+    a{
+        flex: 1;
+        i{
+            font-size: 20px;
+        }
+        &:active{
+            i{
+                color: #4E93F7;
+            }
+        }
+    }
+}
+</style>

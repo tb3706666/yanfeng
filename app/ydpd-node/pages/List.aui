@@ -1,0 +1,231 @@
+<ui>
+<div id="pandian">
+   <aui-header>
+        <aui-titlebar >
+            <left-area>
+                <aui-action type="back" id="backIcon"><i class="icon auicon icon-arrowleft" style="color:white;"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>盘点</aui-text>
+            </caption-area>
+        </aui-titlebar>
+    </aui-header>
+
+
+    <aui-scroller id="addscroller"  class="content showdata" style="display:none;position: absolute; top: 45px; right: 0px; bottom: 45px;left: 0px;text-align: center; background-color:white;">
+        <img src='./assets/imgs/nodata.png' style='width:100%;' v-if="nodata">
+        <aui-list style="text-align:left;"  >
+                <list-cell  class="grid" v-for="item in items" v-on:click="func.listclick(item.TaskId)">
+                    <grid-cell class="flex-1 gridp">
+                        <p style="font-size:18px;font-weight:bold;">{{item.Category}}</p>
+                        <p>资产分类：{{item.Text}}</p>
+                        <p>资产总数：{{item.Count}}</p>
+                        <p>完成情况：{{item.Progress}}{{item.Status}}</p>
+                        <p>开始时间：{{item.Begin}}</p>
+                        <p>结束时间：{{item.End}}</p>
+                    </grid-cell>
+                    <hr style="background-color:#ddd;height:1px;border:none;margin-top:3px;">
+                </list-cell>
+        </aui-list>
+        
+    </aui-scroller>
+
+    <aui-titlebar class="fbottom showdata"  style="display:none;">
+            <left-area>
+                <i class="icon auicon icon-arrowleft" style="color:white;" v-on:click="func.prevs()"></i>
+            </left-area>
+            <caption-area style="line-height:45px;">
+                <aui-text id="pages" style="color:white;text-align:center;">{{pageData.pageno}}/{{pageData.pages}}</aui-text>
+            </caption-area>
+             <right-area>
+                <a>
+                    <i class="icon auicon icon-arrowright" style="color:white;"  v-on:click="func.nexts()"></i>
+                </a>
+            </right-area>
+        </aui-titlebar>
+</div>
+</ui>
+
+
+<script>
+import '@auicomp/header/Header.aui';
+import '@auicomp/button/Button.aui';
+import '@auicomp/scroller/Scroller.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auicomp/datetime/DateTime.aui';
+import '@auicomp/footer/Footer.aui';
+import Alert from '@auicomp/alert/Alert.aui';
+import tool from '@comm/utils/tool';
+import fetch from '@comm/utils/nfetch';
+import { router } from '@auicomp/action/Action.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import './Frame.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+export default class Add{
+    static get tag(){
+        return 'add';
+    }
+
+    
+    created () {
+        $(this.$el).on('enter',function(){
+            $("aui-detail").remove();
+        });
+        $("#backIcon").click(function(){
+            appnest.navigation.closeWindow();
+        });
+        const self = this;
+        fetch.plusready(function(){
+            tool.closeModal();//监听Android返回键，强制关闭所有模态窗口
+            appnest.config.getUserInfo({
+                success:function(r){
+                    window.userInfo = r;
+                    r.loginId='ahuan689';
+                    const obj = self.$obj  = {
+                        items:[],
+                        pageData:{},
+                        pageno:1,
+                        nodata:false,
+                        func:{
+                            prevs:function(){
+                                if(obj.pageno==1){
+                                    Toast.show('已经是第一页');
+                                    return false;
+                                }
+                                if(obj.pageno<obj.pageData.pages&&obj.pageno>1){
+                                        obj.pageno-=1;
+                                        self.getlists();
+                                }
+                            },
+                            nexts:function(){
+                                if(obj.pageno==obj.pageData.pages){
+                                    Toast.show('已经是最后一页');
+                                    return false;
+                                }
+                                if(obj.pageno<obj.pageData.pages&&obj.pageno>0){
+                                    obj.pageno+=1;
+                                    self.getlists();
+                                }
+                            },
+                            listclick:function(taskId){
+                                window.task=taskId;
+                                router.go("/detail");
+                            }
+                        }
+                    };
+                    window.hasLogin = true;//添加登陆成功标志
+                    self.getlists();
+                },
+                fail:function(r){
+                    Alert.show({
+                        content: '获取平台用户信息失败，请联系管理员',
+                        doOk: function(){
+                            appnest.navigation.closeWindow();
+                        }
+                    });
+                }
+            });
+        });
+    }
+    detached(){
+        this.$vm && this.$vm.destroy();
+    }
+    getlists(){
+        let selfs = this;
+        auiLoading.show();
+        fetch({
+            url : "/list",
+            data: {
+                username:window.userInfo.loginId,
+                pageNumbe:selfs.$obj.pageno
+            },
+            success: function(json){
+                if(json.code!=true){
+                    Alert.show({
+                        content: '用户不存在',
+                        doOk: function(){
+                            appnest.navigation.closeWindow();
+                        }
+                    });
+                }
+                if(json.totalCount=='0'){
+                    selfs.$obj.nodata=true;
+                    selfs.$obj.pageData={pageno:1,pages:1};
+                     Toast.show('查无数据');
+                }else{
+                    $.each(json.data,function(e,e1){
+                        selfs.$obj.items.push(e1);
+                    });
+                     selfs.$obj.pageData={pageno:selfs.$obj.pageno,pages:json.pages};
+                }
+                selfs.$vm = $(selfs.$el).render(selfs.$obj);
+                auiLoading.hide();
+                $(".showdata").css("display","block");
+            },
+            error: function(rs){
+                auiLoading.hide();
+                Toast.show(rs.errmsg, function(){});
+            }
+        });
+    }
+}
+
+</script>
+
+<style type="less">
+aui-titlebar{
+    background:#004ea2 !important;
+    left-area{
+        i{color: #ffffff !important;}
+    }
+    aui-text{
+        color: #ffffff !important;
+    }
+}
+    .gridp p:first-child{
+        padding-top: 15px;
+    }
+    .gridp p{
+        padding-left: 15px;
+    }
+    .fbottom{
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+    .auicon {
+    font-size: 25px;
+    }
+    .md-phone-num .mbsc-np-dsp {
+        min-height: 25px;
+        -webkit-box-sizing: content-box;
+        -moz-box-sizing: content-box;
+        box-sizing: content-box;
+    }
+    .mbsc-ios .mbsc-control-w:after, .mbsc-ios .mbsc-control-w:before{
+        border:none;
+    }
+    .mbsc-form-group{
+        margin:0.5em 0;
+    }
+    
+     a[class="button-selectimg"]{
+         padding:4px 6px;
+         border:1px dashed #00A2D4;
+         border-radius:2px;
+    }        
+    tabbar-cell.active{
+        .home:before{
+        content: '\E6E5';
+        }
+        .add:before{
+            content: '\E718';
+        }
+        .me:before{
+            content: '\E713';
+        }
+    }
+    
+</style>

@@ -1,0 +1,102 @@
+<ui>
+<aui-scroller class="content" id="stascroll" style="position: absolute; top: 0px; right: 0px; bottom: 0px;left: 0px;text-align: center;border-top:0;">
+
+<aui-list id="contentlist" v-for="item in items">
+        <list-cell class="grid " v-on:click="func.listclick(item.badge)">
+            <div style="flex:1;display:flex;align-items:center;justify-content:center">
+                <i class="icon auicon icon-people-fill" ></i>
+            </div>
+            <div style="flex:9;display:flex;align-items:center;justify-content:left">
+                <p style="padding:10px;">{{item.badge}}-{{item.name}}</p >
+            </div>
+            <div style="flex:1;display:flex;align-items:center;justify-content:center">
+                <i class="icon auicon icon-arrowright"></i>
+            </div>
+        </list-cell>
+</aui-list>
+</aui-scroller>
+</ui>
+
+<script>
+import '@auicomp/header/Header.aui';
+import '@auicomp/footer/Footer.aui';
+import '@auicomp/scroller/Scroller.aui';
+import '@auicomp/text/Text.aui';
+import '@auicomp/grid/Grid.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auicomp/list/List.aui';
+import '@auicomp/action/Action.aui';
+import fetch from '@comm/utils/nfetch';
+import Alert from '@auicomp/alert/Alert.aui';
+import { router } from '@auicomp/action/Action.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+
+export default class Stafflist{
+    static get tag(){
+        return 'stafflist';
+    }
+
+
+created(){
+        auiLoading.show();
+        fetch({
+            url : '/person',
+            data: {
+                username: window.userInfo.badge
+            },
+            success: function(stadata){
+                auiLoading.hide();
+                stadata.list.forEach((e,i)=>{
+                    obj.items.push(e);
+                })
+            },
+            error: function(rs){
+                auiLoading.hide();
+                Alert.show({
+                    content: '请求错误',
+                });
+            }
+        });
+
+        const $el = $(this.$el);
+        const obj = this.$obj = {
+            items : [{name:window.userInfo.userName,badge:window.userInfo.badge}],
+            func:{
+                listclick:function(badgeParam){
+                    router.go('/daka?badge='+badgeParam);
+                }
+            }
+        };
+        $el.render(obj);
+
+}
+}
+
+
+</script>
+
+<style type="less">
+.md-phone-num .mbsc-np-dsp {
+    min-height: 25px;
+    -webkit-box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    box-sizing: content-box;
+}
+.mbsc-form-group{
+    margin: 0;
+}
+aui-stafflist{
+    aui-list{
+        border-top:0;
+        margin: 0 !important;
+        list-cell{
+            display: flex;
+            padding:5px !important;
+            i{
+                color: #004ea2;
+            }
+        }
+    }
+}
+
+</style>

@@ -1,0 +1,522 @@
+<ui>
+<div id="hl_content">
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <!-- 评奖信息维护查询后点击查看详情 -->
+            <caption-area>
+                <aui-text v-text="auititle"></aui-text>
+            </caption-area>
+            <right-area v-on:click="func.listclick()">
+                <a>
+                    <i class="icon auicon icon-hook-fill"></i>
+                </a>
+            </right-area>
+        </aui-titlebar>
+        <aui-tabbar class="tabbar tabbar-line animated">
+            <tabbar-cell class="active" href="#toggle1">
+                <label class="tab-label">基本信息</label>
+            </tabbar-cell>
+            <tabbar-cell href="#control1">
+                <label class="tab-label">审批信息</label>
+            </tabbar-cell>
+        </aui-tabbar>
+    </aui-header>
+<!-- 基本信息 -->
+    <aui-scroller id="toggle1" class="content active" action-target style="position: absolute; top: 90px; right: 0px; bottom: 0px;left: 0px;">
+        <aui-list >
+            <list-cell v-for="item in items2" id="lists" >
+                <div v-if="item.name=='合理化建议附件'" >
+                    <a>
+                        {{item.name}}
+                    </a><br>
+                        <a class="inblok" v-for="files in item.value" v-on:click="func.downloads(files.fileName,files.attachSeriNo)" v-filter="func.getAttachShowInfo">
+                            <i v-class="files.class" v-style="{color:files.color}"></i>{{files.fileName}}
+                        </a>
+                </div>
+                <div v-if="item.name=='实施报告附件'" >
+                    <a>
+                        {{item.name}}
+                    </a><br>
+                        <a class="inblok" v-for="files in item.value" v-on:click="func.downloads(files.fileName,files.attachSeriNo)" v-filter="func.getAttachShowInfo">
+                            <i v-class="files.class" v-style="{color:files.color}"></i>{{files.fileName}}
+                        </a>
+                </div>
+                <div v-if="item.name!='合理化建议附件'&&item.name!='实施报告附件'" >
+                    <a>
+                    {{item.name}}
+                    </a><br>
+                    <a style="color:red;" v-for="values in item.value">
+                        {{values.text}}
+                    </a><br>
+                </div>
+            </list-cell>
+        </aui-list>
+    </aui-scroller>
+
+<!-- 审批信息 -->
+    <aui-scroller id="control1" class="content" action-target style="position: absolute; top: 90px; right: 0px; bottom: 0px;left: 0px;">
+        <div id="toallocate" >
+            <form id="demo2" style="display:none" mbsc-form >
+                <div class="mbsc-form-group">
+                    <label >
+                        <span class="stylespan" >改进措施</span>
+                        <textarea style="text-index:2em;" rows="3" cols="20" id="propActMeas" name="propActMeas" subval sval errmsg='改进措施不能为空'></textarea>  
+                    </label>
+                    <label >
+                        <span class="stylespan" >改进效果</span>
+                        <textarea style="text-index:2em;" rows="3" cols="20" id="propEffe" name="propEffe" subval sval errmsg='改进效果不能为空'></textarea>  
+                    </label>
+                </div>
+                <div class="mbsc-form-group">
+                     <label >
+                        <span class="stylespan" >节约金额</span>
+                        <input type="text" name="costSaveAmt" subval sval errmsg='节约金额不能为空'>
+                    </label>
+                    <label >
+                        <span class="stylespan" >节约类型</span>
+                        <select id="costSaveType" name="costSaveType" subval sval errmsg='节约类型不能为空'>
+                            <option value="1" id="costSaveType1">硬节约</option>
+                            <option value="2" id="costSaveType2">软节约</option>
+                        </select>
+                    </label>
+                     <label >
+                        <span class="stylespan" >节约金额计算方法</span>
+                        <textarea rows="3" cols="20" name="costSaveNote" id="costSaveNote" subval sval errmsg='节约金额计算方法不能为空'></textarea>  
+                    </label>
+                </div>
+                <div class="mbsc-form-group" >
+                    <label>
+                        <span class="stylespan" >奖项等级</span>
+                        <select id="bonusClassId" name="bonusClassId" subval sval errmsg='奖项等级不能为空'>
+                        <option v-for="item in items4" v-bind:value="item.value">{{item.text}}</option>
+                        </select>
+                    </label>
+                </div>
+            <div class="mbsc-form-group">
+            <list-cell id="upimg" style="background-color:#fff;padding-left:0 !important;">
+                <aui-text class="fl">上传附件</aui-text>
+                <aui-button class="btn btn-primary btcss" v-on:click="func.fimg()">文件上传</aui-button>
+            </list-cell>
+
+            <!-- 上传名称 -->
+            <div class="allfujian" style="background-color:#fff; display:inline-block !important;width:100%;">
+            <input class="fujian" type="text" style="display:none;margin-top:50px;">
+
+            </div>
+
+ <!-- 多附件上传结束 -->
+
+            <!-- 隐藏参数 -->
+            <input type="hidden" name="seriId" v-bind:value="sid" sval>
+            <!-- 状态 -->
+            <input type="hidden" name="sbt" value="提交" sval>
+
+    </aui-scroller>
+    </div>
+</ui>
+
+
+<script>
+import '@auicomp/datetime/DateTime.aui';
+import '@auiutil/mobiscroll3/css/mobiscroll.javascript.min.css';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import Actionsheet from '@auicomp/actionsheet/Actionsheet.aui';
+import Action from '@auicomp/action/Action.aui';
+import tool from '@comm/utils/tool';
+import mobiscroll from '@auiutil/mobiscroll3/js/mobiscroll.javascript.min';
+import Confirm from '@auicomp/confirm/Confirm.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+import fetch from '@comm/utils/xfetch';
+import { router } from '@auicomp/action/Action.aui';
+import './Frame.aui';
+// import $ from 'agile-ce';
+
+export default class EvalDetail{
+    
+    static get tag(){
+        return 'evaldetail';
+    }
+
+    created(){
+        var seriIds=router.getQueryObj(location.search).seriId||router.getQueryObj().seriId;
+        var jfcout=[];
+        var jfcout2=[];
+        var jfcout4=[];
+
+        auiLoading.show();
+        fetch({
+            appId: 'ci',
+            url : 'http://ciurl/hlh_eval_detail.jsp',
+            data: {
+                seriId:seriIds
+            },
+            type:'get',
+            success: function(json){
+                //基本信息页面
+                obj.auititle=json.title;
+                //下拉框解决
+                if(json.costSaveType==1){
+                    $('#costSaveType').next().addClass('jy1').val('硬节约');
+                }else{
+                    $('#costSaveType').next().addClass('jy2').val('软节约');
+                }
+                //基本信息
+                $.each(json.list,function(e,e1){
+                    jfcout2.push(e1);
+                });
+                //审批页面
+                $("#propActMeas").html(json.propActMeas);
+                $("#propEffe").html(json.propEffe);
+                $("input[name='costSaveAmt']").val(json.costSaveAmt);
+                $("#costSaveNote").html(json.costSaveNote);
+
+
+                if(json.costSaveType=="1"){
+                    $("#costSaveType1").attr("selected");
+                }else{
+                    $("#costSaveType2").attr("selected");
+                }
+                //奖项等级
+                $.each(json.bonusInfo,function(n,n1){
+                    //默认显示卓越奖
+                    if(n=='0'){
+                    $('#bonusClassId').next().addClass('jx').val(n1.text);
+                    }
+                    jfcout4.push(n1);
+                })
+
+                auiLoading.hide();
+                
+            },
+            error: function(rs){
+                auiLoading.hide();
+                Toast.show(rs.errmsg);
+            }
+        });
+
+        //附件或图片
+        var flag;
+        //附件路径
+        var filepath;
+        //附件名称
+        var filename;
+
+        var obj = {
+            items:jfcout,
+            items2:jfcout2,
+            items4:jfcout4,
+            //必要id
+            sid:seriIds,
+            //标题信息
+            auititle:'',
+            //
+            func:{
+                listclick:function(){
+                    //获取所有参数
+                    var subdata = [];
+                    $("[subval]").each(function(i,e){
+                        //获取表单的全部参数
+                        let pjson = {
+                            name : $(this).attr('name'),
+                            value : $(this).val()
+                        };
+                        subdata.push(pjson);
+                    })
+                    window.eval_detail=subdata;
+                    obj.func.subform()
+                },
+                downloads:function(fname,id){
+                    auiLoading.show();
+                    fetch.download({
+                        appId: "ci",
+                        url:'http://ciurl/bizProp/download?attachSeriNo='+id,
+                        fileName: fname,
+                        path: "res:download",
+                        success: function(rs) {
+                            appnest.native.openFile({
+                                path: rs.path //需要打开本地文件地址路径，支持全路径或res:前缀路径
+                                });
+                            auiLoading.hide();
+                        },
+                        error: function(rs) {
+                            auiLoading.hide();
+                            Toast.show(rs.errmsg);
+                        }
+                    });
+                },
+                getAttachShowInfo:function(index,files){
+                    var atinfo = tool.getAttachIcon(files.fileName);
+                    files.class = atinfo.class;
+                    files.color = atinfo.color;
+                },
+                //提交表单
+                subform:function(){
+                    //非空校验--start
+                    let errmsg = '',
+                    validateResult=false;
+                    $("[errmsg]").each(function(){
+                            if($(this).val() == ''){
+                            errmsg = $(this).attr('errmsg');
+                            validateResult = true;
+                            return false;
+                            }
+                    })
+                    if(validateResult){
+                        Toast.show(errmsg);
+                        return false;
+                    }
+
+                    //需提交表单信息为subform
+                    var subform = {};
+                    $("[sval]").each(function(i,e){//拼接提交参数为json
+                        subform[$(this).attr('name')] =  $(this).val();
+                    });
+
+                    //发起请求
+                    auiLoading.show();
+                    fetch({
+                        appId: 'ci',
+                        url: 'http://ciurl/bizEvalGrant/toGrantSubmit',
+                        // type:post,
+                        data:subform,
+                        success: function(data1) {
+                            if(data1.result=='success'){
+                                //提交成功
+                                    Toast.show('提交成功！');
+                                    history.go(-1);
+                                //不成功
+                            }else if(data1.result=='failed'){
+                                Toast.show(data1.msg);
+
+                            }
+                            auiLoading.hide();
+                        },
+                        error: function(rs) {
+                            auiLoading.hide();
+                            Toast.show(rs.errmsg);
+                        }
+                    });
+                },
+
+                //提交附件
+                subimg:function(filePaths){
+                    //切换附件or图片
+                    if(flag==1){
+                        filepath=$('.fujian').val();
+                        filename=filepath.substring(filepath.lastIndexOf("/") + 1);
+                    }else if(flag==2){
+                        filepath=filePaths;
+                        filename=filepath.substring(filepath.lastIndexOf("/") + 1)
+                    }
+
+                    auiLoading.show();
+                    fetch({
+                        appId: 'ci',
+                        url: 'http://ciurl/bizProp/upload',
+                        data:[
+                        {
+                            type:1,
+                            name:'Filedata',
+                            value:filepath
+                        },
+                        {
+                            type:0,
+                            name:'Filename',
+                            value:filename
+                        },
+                        {
+                            type:0,
+                            name:'seriId',
+                            value:seriIds
+                        },
+                        {
+                            type:0,
+                            name:'addtType',
+                            value:'2'
+                        },
+                        {
+                            type:0,
+                            name:'Upload',
+                            value:'Submit Query'
+                        }],
+                        success: function(data1) {
+                            Toast.show('上传成功！');
+                            $('.allfujian').append("<p class="+data1.attachSeriNo+">"+filename+"</p>")
+
+                            //删除附件
+                            $("."+data1.attachSeriNo).click(function(){
+                                appnest.ui.confirm({
+                                    content:'是否删除'+data1.filename+'?',
+                                    confirmButton:'确认',
+                                    cancelButton:'取消',
+                                    success:function(rc){
+                                        if(rc.buttonType == 'confirm')
+                                            obj.func.deletefujian(data1.attachSeriNo);
+                                    }
+                                });
+                            });
+
+                            auiLoading.hide();
+                        },
+                        error: function(rs) {
+                            auiLoading.hide();
+                            Toast.show(rs.errmsg);
+                        }
+                    });
+                },
+    
+                //删除附件
+                deletefujian:function(pid){
+                    auiLoading.show();
+                    fetch({
+                        appId: 'ci',
+                        url: 'http://ciurl/bizProp/deleteAddt',
+                        data:{
+                            attachSeriNo:pid,
+                        },
+                        type:"get",
+                        //若请求接口中未返回错误信息,设置以下
+                        dataType:'text',
+                        success: function(data1) {
+                            Toast.show('删除成功！');
+                            $('.'+pid).remove();
+                            auiLoading.hide();
+                        },
+                        error: function(rsp){
+                            auiLoading.hide();
+                            Toast.show(rsp.errmsg);
+                        }
+                    });
+
+                },
+
+                //照片上传
+                fimg: function() {
+                    Actionsheet.show({
+                        list: [{
+                            text: '选择附件',
+                            handler: function() {
+                                    flag=1;
+                                appnest.ui.selectFile({
+                                success: function (res) {
+                                    var filePaths = res.filePaths ; // 用户选择本地文件路径数组
+                                    // $('.fileimg').hide();
+                                    // $('.fujian').val(filePaths).show();
+                                    $('.fujian').val(filePaths);
+                                        obj.func.subimg(filePaths)
+                                        },
+                                            fail: function (res) {
+                                                Toast.show(res.errmsg);
+                                    }
+                                    });
+                            }
+                        },
+                        {
+                            text: '拍照上传',
+                            handler: function() {
+                                flag=2;
+                                appnest.photo.camera({
+                                    width: 1080, // 拍照后生成图片宽度
+                                    success: function(res) {
+                                        var img = res.imagePath;
+                                        var thumbnailPath = res.thumbnailPath;
+                                        obj.func.subimg(img)
+                                    },
+                                    fail: function(res) {
+                                        Toast.show(res.errmsg);
+                                    }
+                                });
+                            }
+                        }],
+                        doCancel: function() {
+                        }
+                    });
+                },
+            }
+        };
+        $('#hl_content').render(obj);
+
+//form组件开始
+       mobiscroll.settings = {
+            theme: 'ios',
+            lang: 'zh',
+        };
+
+        var date,  widget,
+            now = new Date(),
+            form = document.getElementById("demo"),
+            form = document.getElementById("demo2");
+
+        mobiscroll.form('#demo');
+        mobiscroll.form('#demo2');
+//form组件结束
+
+
+// tabbar-cell
+
+        const $el = $(this.$el);
+        Action.listener($el.find('tabbar-cell').attr('type', 'control'));
+
+        this.$elvm = $el.render({
+            list: [
+                {
+                    title: '第一项'
+                },
+                {
+                    title: '第二项'
+                }
+            ]
+        })
+    }
+
+    detached(){
+        this.$elvm && this.$elvm.destroy();
+    }
+}
+
+</script>
+
+<style>
+.stylespan{
+    width:140px;
+}
+[type="toggle"].active .icon-arrowdown::before,
+[type="control"].active .icon-arrowdown::before{
+    content: '\e694';
+}
+.content-tips{
+    font-size: 13px;
+    color: #7F8C8D;
+    margin: 10px;
+}
+#toggle a{
+    display: inline-block;
+}
+/* 附件 */
+    .btcss {
+        top: 10px !important;
+        right: 25% !important;
+        transform: none !important;
+    }
+    .fileimg {
+        width: 100px;
+        height: 100px;
+        margin-top: 40px;
+        margin-left: 50px;
+    }
+    .allfujian p{
+        height: 30px;
+        line-height: 30px;
+        font-weight: bold;
+        text-align:right;
+    }
+    .inblok{
+        display: inline-block;
+        width: 100%;
+    }
+</style>
+
+

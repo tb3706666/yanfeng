@@ -1,0 +1,723 @@
+<ui>
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back" id="backIcon"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <input type="text" id="key" name="key" style="width:100%;height:26px;border:0"  placeholder="请输入关键字...">
+            </caption-area>
+
+             <right-area v-on:click="func.searchlist()">
+                <a>
+                    <i class="icon auicon icon-search"></i>
+                </a>
+            </right-area>
+        </aui-titlebar>
+
+    </aui-header>
+
+    <!-- 主页 -->
+<div class="active indexrf" style="position: absolute; top: 45px; right: 0px; bottom: 60px;left: 0px; " action-target>
+
+    <!-- 轮播图 -->
+    <div class="swiper-container" id="indexSwiper" style="height: 140px;">
+        <div class="swiper-wrapper">
+        </div>
+        <!-- 分页器 -->
+         <div class="swiper-pagination"></div>
+    </div>
+    <aui-refresher class="search-refresher-ie content " delay style="position: absolute; top: 140px; right: 0px; bottom: 0;left: 0px;text-align: center; background-color:white;" v-on:pulldown="func.doPullDown"  v-on:pullup="func.doPullUp" auto>
+        <p style="font-size:15px;font-weight:bold;margin:5px 10px;text-align:left">idea最新动态列表</p>
+        <aui-list v-for="item in dongtais">
+            <!-- 发布内容 -->
+            <list-cell class="grid" v-on:click="func.ideax(item.id)">
+                <grid-cell>
+                    <img class="media-object pull-left touxiang pic" v-bind:src="item.headImg">
+                </grid-cell>
+                <grid-cell class="flex-1 padded">
+                    <a style="color: lightseagreen;font-size: medium;">{{item.author}}</a><small style="float:right;">{{item.date}}</small>
+                    <p class="lineone">{{item.titContent}}</p>
+                </grid-cell>
+            </list-cell>
+
+            <!-- 回复内容 -->
+            <div v-if="item.replyInfo.length>0">
+                <div v-for="replys in item.replyInfo">
+                    <list-cell class="grid" style="padding:6px 12px;">
+                        <grid-cell>
+                            <p style="color:#000;margin-bottom:5px;text-align:left;">{{replys.name+replys.text}}</p>
+                            <p style="color:grey;text-align:left;font-size:12px;">{{replys.date}}</p>
+                        </grid-cell>
+                        <grid-cell style="float:right;" v-if="replys.huifuricon!=''&&replys.huifuricon!=undefind">
+                            <i class="icon auicon icon-chat" v-on:click="func.showLouceng(replys.replyId)"></i>
+                        </grid-cell>
+                    </list-cell>
+                
+                    <!-- 回复框 回复楼层-->
+                    <list-cell v-bind:class="replys.replyId" style="display:none;">
+                        <p><input type="text" class="inputtext"><i class="icon auicon icon-paperplane-fill" v-on:click="func.reToLouceng(replys.replyId)"  style="color:#0086b3;"></i></p>
+                    </list-cell>
+                </div>
+            </div>
+            <!-- 回复框 回复楼主-->
+            <list-cell v-bind:class="item.id" style="display:none;">
+                <input type="text" class="inputtext"><i class="icon auicon icon-paperplane-fill" v-on:click="func.reToLouzhu(item.id)" style="color:#0086b3"></i>
+            </list-cell>
+            <!-- 回复,赞,踩-->
+            <list-cell style="padding: 5px 0;display:flex;justify-content:space-around">
+                <grid-cell class="flex-1 padded" style="text-align:center">
+                <img src="./assets/imgs/comments.png" width="20px" height="20px" v-on:click="func.showLouzhu(item.id)"><span class="num">{{item.reply_no}}</span>
+                </grid-cell>
+
+                <grid-cell class="flex-1 padded" style="text-align:center" v-if="item.zanYn=='1'">
+                    <img src="./assets/imgs/good.png" width="20px" height="20px" v-on:click="func.like(item.id)"><span class="num">{{item.like_no}}</span>
+                </grid-cell>
+                <grid-cell class="flex-1 padded" style="text-align:center" v-else>
+                    <img src="./assets/imgs/good.png" width="20px" height="20px" ><span class="num">{{item.like_no}}</span>
+                </grid-cell>
+
+                <grid-cell class="flex-1 padded" style="text-align:center" v-if="item.caiYn=='1'">
+                    <img src="./assets/imgs/bad.png" width="20px" height="20px" v-on:click="func.cai(item.id)"><span class="num">{{item.step_no}}</span>
+                </grid-cell>
+                <grid-cell class="flex-1 padded" style="text-align:center" v-else>
+                    <img src="./assets/imgs/bad.png" width="20px" height="20px" ><span class="num">{{item.step_no}}</span>
+                </grid-cell>
+            </list-cell>
+        </aui-list>
+            
+        <div v-if="!hasData" style="text-align:center;padding:10px;color:#ddd;">没有更多数据</div>
+    </aui-refresher>
+</div>
+
+
+    <!-- 个人信息 -->
+    <aui-scroller id="other" class="content bgef4" action-target style="position: absolute; top: 45px; right: 0px; bottom: 60px;left: 0px;">
+        <div id="userinfo" >
+            <aui-list class="flist">
+                    <list-cell class="grid">
+                        <grid-cell>
+                            <img class="media-object pull-left pic" v-bind:src="items.userImg"  width="60px" height="60px" style="border-radius:5px;">
+                        </grid-cell>
+                        <grid-cell class="flex-1 padded" style="font-size:18px;margin-top:5px;" >
+                        {{items.username}}
+                            <p style="color:#9B9B9B;margin-top:5px; font-size:14px;">{{items.position}}</p>
+                        </grid-cell>
+                    </list-cell>
+            </aui-list>
+
+            <aui-list class="fflist">
+                    <list-cell style="padding-left:30px;padding-right:70px;">
+                        <a class="fl">
+                            <span>
+                            <img src="./assets/imgs/jifen.png" class="mr10">{{items.myCredit}}
+                            </span>
+                        </a>
+                    
+                        <a class="fr">
+                            <span v-on:click="func.xiaoxi()">
+                            <img src="./assets/imgs/xiaoxi.png" class="mr10">{{items.myMsg}}
+                            </span>
+                        </a>
+                
+                    </list-cell>
+            </aui-list>
+        </div>
+            <aui-list>
+            
+                    <list-cell v-on:click="func.myidea()">
+                            <span class="font17"><img src="./assets/imgs/idea.png" class="mr10">我的idea</span><i class="icon auicon icon-arrowright"></i>
+                    </list-cell>           
+                    <list-cell v-on:click="func.biaoqianyun()">
+                            <span class="font17"><img src="./assets/imgs/biaoqianyun.png" class="mr10">标签云</span> <i class="icon auicon icon-arrowright"></i>
+                    </list-cell>          
+                    <list-cell v-on:click="func.weijie()">
+                            <span class="font17"><img src="./assets/imgs/tiji.png" class="mr10">未解题集</span> <i class="icon auicon icon-arrowright"></i>
+                    </list-cell>
+            </aui-list>
+
+                <aui-list>
+                    <list-cell v-on:click="func.huodong()">
+                            <span class="font17"><img src="./assets/imgs/huodong.png" class="mr10">活动</span> <i class="icon auicon icon-arrowright"></i>
+                    </list-cell>
+                    <list-cell v-on:click="func.fenxiang()">
+                            <span class="font17"><img src="./assets/imgs/fenxiang.png" class="mr10">M分享</span> <i class="icon auicon icon-arrowright"></i>
+                    </list-cell>
+                    <list-cell v-on:click="func.jieshao()">
+                            <span class="font17"><img src="./assets/imgs/jieshao.png" class="mr10">介绍</span> <i class="icon auicon icon-arrowright"></i>
+                    </list-cell>
+            </aui-list>
+
+                <aui-list>
+                    <list-cell v-on:click="func.jifen()">
+                            <span class="font17"><img src="./assets/imgs/jifenpaihang.png" class="mr10">积分排行</span> <i class="icon auicon icon-arrowright"></i>
+                    </list-cell>
+                    <list-cell v-on:click="func.paihang()">
+                            <span class="font17"><img src="./assets/imgs/paihang.png" class="mr10">建议排行</span> <i class="icon auicon icon-arrowright"></i>
+                    </list-cell>
+            </aui-list>
+
+    </aui-scroller>
+
+    <aui-footer>
+        <aui-tabbar id="footer" class="tabbar tabbar-footer tabbar-tiled">
+
+            <tabbar-cell class="active" href=".indexrf">
+                <i class="tab-icon icon auicon icon-home home"></i>
+                <label class="tab-label">首页</label>
+            </tabbar-cell>
+           
+            
+            <tabbar-cell>
+            <aui-action href="#/addnew" class="acblock">
+                <i class="tab-icon icon auicon icon-plus add"></i>
+                <label class="tab-label">新增</label>
+                 </aui-action>
+                </tabbar-cell>      
+            <tabbar-cell href="#other">
+                <i class="tab-icon icon auicon icon-person me"></i>
+                <label class="tab-label">我的</label>
+            </tabbar-cell>
+
+        </aui-tabbar>
+    </aui-footer>
+</ui>
+
+
+<script>
+// import '@auicomp/swiper/Swiper.aui';
+import '@auicomp/header/Header.aui';
+import '@auicomp/scroller/Scroller.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auicomp/tabbar/Tabbar.aui';
+import '@auicomp/footer/Footer.aui';
+import '@auicomp/grid/Grid.aui';
+import '@auicomp/list/List.aui';
+import '@auicomp/text/Text.aui';
+import '@auicomp/toggle/Toggle.aui';
+import '@auicomp/button/Button.aui';
+import '@auicomp/action/Action.aui';
+
+import Swiper from 'swiper';
+import 'swiper/dist/css/swiper.css';
+
+import Refresher from '@auicomp/refresher/Refresher.aui';
+import Alert from '@auicomp/alert/Alert.aui';
+import fetch from '@comm/utils/xfetch';
+import Action,{ router } from '@auicomp/action/Action.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+
+export default class Iexpress{
+    
+    static get tag(){
+        return 'iexpress';
+    }
+
+    created(){
+        const selfThis = this;
+        //清楚缓存页面
+        $(this.$el).on('enter',function(){
+            $("aui-suggestion").remove();
+            $("aui-biaoqianyun").remove();
+            $("aui-myidea").remove();
+            $("aui-huodong").remove();
+            $("aui-huodong").remove();
+            $("aui-mshare").remove();
+            $("aui-introduction").remove();
+            $("aui-searchlist").remove();
+        });
+        $("#backIcon").click(function(){
+            appnest.navigation.closeWindow();
+        });
+        
+        const $el = $(this.$el);
+        Action.listener($el.find('tabbar-cell').attr('type', 'control'));
+
+        const indexSwiper = new Swiper('#indexSwiper', {
+            autoplay: true,//可选选项，自动滑动
+            loop:true,
+            pagination: {
+                el: '.swiper-pagination',
+            }
+        })
+
+        var nowpage=2;
+        var dongtai=[];
+        
+        auiLoading.show();
+        fetch({
+            appId:'iexpress',
+            url:'http://IEXPRESS/main',
+            success:function(json){
+                obj.items.username=json.username;
+                obj.items.position=json.position;
+                obj.items.myCredit=json.myCredit;
+                obj.items.myMsg=json.myMsg;
+                //轮播图
+                $.each(json.bannerInfo,function(e,e1){
+                    var imgSrc = e1.imgSrc;
+                    var imgName=imgSrc.replace(/http:/g,"").replace(/https:/g,"").replace(/\//g,"&");
+                    appnest.file.isFileExist({
+                        path:"res:download/"+imgName,
+                        success:function(rs){
+                            if(rs.code == 0){
+                                fetch.download({
+                                    appId: 'iexpress',
+                                    url: imgSrc,
+                                    fileName: imgName,
+                                    path: "res:download",
+                                    success: function(rs) {
+                                        obj.func.getBase64(rs.path,function(base64Res){
+                                            // e1.imgSrc=base64Res.data;
+                                            indexSwiper.appendSlide('<div class="swiper-slide" ><img style="width:100%;height:100%" src="'+base64Res.data+'"/></div>');
+                                        });
+                                        
+                                    },
+                                    error: function(rsp){}
+                                });
+                            }else{
+                                obj.func.getBase64("res:download/"+imgName,function(base64Res){
+                                    // e1.imgSrc=base64Res.data;
+                                    indexSwiper.appendSlide('<div class="swiper-slide" ><img style="width:100%;height:100%" src="'+base64Res.data+'"/></div>');
+                                });
+                            }
+                        }
+                    });
+                });
+                
+                //动态列表
+                $.each(json.dongtaiInfo,function(e,e1){
+                    if(e1.headImg.length<=15){
+                        e1.headImg="./assets/imgs/default.png"
+                    }else{
+                        var imgSrc = e1.headImg;
+                        var imgName=imgSrc.replace(/http:/g,"").replace(/https:/g,"").replace(/\//g,"&");
+                        appnest.file.isFileExist({
+                            path:"res:download/"+imgName,
+                            success:function(rs){
+                                if(rs.code == 0){
+                                    fetch.download({
+                                        appId: 'iexpress',
+                                        url: imgSrc,
+                                        fileName: imgName,
+                                        path: "res:download",
+                                        success: function(rs) {
+                                            obj.func.getBase64(rs.path,function(base64Res){
+                                                e1.headImg=base64Res.data;
+                                            },50);
+                                        },
+                                        error: function(rsp){}
+                                    });
+                                }else{
+                                    obj.func.getBase64("res:download/"+imgName,function(base64Res){
+                                        e1.headImg=base64Res.data;
+                                    },50);
+                                }
+                            }
+                        });
+                    }
+                    dongtai.push(e1);
+                });
+
+                //个人信息头像
+                var imgSrc = json.userImg;
+                var imgName=imgSrc.replace(/http:/g,"").replace(/https:/g,"").replace(/\//g,"&");
+                appnest.file.isFileExist({
+                    path:"res:download/"+imgName,
+                    success:function(rs){
+                        if(rs.code == 0){
+                            fetch.download({
+                                appId: 'iexpress',
+                                url: imgSrc,
+                                fileName: imgName,
+                                path: "res:download",
+                                success: function(rs) {
+                                    obj.func.getBase64(rs.path,function(base64Res){
+                                        json.userImg=base64Res.data;
+                                        obj.items.userImg = json.userImg;
+                                    });
+                                },
+                                error: function(rsp){}
+                            });
+                        }else{
+                            obj.func.getBase64("res:download/"+imgName,function(base64Res){
+                                json.userImg=base64Res.data;
+                                obj.items.userImg = json.userImg;
+                            });
+                        }
+                    }
+                });
+                obj.totalPage = json.total;
+                // selfThis.$vm = $el.render(obj);
+                Refresher.init(".search-refresher-ie");
+                auiLoading.hide();
+            },
+            error: function(rs){
+                auiLoading.hide();
+                Toast.show(rs.errmsg);
+            }
+        });
+
+        const obj = this.$obj ={
+            items:{
+                username:"",
+                position:"",
+                myCredit:"",
+                myMsg:"",
+                userImg:""
+            },
+            dongtais:dongtai,
+            currentPage:1,
+            totalPage:2,
+            hasData:true,
+            func:{
+                getBase64:function(imgPath,cb){//图片内容base64编码
+                    if(arguments[2]){
+                        appnest.photo.getBase64Image({//图片需要压缩
+                            imagePath:imgPath,
+                            width:arguments[2],
+                            success:function(base64Res){
+                                cb&&cb(base64Res);
+                            },
+                            fail:function(base64Res){
+                            }
+                        });
+                    }else{
+                        appnest.photo.getBase64Image({
+                            imagePath:imgPath,
+                            success:function(base64Res){
+                                cb&&cb(base64Res);
+                            },
+                            fail:function(base64Res){
+                            }
+                        });
+                    }
+                },
+                searchData:function(cb){
+                    auiLoading.show();
+                    fetch({
+                        appId: 'iexpress',
+                        url : 'http://IEXPRESS/dongtai_list.jsp',
+                        data: {
+                            page:obj.currentPage
+                        },
+                        success:function(rsp){
+                            nowpage=obj.currentPage;
+                             cb && cb(rsp);
+                             auiLoading.hide();
+                        },
+                        error: function(rsp){
+                            auiLoading.hide();
+                            Toast.show(rsp.errmsg);
+                        }
+                    });
+                },
+                doPullDown:function(e, $refresh){
+                    $refresh.refresh();
+                },
+                doPullUp:function(e, $refresh){
+                    if(obj.totalPage > obj.currentPage){
+                        obj.currentPage += 1;
+                        obj.func.searchData(function(rsp){
+                            obj.currentPage = nowpage;
+                            obj.totalPage = rsp.total;
+                            if(rsp.dongtaiInfo.length > 0){
+                                $.each(rsp.dongtaiInfo, function(i,e) {
+                                    if(e.headImg.length<=15){
+                                        e.headImg="./assets/imgs/default.png"
+                                    }else{
+                                        var imgSrc = e.headImg;
+                                        var imgName=imgSrc.replace(/http:/g,"").replace(/https:/g,"").replace(/\//g,"&");
+                                        appnest.file.isFileExist({
+                                            path:"res:download/"+imgName,
+                                            success:function(rs){
+                                                if(rs.code == 0){
+                                                    fetch.download({
+                                                        appId: 'iexpress',
+                                                        url: imgSrc,
+                                                        fileName: imgName,
+                                                        path: "res:download",
+                                                        success: function(rs) {
+                                                            obj.func.getBase64(rs.path,function(base64Res){
+                                                                e.headImg=base64Res.data;
+                                                            },50);
+                                                        },
+                                                        error: function(rsp){}
+                                                    });
+                                                }else{
+                                                    obj.func.getBase64("res:download/"+imgName,function(base64Res){
+                                                        e.headImg=base64Res.data;
+                                                    },50);
+                                                }
+                                            }
+                                        });
+                                    }
+                                    obj.dongtais.push(e);
+                                });
+                                $refresh.refresh();
+                            }else{
+                                Toast.show('没有更多数据');
+
+                            }
+                        });
+                    }else{
+                        obj.hasData = false;
+                        return $refresh.end();
+                    }
+                },
+                showLouzhu:function(id){
+                    if($('.'+id).css("display")=="none"){
+                        $('.'+id).css("display","block");
+                    }else{
+                        $('.'+id).css("display","none");
+                    }
+                    
+                },
+                showLouceng:function(id){
+                    if($('.'+id).css("display")=="none"){
+                        $('.'+id).css("display","block");
+                    }else{
+                        $('.'+id).css("display","none");
+                    }
+                    
+                },
+                reToLouzhu:function(id){
+                    var re=$("."+id+" input").val();
+                    if(re==""){
+                        Toast.show("请输入要回复的内容!");
+                        return false;
+                    }
+                    auiLoading.show();
+                    fetch({
+                        appId:"iexpress",
+                        url:"http://IEXPRESS/reply.jsp",
+                        data:{
+                            comment:re,
+                            id:id
+                        },
+                        success:function(json){
+                           obj.func.submitSuccess(json);
+                           auiLoading.hide();
+                        },
+                        error: function(rsp){
+                            auiLoading.hide();
+                            Toast.show(rsp.errmsg);
+                        }
+                    });
+                },
+                reToLouceng:function(id){
+                    var re=$("."+id+" input").val();
+                    if(re==""){
+                        Toast.show("请输入要回复的内容!");
+                        return false;
+                    }
+                    auiLoading.show();
+                    fetch({
+                        appId:"iexpress",
+                        url:"http://IEXPRESS/reply2.jsp",
+                        data:{
+                            comment:re,
+                            id:id
+                        },
+                        success:function(json){
+                           obj.func.submitSuccess(json);
+                           auiLoading.hide();
+                        },
+                        error: function(rsp){
+                            auiLoading.hide();
+                            Toast.show(rsp.errmsg);
+                        }
+                    });
+                },
+                like:function(id){
+                    auiLoading.show();
+                    fetch({
+                        appId:"iexpress",
+                        url:"http://IEXPRESS/zan.jsp",
+                        data:{
+                            id:id
+                        },
+                        success:function(json){
+                           obj.func.submitSuccess(json);
+                           auiLoading.hide();
+                        },
+                        error: function(rsp){
+                            auiLoading.hide();
+                            Toast.show(rsp.errmsg);
+                        }
+                    });
+                },
+                cai:function(id){
+                    auiLoading.show()
+                    fetch({
+                        appId:"iexpress",
+                        url:"http://IEXPRESS/cai.jsp",
+                        data:{
+                            id:id,
+                            type:"cai"
+                        },
+                        success:function(json){
+                           obj.func.submitSuccess(json);
+                           auiLoading.hide()
+                        },
+                        error: function(rsp){
+                            auiLoading.hide();
+                            Toast.show(rsp.errmsg);
+                        }
+                    });
+                },
+                submitSuccess:function(json){
+                    if(json.code!=0){
+                        if(json.submitType == "reply" || json.submitType == "reply2"){
+							Toast.show("回复失败!");
+						}else if(json.submitType == "zan"){
+							Toast.show("点赞失败!");
+						}else if(json.submitType == "cai"){
+							Toast.show("操作失败!");
+						}else{
+							Toast.show(json.message);
+                        }
+                        return false;
+                    }else{
+						if(json.submitType == "reply" || json.submitType == "reply2"){
+							Toast.show("回复成功!");
+						}else if(json.submitType == "zan"){
+							Toast.show("点赞成功!");
+						}else if(json.submitType == "cai"){
+							Toast.show("操作成功!");
+						}else{
+							Toast.show(json.message);
+                        }
+                    }
+                    document.querySelector('.search-refresher-ie').component.refresher.triggerDownScroll();
+                },
+                xiaoxi:function(){
+                    router.go('/mymsg');
+                },
+                myidea:function(){
+                    router.go('/myidea');
+                },
+                biaoqianyun:function(){
+                    router.go('/bqy');
+                },
+                weijie:function(){
+                    router.go('/weijie');
+                },
+                huodong:function(){
+                    router.go('/hd');
+                },
+                fenxiang:function(){
+                    router.go('/mshare');
+                },
+                jieshao:function(){
+                    router.go('/introduction');
+                },
+                jifen:function(){
+                    router.go('/jifen');
+                },
+                paihang:function(){
+                    router.go('/suggestion');
+                },
+                ideax:function(id){
+                    router.go('/xiang?id='+id);
+                },
+                searchlist:function(){
+                    var key=$("input[name='key']").val();
+                    if(key==""){
+                        Toast.show("请输入关键字！");
+                        return false;
+                    }
+                    router.go('/searchlist?key='+key);
+                }
+            },
+           
+        };
+        this.$vm = $el.render(obj);
+    }
+
+}
+
+</script>
+
+<style type="less">
+[type="toggle"].active .icon-arrowdown::before,
+[type="control"].active .icon-arrowdown::before{
+    content: '\e694';
+}
+
+.touxiang{
+    width: 50px;
+    height: 50px;
+    border-radius: 4px;
+}
+.content-tips{
+    font-size: 13px;
+    color: #7F8C8D;
+    margin: 10px;
+}
+.flist{
+    margin-bottom: 0 !important;
+    border-bottom: 0 !important;
+}
+.fflist{
+    border-top: 0 !important;
+}
+.acblock{
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+}
+
+   tabbar-cell.active{
+        .home:before{
+        content: '\E6E5';
+        }
+        .add:before{
+            content: '\E718';
+        }
+        .me:before{
+            content: '\E713';
+        }
+    }
+    .bgef4{
+        background-color:#EFEFF4 !important;
+    }
+    .bgef4 aui-list{
+        background-color:#fff !important;
+    }
+.fl{
+    float: left;
+}
+.fr{
+    float: right;
+}
+.mr10{
+    margin-right: 10px;
+    width: 15px;
+    height: 15px;;
+}
+.font17{
+    font-size: 17px;
+}
+
+.inputtext{
+    border: 1px solid darkgray;
+    width: 90%;
+    height: 35px
+}
+.auicon{
+    font-size: 26px;
+}
+.num{
+    vertical-align: super;
+    margin-left: 15px;
+}
+.lineone{
+    color: #000 !important;
+    margin-top: 5px;
+}
+
+</style>
+
+

@@ -1,0 +1,166 @@
+<ui>
+<div id="otherlist">
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+            <!-- 代他人处理 -->
+                <aui-text>合理化列表</aui-text>
+            </caption-area>
+        </aui-titlebar>
+       
+    </aui-header>
+
+     <aui-refresher  delay class="search-refresher others" style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;text-align: center; background-color:white;" v-on:pulldown="func.doPullDown" v-on:pullup="func.doPullUp" auto>
+            <aui-list style="text-align:left;">
+                <list-cell class="grid" v-for="item in listDatas" v-on:click="func.listclick(item.SERI_ID,item.NOW_STATUS_ID,item.stepId)">
+                    <grid-cell class="flex-1 padded">
+                        {{item.PROP_NAME}}<br>
+                        <p style="color:#ccc;">提出日期：{{item.PROP_DATE}} 状态：{{item.NOW_STATUS_NAME}}</p>
+                    </grid-cell>
+                </list-cell>
+            </aui-list>
+            <div v-if="!hasData" style="text-align:center;padding:10px;color:#ddd;">没有更多数据</div>
+            <img src='./assets/imgs/nodata.png' v-show="nodata"/>
+    </aui-refresher>
+
+</div>
+</ui>
+
+
+<script>
+import '@auicomp/header/Header.aui';
+import '@auicomp/button/Button.aui';
+import '@auicomp/scroller/Scroller.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auicomp/button/Button.aui';
+import '@auicomp/tabbar/Tabbar.aui';
+
+import Action from '@auicomp/action/Action.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import mobiscroll from '@auiutil/mobiscroll3/js/mobiscroll.javascript.min';
+import Refresher from '@auicomp/refresher/Refresher.aui';
+import fetch from '@comm/utils/nfetch';
+import { router } from '@auicomp/action/Action.aui';
+import './Frame.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+// import $ from 'agile-ce';
+
+export default class OtherPage{
+    
+     static get tag(){
+        return 'otherpage';
+     }
+
+    created(){
+        //删除缓存的详情页面
+        $(this.$el).on('enter',function(){
+            $("aui-other_detail").remove();
+            $("aui-otheredit").remove();
+        });
+        Refresher.init(".search-refresher",{});
+        var nowpage=1;
+        const obj = this.$obj ={
+            nodata:false,
+            currentPage:1,
+            totalPage:1,
+            listDatas:[],
+            hasData:true,
+            func:{
+                searchData:function(cb){
+                    auiLoading.show();
+                    fetch({
+                        appId: 'ci',
+                        url : '/hlh_other_list.jsp',
+                        data: {
+                            pageNo:obj.currentPage
+                        },
+                        success:function(rsp){
+                            window.logininfo.otherNum=rsp.total;
+                            nowpage=obj.currentPage;
+                             cb && cb(rsp);
+                             auiLoading.hide();
+                        },
+                        error: function(rsp){
+                            auiLoading.hide();
+                            Toast.show(rsp.errmsg, function(){
+                                console.log('Toast Close');
+                            });
+                        }
+                    });
+                },
+                doPullDown:function(e, $refresh){
+                    obj.currentPage = 1;
+                    obj.totalPage = 1;
+                    obj.hasData=true;
+                    obj.listDatas.$reset([]);
+                    obj.func.searchData(function(rsp){
+                        if(nowpage == rsp.total){
+                            obj.hasData=true;
+                        }
+                        obj.currentPage = nowpage;
+                        obj.totalPage=rsp.total;
+                        if(rsp.rows.length > 0){
+                            obj.nodata = false;
+                            obj.listDatas.$reset(rsp.rows);
+                            $refresh.refresh();
+                        }else{
+                            obj.nodata = true;
+                            return $refresh.end();
+                        }
+                    });
+                },
+                doPullUp:function(e, $refresh){
+                    console.log('pull down');
+                    if(obj.totalPage > obj.currentPage){
+                        obj.currentPage += 1;
+                        obj.func.searchData(function(rsp){
+                            obj.currentPage = nowpage;
+                            obj.totalPage = rsp.total;
+                            if(rsp.rows.length > 0){
+                                $.each(rsp.rows, function(i,e) {
+                                    obj.listDatas.push(e);
+                                });  
+                                $refresh.refresh();
+                            }else{
+                                Toast.show('没有更多数据', function(){
+                                    obj.hasData = false;
+                                    return $refresh.end();
+                                });
+
+                            }
+                        });
+                    }else{
+                        obj.hasData = false;
+                        return $refresh.end();
+                    }
+                },
+                 listclick:function(seriId,status,stepId){
+                     window.other_seriId=seriId;
+                     window.other_status=status;
+                     window.other_stepId=stepId;
+                     if(status == "20100" || status == "10000"){
+                         router.go('/otheredit');
+                     }else{
+                         router.go('/other_detail');
+                     }
+                    
+                }
+            }
+        }
+        this.$vm = $(this.$el).find('#otherlist').render(obj);
+        
+    }
+detached(){
+        this.$elvm && this.$elvm.destroy();
+    }
+   
+}
+
+</script>
+
+
+
+

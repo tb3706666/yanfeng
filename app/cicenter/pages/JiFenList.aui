@@ -1,0 +1,225 @@
+<ui>
+   <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>积分查询</aui-text>
+            </caption-area>
+        </aui-titlebar>
+    </aui-header>
+
+
+   <aui-refresher delay class="search-refresher" style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;text-align: center; background-color:white;" v-on:pulldown="func.doPullDown" v-on:pullup="func.doPullUp" auto>
+        <div v-for="item in listDatas" >
+            <aui-list  class="mb0">
+                <list-cell v-on:click="func.jlistclick(item.EMP_ID)">
+                    <a style="text-align:left;font-weight:bold;">
+                        {{item.empName}} <i class="icon auicon icon-arrowright"></i>
+                    </a>
+                </list-cell>
+            </aui-list>
+         
+            <aui-list  class="mb0" v-bind:id="item.EMP_ID" style="display:none;">
+                <list-cell class="grid staf-grid" >
+                    <grid-cell class="flex-1 padded staf">
+                        <p style="text-align:left;">员工工号<span style="float:right;color:red;">{{item.EMP_ID}}</span></p >
+                    </grid-cell>
+                </list-cell>
+                <list-cell class="grid staf-grid" >
+                    <grid-cell class="flex-1 padded staf">
+                        <p style="text-align:left;">员工姓名<span style="float:right;color:red;">{{item.empName}}</span></p >
+                    </grid-cell>
+                </list-cell>
+                <list-cell class="grid staf-grid" >
+                    <grid-cell class="flex-1 padded staf">
+                        <p style="text-align:left;">员工英文名<span style="float:right;color:red;">{{item.empEnName}}</span></p >
+                    </grid-cell>
+                </list-cell>
+                <list-cell class="grid staf-grid" >
+                    <grid-cell class="flex-1 padded staf">
+                        <p style="text-align:left;">积分<span style="float:right;color:red;">{{item.PROP_POINT}}</span></p >
+                    </grid-cell>
+                </list-cell>
+                <list-cell class="grid staf-grid" >
+                    <grid-cell class="flex-1 padded staf">
+                        <p style="text-align:left;">提议积分<span style="float:right;color:red;">{{item.PROP_POINTP}}</span></p >
+                    </grid-cell>
+                </list-cell>
+                <list-cell class="grid staf-grid" >
+                    <grid-cell class="flex-1 padded staf">
+                        <p style="text-align:left;">实施积分<span style="float:right;color:red;">{{item.PROP_POINTA}}</span></p >
+                    </grid-cell>
+                </list-cell>
+                <list-cell class="grid staf-grid" >
+                    <grid-cell class="flex-1 padded staf">
+                        <p style="text-align:left;">已兑换积分<span style="float:right;color:red;">{{item.PROP_POINTD}}</span></p >
+                    </grid-cell>
+                </list-cell>
+                <list-cell class="grid staf-grid" >
+                    <grid-cell class="flex-1 padded staf">
+                        <p style="text-align:left;">剩余积分<span style="float:right;color:red;">{{item.PROP_POINTDB}}</span></p >
+                    </grid-cell>
+                </list-cell>
+                <list-cell class="grid staf-grid" >
+                    <grid-cell class="flex-1 padded staf">
+                        <p style="text-align:left;">员工所属事业部<span style="float:right;color:red;">{{item.divs}}</span></p >
+                    </grid-cell>
+                </list-cell>
+                <list-cell class="grid staf-grid" >
+                    <grid-cell class="flex-1 padded staf">
+                        <p style="text-align:left;">员工所属部门<span style="float:right;color:red;">{{item.depts}}</span></p >
+                    </grid-cell>
+                </list-cell>
+                <list-cell class="grid staf-grid" >
+                    <grid-cell class="flex-1 padded staf">
+                        <p style="text-align:left;">员工所属科室<span style="float:right;color:red;">{{item.sects}}</span></p >
+                    </grid-cell>
+                </list-cell>
+            </aui-list>
+        </div>
+        <img src="./assets/imgs/nodata.png" v-if="!noimg">
+        <div v-if="!hasData" style="text-align:center;padding:10px;color:#ddd;">没有更多数据</div>
+    </aui-refresher>
+
+</ui>
+
+
+<script>
+import '@auicomp/datetime/DateTime.aui';
+import '@auiutil/mobiscroll3/css/mobiscroll.javascript.min.css';
+import mobiscroll from '@auiutil/mobiscroll3/js/mobiscroll.javascript.min';
+import Refresher from '@auicomp/refresher/Refresher.aui';
+import fetch from '@comm/utils/xfetch';
+import Toast from '@auicomp/toast/Toast.aui';
+import { router } from '@auicomp/action/Action.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import './Frame.aui';
+import '@auicomp/list/List.aui';
+
+export default class JiFenList{
+    static get tag(){
+        return 'jifenlist';
+    }
+
+    created () {
+        Refresher.init(".search-refresher",{});
+        var dateS = router.getQueryObj().dateS;//获取开始时间
+        var dateE = router.getQueryObj().dateE;//获取结束时间
+        var postman = router.getQueryObj().postman;//获取提出人
+        var pdept = router.getQueryObj().pdept;//获取提出部门/科室
+
+        var nowpage=1;
+        const obj = this.$obj ={
+            currentPage:1,
+            totalPage:1,
+            listDatas:[],
+            hasData:true,
+            noimg:true,
+            func:{
+                searchData:function(cb){
+                    auiLoading.show();
+                    fetch({
+                        appId: 'ci',
+                        url : 'http://ciurl/bizCreditQuery/griddatasInProc?propDateS='+dateS.replace('/', "-").replace('/', "-")+'&propDateE='+dateE.replace('/', "-").replace('/', "-")+'&pemp='+postman+'&pdept='+pdept+'&rows=20&page='+obj.currentPage,
+                        data: {
+                            
+                        },
+                        success:function(rsp){
+                            nowpage=obj.currentPage;
+                             cb && cb(rsp);
+                             auiLoading.hide();
+                        },
+                        error: function(rsp){
+                            auiLoading.hide();
+                            Toast.show(rsp.errmsg);
+                        }
+                    });
+                },
+                doPullDown:function(e, $refresh){
+                    obj.currentPage = 1;
+                    obj.totalPage = 1;
+                    obj.hasData=true;
+                    obj.listDatas.$reset([]);
+                    obj.func.searchData(function(rsp){
+                        if(nowpage == Math.ceil((rsp.total/20))){
+                            obj.hasData=true;
+                        }
+                        obj.currentPage = nowpage;
+                        obj.totalPage=Math.ceil((rsp.total/20));
+                        if(rsp.rows.length > 0){
+                            obj.listDatas.$reset(rsp.rows);
+                            $refresh.refresh();
+                        }else{
+                            obj.noimg=false;
+                            Toast.show('未查询到数据'); 
+                        }
+                    });
+                },
+                doPullUp:function(e, $refresh){
+                    console.log('pull down');
+                    if(obj.totalPage > obj.currentPage){
+                        obj.currentPage += 1;
+                        obj.func.searchData(function(rsp){
+                            obj.currentPage = nowpage;
+                            obj.totalPage = Math.ceil((rsp.total/20));
+                            if(rsp.rows.length > 0){
+                                $.each(rsp.rows, function(i,e) {
+                                    obj.listDatas.push(e);
+                                });  
+                                $refresh.refresh();
+                            }else{
+                                Toast.show('没有更多数据');
+
+                            }
+                        });
+                    }else{
+                        obj.hasData = false;
+                        return $refresh.end();
+                    }
+                },
+                jlistclick:function(id){
+                    var n=$("#"+id).css('display');
+                    if(n=='none'){
+                        $("#"+id).css('display','block');
+                    }else{
+                        $("#"+id).css('display','none');
+                    }
+                }
+            }
+        }
+        this.$vm = $(this.$el).find('.search-refresher').render(obj);
+    }
+     detached(){
+        this.$vm && this.$vm.destroy();
+    }
+}
+
+</script>
+
+<style>
+
+    .md-phone-num .mbsc-np-dsp {
+        min-height: 25px;
+        -webkit-box-sizing: content-box;
+        -moz-box-sizing: content-box;
+        box-sizing: content-box;
+    }
+    .mbsc-ios .mbsc-control-w:after, .mbsc-ios .mbsc-control-w:before{
+        border:none;
+    }
+    .mbsc-form-group{
+        margin:0.5em 0;
+    }
+    .stylespan{
+        height:44px;
+        line-height:44px;
+        width:110px;
+        text-align: left;
+    }
+    .mb0{
+        margin-bottom: 0 !important;
+        border-bottom: 0 !important;
+    }
+</style>

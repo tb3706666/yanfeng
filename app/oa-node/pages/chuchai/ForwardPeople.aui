@@ -1,0 +1,201 @@
+<ui>
+    <div class="ForwardPeople">
+       <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>选择人员</aui-text>
+                </caption-area>
+                <right-area>
+                    <a v-on:click="func.ForwardPeoplePeople" v-if="isAjaxed&&hasData">
+                        <i class="icon auicon icon-rdook"></i>
+                    </a>
+                </right-area>
+            </aui-titlebar>
+            <div class="search-box">
+                <form class="subjectarea" action="" v-on:submit="func.submit">
+                    <input class="subject"  type="search" v-like="text" v-model="searchInfo" placeholder="请输入查询工号或姓名" autocomplete="off" >
+                </form>
+            </div>
+        </aui-header>
+        <aui-scroller  class="scroll aui-refresher-ForwardPeople">
+            <div class="list" v-if="isAjaxed&&hasData">
+                <div class="list-item" v-for="item in list" >
+                    <div v-if="item.checked == 'true'" style="width:100%">
+                        <input type="radio" checked  v-bind:value="$index" v-model="forwardIndex" v-bind:id="item.id" class="magic-radio"   name="ForwardPeople"/>
+                        <label v-bind:for="item.id">
+                            <div>{{item.name}}</div>
+                            <div class="parentName">{{item.parentName}}</div>
+                        </label>
+                    </div>
+                    <div v-else style="width:100%">
+                        <input type="radio"  v-bind:value="$index" v-model="forwardIndex" v-bind:id="item.id" class="magic-radio"   name="ForwardPeople"/>
+                        <label v-bind:for="item.id">
+                            <div>{{item.name}}</div>
+                            <div class="parentName">{{item.parentName}}</div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div v-if="isAjaxed&&!hasData" class="nodata">
+                    <img src="./assets/imgs/nodata.png">
+                </div>
+        </aui-refresher>
+    </div>
+</ui>
+<script>
+    import '@auicomp/refresher/Refresher.aui';
+    import '@auicomp/list/List.aui';
+    import fetch from "@libs/fetch";
+    import common from '@libs/common';
+    import { router } from '@auicomp/action/Action.aui';
+    import 'magic-check/css/magic-check.min.css';
+
+    export default class ForwardPeople {
+
+        static get tag() {
+            return 'ForwardPeople';
+        }
+        created() {
+            var self = this;
+            const obj = this.$obj = {
+                searchInfo:"",
+                isAjaxed:false,
+                hasData:false,
+                forwardIndex:"",
+                list:[],
+                func:{
+                    submit(e){
+                        obj.forwardIndex = ''; //清空已选中人员
+                        self.loadData(true);
+                        $('.subject').blur();
+                        e.preventDefault();
+                    },
+                   ForwardPeoplePeople(){
+                        self.doSubmit();
+                   }
+                }
+            }
+            this.$vm = $(this.$el).render(this.$obj);
+            this.loadData(false);
+        }
+        detached(){
+            this.$vm && this.$vm.destroy();
+        }
+        loadData(isSearch){
+            let self = this;
+            let data = {
+                s_bean:'orgDialogRecentContactList',
+                orgType:'12',
+                cur_userid:router.getQueryObj().cur_user,
+                handle_id:router.getQueryObj().handle_id,
+            };
+            if(isSearch){
+                data.s_bean='organizationDialogSearch';
+                data.startWith='';
+                data.key = this.$obj.searchInfo;
+            }
+            console.log(data);
+            fetch({
+                appId: common.appId,
+                url : common.oaUrl+"/getpeople.jsp",
+                data: data,
+                type: 'post',
+                success: function(data){
+                    console.log(JSON.stringify(data));
+                    self.$obj.isAjaxed = true;
+                    self.$obj.hasData = data.list.length>0;
+                    self.$obj.list=data.list;
+                }
+            });
+        }
+        doSubmit(){
+            let self = this;
+            if(this.$obj.forwardIndex == ''){
+                common.alert("请选择转办人员!");
+                return;
+            }
+            var prePageData = document.querySelector(router.getQueryObj().page).component.$obj;
+            prePageData.forwardValue = this.$obj.list[this.$obj.forwardIndex].id;
+            prePageData.forwardName = this.$obj.list[this.$obj.forwardIndex].name;
+            fetch({
+                appId: common.appId,
+                url : common.oaUrl+'/set_recent_people.jsp',
+                data: {
+                    contactIds:this.$obj.list[this.$obj.forwardIndex].id
+                },
+                type: 'post',
+                success: function(dataInfo){
+                    console.log(dataInfo)
+                    history.go(-1);
+                }
+            });
+
+            
+        }
+    }
+</script>
+<style type='less'>
+@import url('../../assets/less/theme/default/common.less');
+.ForwardPeople{
+    .search-box{
+        width: 100%;
+        padding: 5px;
+        .subjectarea{
+                width:100%;
+                border: 1px solid @border-color;
+                border-radius: 4px;
+                .subject{
+                    border: 0;
+                    width:100%;
+                    padding:10px;
+                    font-size: fts-normal;
+                    -webkit-appearance: textfield;    
+                }
+            }
+            input::-webkit-search-decoration,
+            input::-webkit-search-cancel-button {
+            display: none;
+            }
+    }
+    
+    .aui-refresher-ForwardPeople{
+        position:absolute;
+        top:95px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        .list{
+            .list-item{
+                padding: 8px;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                border-bottom:1px solid @border-color;
+                label{
+                    width: 100%;
+                    .parentName{
+                        overflow: hidden;/*超出部分隐藏*/
+                        white-space: nowrap;/*不换行*/
+                        text-overflow:ellipsis;/*超出部分文字以...显示*/
+                    }
+                }
+                &:last-clild{
+                    border:0;
+                }
+                &:active{
+                    background: @active-color;
+                }
+            }
+        }
+    }
+    label:before,label:after{
+        box-sizing:border-box;
+    }
+
+}
+
+</style>

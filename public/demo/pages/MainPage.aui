@@ -1,0 +1,113 @@
+<ui>
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action href="index.html"><i class="icon auicon icon-arrowleft-fill"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>AMD DEMO</aui-text>
+            </caption-area>
+            <right-area>
+                <aui-action href="#/about"><i class="icon auicon icon-rdohint-fill"></i></aui-action>
+            </right-area>
+        </aui-titlebar>
+    </aui-header>
+
+    <aui-scroller id="index" action-target class="content active" style="position: absolute; top: 45px; right: 0px; bottom: 51px;left: 0px;">
+        <aui-index></aui-index>
+    </aui-scroller>
+    <aui-scroller id="msg" action-target class="content" style="position: absolute; top: 45px; right: 0px; bottom: 51px;left: 0px;">
+        <aui-index></aui-index>
+    </aui-scroller>
+    <aui-scroller id="contact" action-target class="content" style="position: absolute; top: 45px; right: 0px; bottom: 51px;left: 0px;">
+        <aui-index></aui-index>
+    </aui-scroller>
+    <aui-scroller id="console" action-target class="content" style="position: absolute; top: 45px; right: 0px; bottom: 51px;left: 0px;">
+        <aui-index></aui-index>
+    </aui-scroller>
+    <aui-scroller id="more" action-target class="content" style="position: absolute; top: 45px; right: 0px; bottom: 51px;left: 0px;">
+        <aui-index></aui-index>
+    </aui-scroller>
+
+    <aui-footer>
+        <aui-tabbar id="footer" class="tabbar tabbar-footer tabbar-tiled">
+            <tabbar-cell class="active" href="#index">
+                <i class="tab-icon icon auicon icon-home"></i>
+                <label class="tab-label">首页</label>
+            </tabbar-cell>
+            <tabbar-cell href="#msg">
+                <i class="tab-icon icon auicon icon-chat"></i>
+                <label class="tab-label">消息</label>
+            </tabbar-cell>
+            <tabbar-cell href="#contact">
+                <i class="tab-icon icon auicon icon-contact"></i>
+                <label class="tab-label">通讯录</label>
+            </tabbar-cell>
+            <tabbar-cell href="#console">
+                <i class="tab-icon icon auicon icon-grid"></i>
+                <label class="tab-label">工作台</label>
+            </tabbar-cell>
+            <tabbar-cell href="#more">
+                <i class="tab-icon icon auicon icon-rdomore"></i>
+                <label class="tab-label">更多</label>
+            </tabbar-cell>
+        </aui-tabbar>
+    </aui-footer>
+</ui>
+
+
+<script>
+
+const Action = auicomponents.Action;
+
+function MainPage(){
+	
+}
+
+MainPage.prototype = {
+	created: function(){
+		Action.listener($(this.$el).find('aui-footer tabbar-cell').attr('type', 'control'));
+	}
+}
+
+MainPage.tag = 'mainpage';
+
+define(['aui!components/Index.aui'], function(Index){
+	return MainPage;
+});
+
+</script>
+
+<style type="less">
+
+aui-mainpage{
+    
+    aui-titlebar .icon{
+        color: #3498DB;
+    }
+    
+
+    #footer{
+        border-top: 1px solid #ddd;
+    }
+
+    tabbar-cell.active{
+        .icon-home:before{
+        content: '\E6E5';
+        }
+        .icon-chat:before{
+            content: '\E6B8';
+        }
+        .icon-contact:before{
+            content: '\E6C4';
+        }
+        .icon-grid:before{
+            content: '\E6E1';
+        }
+        .icon-rdomore:before{
+            content: '\E745';
+        }
+    }
+}
+
+</style>

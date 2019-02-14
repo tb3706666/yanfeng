@@ -1,0 +1,97 @@
+<ui>
+    <div class="LoadingPage">
+    </div>
+</ui>
+<script>
+// import fetch from '@comm/utils/xfetch';
+import '@auicomp/action/Action.aui';
+import '@auicomp/scroller/Scroller.aui';
+import Alert from '@auicomp/alert/Alert.aui';
+import { router } from '@auicomp/action/Action.aui';
+import sha1 from 'crypto-js/sha1';
+
+export default class LoadingPage {
+
+    static get tag() {
+        return 'loading';
+    }
+    created(){
+        var badge = router.getQueryObj(location.search).badge;//获取用户工号
+        if(badge && badge != ''){
+            let timeStamp = new Date().getTime(),
+            securityCode = 'WwB0HMmoIKD2I1tcl7YSYmyIGd2urHODxYl9AW0lyByR6C6SMyZJxevn4t2xI0jwIDAQAB',
+            nonce = Math.ceil(Math.random()*1000000); 
+            let paramsArr = [securityCode,timeStamp,nonce];
+            let signParam = paramsArr.sort().join('');
+            let sign = sha1(signParam).toString().toUpperCase();
+            console.log(sign);
+            window.location.replace('https://app.yanfengadient.com/xiaofei/wallet/toIndex.do?userNo='+badge+'&appId=XYYD201711281345&timestamp='+timeStamp+'&nonce='+nonce+'&sign='+sign);
+
+        }else{
+            Alert.show({
+                content: '获取用户工号失败',
+                doOk: function(){
+                    appnest.navigation.closeWindow();
+                }
+            });
+        }
+        // fetch.plusready(function(){
+        //     console.log("badge="+badge);
+        //     if(null!=badge){
+
+        //         fetch({
+        //             appId: 'xiaofeiexmobi',
+        //             url : 'http://xiaofeiurl/changeuser.jsp',
+        //             data: {
+        //                 username: badge,
+        //                 password: 'Autumn2018',
+        //                 lan: 'ch'
+        //             },
+        //             success: function(json){
+        //                 if(json.username && json.appId && json.sign){
+        //                     var locahref = 'https://app.yanfengadient.com/xiaofei/wallet/toIndex.do?userNo='+json.username+'&appId='+json.appId+'&timestamp='+json.timestamp+'&nonce='+json.nonce+'&sign='+json.sign;
+        //                     window.location.replace(locahref);
+        //                 }else{
+        //                     Alert.show({
+        //                         content: '请求错误',
+        //                         doOk: function(){
+        //                             appnest.navigation.closeWindow();
+        //                         }
+        //                     });
+        //                 }
+    
+        //             },
+        //             error: function(rs){
+        //                 Alert.show({
+        //                     content: '请求错误',
+        //                     doOk: function(){
+        //                         appnest.navigation.closeWindow();
+        //                     }
+        //                 });
+        //             }
+        //         });
+        //     }else{
+        //         Alert.show({
+        //             content: '获取用户工号失败',
+        //             doOk: function(){
+        //                 appnest.navigation.closeWindow();
+        //             }
+        //         });
+        //     }
+        // });
+    }
+}
+</script>
+<style type='less'>
+@import url('../assets/less/theme/default/common.less');
+
+.LoadingPage{
+    background-image: url(../assets/imgs/loading.png);
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 100%;
+    background-size:100% 100%;    
+    position:absolute;    
+    filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='../assets/imgs/loading.png',sizingMethod='scale');
+}
+</style>

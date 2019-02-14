@@ -1,0 +1,51 @@
+<ui>
+    <div class="Webview">
+        <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>查看EODS</aui-text>
+                </caption-area>
+                <right-area>
+
+                </right-area>
+            </aui-titlebar>
+        </aui-header>
+
+        <aui-scroller class="content">
+            <div v-html="data"></div>
+        </aui-scroller>
+    </div>
+</ui>
+
+
+<script>
+    import {
+        router
+    } from '@auicomp/action/Action.aui';
+    import common from '@libs/common';
+    import fetch from "@libs/xfetch";
+    import { Base64 } from "js-base64";
+
+    export default class Webview {
+
+        static get tag() {
+            return 'Webview';
+        }
+        created() {
+           
+            //删除缓存的列表页面
+            let self = this;
+            const obj = this.$obj = {
+               data:Base64.decode(router.getQueryObj().data),
+            }
+            this.$vm = $(this.$el).render(this.$obj);
+        }
+        
+        detached() {
+            this.$vm && this.$vm.destroy();
+        }
+    }
+</script>

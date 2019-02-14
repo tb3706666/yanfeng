@@ -1,0 +1,227 @@
+<ui>
+    <div class="loginHR">
+        <img src="./assets/imgs/login_logo.png" class="logo">
+        <div class="fd-row border-bt1 input-box">
+            <img  src="./assets/imgs/admin.png" class="icon">
+            <input type="text" v-bind:placeholder="data.username[lan]" v-model="username">
+        </div>
+        <div class="fd-row border-bt1 input-box">
+            <img  src="./assets/imgs/password.png"  class="icon">
+            <input type="password" v-bind:placeholder="data.password[lan]" v-model="password">
+        </div>
+         <div class="checkbox-box">
+            <input type="checkbox"   v-model="rember" id="rember" class="magic-checkbox"  />
+            <label for="rember">
+                {{data.rempwd[lan]}}
+            </label>
+        </div>
+        <div class="login-bt" v-on:click="func.submit">{{data.login[lan]}}</div>
+        <div class="back-bt" v-on:click="func.back"></div>
+    </div>
+</ui>
+<script>
+    import commLang from '@lang/comm';
+    import common from '@libs/common';
+    import 'magic-check/css/magic-check.min.css';
+    import fetch from "@libs/fetch";
+    import { router } from '@auicomp/action/Action.aui';
+    export default class loginHR {
+
+        static get tag() {
+            return 'loginHR';
+        }
+        
+        created() {
+            let self = this;
+             const obj = this.$obj = {
+                lan:localStorage.getItem("lan"),
+                data:commLang.login,
+                username:localStorage.getItem("username"),
+                password:localStorage.getItem("password"),
+                rember:localStorage.getItem("rember")=='true',
+                hidden:[],
+                func:{
+                    back(){
+                        history.go(-1);
+                    },
+                    submit(){
+                        if(obj.username==null||obj.username==''){
+                            common.alert(obj.data.usernameerror[obj.lan])
+                            return;
+                        }
+                        if(obj.password==null||obj.password==''){
+                            common.alert(obj.data.pwderror[obj.lan])
+                            return;
+                        }
+                        self.doSubmit();
+                    }
+                }
+            }
+            this.$vm = $(this.$el).render(this.$obj);
+            //this.loadDate()
+        }
+        detached(){
+            this.$vm && this.$vm.destroy();
+        }
+        loadDate(){
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : common.hrUrl+"//",
+                data: {
+                },
+                type: 'get',
+                success: function(infos){
+                    console.log(JSON.stringify(infos));
+                    self.$obj.hidden = infos.hidden
+                }
+            });
+        }
+        doSubmit(){
+            //统一调用登陆接口
+             let self= this;
+             window.hasLogin = false;//添加登陆成功标志
+            fetch({
+                appId: common.appId,
+                url :  common.oaUrl+'/ek',
+                data: {
+                    username:  this.$obj.username,
+                    password: this.$obj.password,
+                    lan: this.$obj.lan,
+                },
+                type: 'post',
+                success: function(Data){
+                    if (Data.hr_status == "fail") {
+                        common.alert(self.$obj.data.error[self.$obj.lan]);
+						localStorage.removeItem("password")
+                        localStorage.removeItem("rember")
+                    }else{
+                        window.hasLogin = true;//添加登陆成功标志
+                        if (self.$obj.rember) {
+                            localStorage.setItem("password",self.$obj.password)
+                            localStorage.setItem("rember",self.$obj.rember)
+						} else {
+							localStorage.removeItem("password")
+                            localStorage.removeItem("rember")
+						}
+                        localStorage.setItem("username",self.$obj.username)
+                        localStorage.setItem("haveLoginHR","true")
+                        self.getCookie();
+						
+                    }
+                   
+                    
+                    
+                }
+            });
+        }
+        getCookie(){
+            router.go(router.getQueryObj().path,true)
+        }
+        // doSubmit(){
+        //     let postData = [];
+        //     for(let i = 0;i<this.$obj.hidden.length;i++){
+        //         console.log(this.$obj.hidden[i].name+"	"+this.$obj.hidden[i].value)
+        //         postData.push({
+        //             type:0,
+        //             name:this.$obj.hidden[i].name,
+        //             value:this.$obj.hidden[i].value
+        //         })
+        //     }
+        //     postData.push({
+        //         type:0,
+        //         name:'username',
+        //         value:this.$obj.username
+        //     })
+        //     postData.push({
+        //         type:0,
+        //         name:'password',
+        //         value:this.$obj.password
+        //     })
+        //     postData.push({
+        //         type:0,
+        //         name:'lan',
+        //         value:this.$obj.lan
+        //     })
+        //     console.log(common.hrUrl+"/logincheck.jsp");
+        //     let self = this;
+        //     fetch({
+        //         appId: common.appId,
+        //         url : common.hrUrl+"/logincheck.jsp",
+        //         data: postData,
+        //         type: 'post',
+        //         success: function(rspObj){
+        //             console.log(JSON.stringify(rspObj));
+        //             if (rspObj.status == "success") {
+		// 				if (self.$obj.rember) {
+        //                     localStorage.setItem("password",self.$obj.password)
+        //                     localStorage.setItem("rember",self.$obj.rember)
+		// 				} else {
+		// 					localStorage.removeItem("password")
+        //                     localStorage.removeItem("rember")
+		// 				}
+        //                 localStorage.setItem("username",self.$obj.username)
+        //                 localStorage.setItem("haveLoginHR","true")
+		// 				router.go(router.getQueryObj().path,true)
+		// 			} else {
+		// 				common.alert(self.$obj.data.error[self.$obj.lan]);
+		// 				localStorage.removeItem("password")
+        //                 localStorage.removeItem("rember")
+		// 			}
+        //         }
+        //     });
+        // }
+    }
+</script>
+<style type='less'>
+@import url('../assets/less/theme/default/common.less');
+.loginHR{
+    background: url(../assets/imgs/background.png) center center / 100% 100% no-repeat;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    .back-bt{
+        position: absolute;
+        top: 20px;
+        left:20px;
+        background: url(../assets/imgs/back.png) center center / 30px 30px no-repeat;
+        width: 30px;
+        height: 30px;
+    }
+    .logo{
+        margin-top: 15%;
+        width: 75%;
+    }
+    .icon{
+        width: 30px;
+        height: 30px;
+        margin: 5px;
+    }
+    input[type='text'],input[type='password']{
+        background: transparent;
+        padding: 8px 0;
+    }
+    .input-box{
+        width: 80%;
+        margin-top: 5%;
+    }
+    .checkbox-box{
+        margin-top: 5%;
+    }
+    .login-bt{
+        margin-top: 5%;
+        width: 80%;
+        background: #2371AF;
+        color: white;
+        text-align: center;
+        padding: 8px 0;
+    }
+    label:before,label:after{
+        box-sizing:border-box;
+    }
+}
+
+</style>

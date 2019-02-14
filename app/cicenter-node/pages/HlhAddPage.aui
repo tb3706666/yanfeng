@@ -1,0 +1,401 @@
+<ui>
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>合理化录入</aui-text>
+            </caption-area>
+            <right-area>
+                <a id="subIcon"><i class="icon auicon icon-hook-fill"></i></a>
+            </right-area>
+        </aui-titlebar>
+    </aui-header>
+    <aui-scroller class="content" style="position:absolute;top:45px;right: 0px;bottom: 0px;left: 0px;">
+        <div id="addform1">
+            <div class="editdiv">
+                <label for="propName" class="leftlb">合理化名称</label>
+                <input type="text" name="propName" needsub id="propName" v-model="subdata.propName" placeholder="必填"/>
+            </div>
+            <div class="editdiv">
+                <input type="hidden" name="propDate" needsub id="propDate" v-model="subdata.propDate" v-like="text"/>
+                <font for="propName" class="leftlb">提出时间</font>
+                <div class="readonlyedit flex-row-between" style="flex:1;justify-content: flex-end;" v-on:click="func.selectDate">
+                    <font style="margin-right:10px;" v-text="subdata.propDate"></font>
+                    <i class="icon auicon icon-calendar" style="font-size:20px"></i>
+                </div>
+            </div>
+            <div class="editdiv">
+                <label  for="doSelf" class="leftlb">自己实施</label>
+                <input type="checkbox" id="doSelf" needsub name="doSelf" v-model="subdata.doSelf"></input>
+            </div>
+            <div class="editdiv" v-show="subdata.doSelf">
+                <font  class="leftlb">合理化分类</font>
+                <input type="hidden" name="ptId" id="ptId" needsub v-model="subdata.ptId" v-like="text"/>
+                <div class="readonlyedit flex-row-between" style="flex:1;justify-content: flex-end;" v-on:click="func.selectPt">
+                    <font style="margin-right:10px;" v-text="subdata.ptIdText"></font>
+                    <i class="icon auicon icon-rdodown" style="font-size:20px"></i>
+                </div>
+                
+            </div>
+            <div class="editdiv">
+                <label for="pempMtel" class="leftlb">手机号码</label>
+                <input type="text" name="pempMtel" id="pempMtel" needsub v-model="subdata.pempMtel" placeholder="必填"/>
+            </div>
+            <div class="textareadiv">
+                <label for="pempMtel">现状说明(地点、现状缺点与不足)</label><br>
+                <textarea rows="3" id="propActu" name="propActu" needsub v-model="subdata.propActu"  placeholder="必填"></textarea>
+            </div>
+            <div class="textareadiv">
+                <label for="pempMtel">改进措施/预期效果</label><br>
+                <textarea rows="3" id="propMeas" name="propMeas" needsub v-model="subdata.propMeas"  placeholder="必填"></textarea>
+            </div>
+            <div class="editdiv" v-show="!subdata.doSelf">
+                <input type="hidden" name="recAempId" id="recAempId" needsub v-model="subdata.recAempId"  v-like="text"/>
+                <font class="leftlb">建议实施人员</font>
+                <div class="readonlyedit flex-row-between" style="flex:1;justify-content: flex-end;" v-on:click="func.manclick">
+                    <font style="margin-right:10px;" v-text="subdata.recAempName"></font>
+                    <i class="icon auicon icon-contact" style="font-size:20px"></i>
+                </div>
+            </div>
+            <div class="attchdiv">
+                <font class="leftlb">合理化建议附件</font>
+                <div style="flex:1;text-align:right">
+                
+                    <aui-botton class="btn btn-outlined btn-primary" v-on:click="func.selectFile">附件上传</aui-botton>
+                    <aui-botton class="btn btn-outlined btn-primary" v-on:click="func.selectPhoto">拍照上传</aui-botton>
+                </div>
+            </div>
+
+            <aui-list style="border-top:0" v-if="subdata.attachInfo.attachSeriNo != ''">
+                <list-cell v-on:click="func.deleteAttach(subdata.attachInfo.attachSeriNo,subdata.attachInfo.filename)" style="padding:10px" >{{subdata.attachInfo.filename}}<button style="right:10px" class="btn btn-outlined btn-primary">删除</button></list-cell>
+            </aui-list>
+
+            <input v-for="hid in subdata.hiddenparams" needsub type="hidden" v-bind:name="hid.name" v-bind:id="hid.name" v-bind:value="hid.value"/>
+        </div>
+    </aui-scroller>
+</ui>
+
+
+<script>
+import '@auicomp/header/Header.aui';
+import '@auicomp/button/Button.aui';
+import '@auicomp/scroller/Scroller.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auicomp/list/List.aui';
+import '@auicomp/grid/Grid.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import fetch from '@comm/utils/nfetch';
+import { router } from '@auicomp/action/Action.aui';
+import Actionsheet from '@auicomp/actionsheet/Actionsheet.aui';
+import Selectsheet from '@comm/components/Selectsheet.aui';
+import Confirm from '@auicomp/confirm/Confirm.aui';
+import tool from '@comm/utils/tool';
+
+export default class HlhAddPage{
+    static get tag(){
+        return 'hlhadd';
+    }
+
+    created () {
+        const $el = $(this.$el);// this即当前类的实例化对象，该对象的$el属性即为对应组件的原生js dom对象
+        $el.on("backfill",function(e,personId,personName){
+            obj.subdata.recAempId = personId;
+            obj.subdata.recAempName = personName;
+        });
+        $el.find("#subIcon").on("click",function(){
+            if($.trim($el.find("#propName").val()) == ""){
+                Toast.show("请填写合理化名称", function(){});
+                return;
+            }
+            if($.trim($el.find("#propName").val()).length > 10){
+                Toast.show("合理化名称不能超过10个字符,请重新输入!", function(){});
+                return;
+            }
+            if($.trim($el.find("#propDate").val()) == ""){
+                Toast.show("请选择提出时间", function(){});
+                return;
+            }
+            if(obj.subdata.doSelf && $.trim($el.find("#ptId").val()) == ""){
+                Toast.show("请选择合理化分类", function(){});
+                return;
+            }
+
+            if($.trim($el.find("#pempMtel").val()) == ""){
+                Toast.show("请填写手机号码", function(){});
+                return;
+            }
+            if(!tool.mobileNoRegex($.trim($el.find("#pempMtel").val()))){
+                Toast.show("手机号码格式不正确,请重新输入!", function(){});
+                return;
+            }
+
+            if($.trim($el.find("#propActu").val()) == ""){
+                Toast.show("请填写现状说明", function(){});
+                return;
+            }
+            if($.trim($el.find("#propMeas").val()) == ""){
+                Toast.show("请填写现状说明", function(){});
+                return;
+            }
+
+            var finalsubData = {};
+            var finalParams = $el.find("[needsub]");
+            $.each(finalParams,function(){
+                if($(this).attr("name") == "doSelf"){//单独判断checkbox
+                    finalsubData['doSelf'] = obj.subdata.doSelf?"1":"";
+                }else{
+                    finalsubData[$(this).attr("name")] = $.trim($(this).val());
+                }
+            });
+            auiLoading.show();
+            fetch({
+                appId: 'ci',
+                url : '/createSubmit',
+                data:finalsubData,
+                success:function(rsp){
+                    auiLoading.hide();
+                    if(rsp.result == "success"){
+                        Toast.show("操作成功", function(){
+                            history.go(-1);
+                        });
+                    }else{
+                        Toast.show(rsp.msg, function(){});
+                    }
+                    
+                },
+                error:function(rsp){
+                    auiLoading.hide();
+                    Toast.show(rsp.errmsg, function(){});
+                }
+            });
+        });
+        
+        auiLoading.show();
+        fetch({
+            appId: 'ci',
+            url : '/hlh_add.jsp',
+            success:function(rsp){
+                auiLoading.hide();
+                obj.subdata.pempMtel = rsp.pempMtel;
+                obj.subdata.propDate = rsp.propDate;
+                obj.subdata.hlh_fenlei.$reset(rsp.hlh_fenlei);
+                obj.subdata.hiddenparams.$reset(rsp.hideInfo);
+                
+            },
+            error:function(rsp){
+                auiLoading.hide();
+                Toast.show(rsp.errmsg, function(){});
+            }
+        });
+        const obj = this.$obj = {
+            subdata:{
+                propName:'',
+                propDate:'',
+                doSelf:false,
+                pempMtel:'',
+                ptId:'',
+                ptIdText:'',
+                propActu:'',
+                propMeas:'',
+                recAempId:'',
+                recAempName:'',
+                hlh_fenlei:[],
+                hiddenparams:[],
+                attachInfo:{
+                    attachSeriNo:'',
+                    filename:'',
+                }
+            },
+            func:{
+                manclick:function(){//进入选人页面
+                    router.go('/chooseperson?backpage=aui-hlhadd');//backpage参数为能通过jquery选中当前页面的【选择器】
+                },
+                uploadFile:function(filepath){//附件、照片上传函数
+                    let fileName = filepath.substring(filepath.lastIndexOf("/") + 1, filepath.length);
+                    auiLoading.show();
+                    fetch({
+                        appId: 'ci',
+                        url : '/upload',
+                        data:[
+                            {type:1,name:'Filedata',value:filepath},
+                            {type:0,name:'Filename',value:fileName},
+                            {type:0,name:'seriId',value:$el.find("#seriId").val()},
+                            {type:0,name:'addtType',value:'1'},
+                            {type:0,name:'Upload',value:'Submit Query'}
+                        ],
+                        success:function(rsp){
+                            auiLoading.hide();
+                            if(rsp.attachSeriNo != ""){
+                                obj.subdata.attachInfo.attachSeriNo = rsp.attachSeriNo;
+                                obj.subdata.attachInfo.filename = rsp.filename;
+                            }else{
+                                Toast.show("上传失败", function(){});
+                            }
+                        },
+                        error:function(rsp){
+                            auiLoading.hide();
+                            Toast.show(rsp.errmsg, function(){});
+                        }
+                    });
+                },
+                deleteAttach:function(atNo,atName){//删除附件、照片函数
+
+                    Confirm.show({
+                        content: '是否删除"'+atName+'"？',
+                        doOk: function(){
+                            auiLoading.show();
+                            fetch({
+                                appId: 'ci',
+                                url : '/deleteAddt?attachSeriNo='+atNo,
+                                type:'get',
+                                dataType:'text',
+                                success:function(rsp){
+                                    auiLoading.hide();
+                                    obj.subdata.attachInfo.attachSeriNo = "";
+                                    obj.subdata.attachInfo.filename = "";
+                                },
+                                error:function(rsp){
+                                    auiLoading.hide();
+                                    Toast.show(rsp.errmsg, function(){});
+                                }
+                            });
+                        }
+                    });
+                },
+                selectFile:function(){//选择文件
+                    appnest.ui.selectFile({
+                        success:function(res){
+                            obj.func.uploadFile(res.filePaths[0]);
+                        },
+                        fail:function(res){
+                            Toast.show(res.errMsg, function(){});
+                        }
+                    });
+                },
+                selectPhoto:function(){//选择照片
+                    Actionsheet.show({
+                        list:[
+                            {
+                                text:'拍照',
+                                handler:function(){
+                                    appnest.photo.camera({
+                                        success: function (res) {
+                                            obj.func.uploadFile(res.imagePath);
+                                        },
+                                        fail: function (res) {
+                                            Toast.show(res.errMsg, function(){});
+                                        }
+                                    });
+                                }
+                            },
+                            {
+                                text:'图库',
+                                handler:function(){
+                                    appnest.photo.album({
+                                        success: function (res) {
+                                            obj.func.uploadFile(res.imagePath);
+                                        },
+                                        fail: function (res) {
+                                            Toast.show(res.errMsg, function(){});
+                                        }
+                                    });
+                                }
+                            }
+                        ]
+                    });
+                },
+                selectDate:function(e){//弹出日期选择框
+                    appnest.ui.selectDate({
+                        success: function (res) {
+                            obj.subdata.propDate = res.date;
+                        },
+                        fail: function (res) {
+                            Toast.show(res.errMsg, function(){});
+                        }
+                    });
+                },
+                selectPt:function(){//弹出“合理化分类”选择框
+                    Selectsheet.show({
+                        list: obj.subdata.hlh_fenlei.map(function(item){
+                            return item.text;
+                        }),
+                        func:function(index){
+                            obj.subdata.ptId = obj.subdata.hlh_fenlei[index].value;
+                            obj.subdata.ptIdText = obj.subdata.hlh_fenlei[index].text;
+                        }
+                    });
+                },
+            }
+        }
+        $el.find('#addform1').render(obj);
+        
+    }
+
+    detached(){
+        this.$vm && this.$vm.destroy();
+    }
+}
+
+
+</script>
+
+<style type="less">
+@defaultborder:1px solid #ddd;
+.flex-row-between{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.readonlyedit{
+    padding: 5px 0;
+    &:active{
+        background: rgb(209, 207, 207);
+    }
+}
+.leftlb{
+    color:#8E8E93;
+    width: 25%;
+}
+#addform1{
+    .editdiv{
+        padding: 0 10px;
+        height: 46px;
+        border-bottom: @defaultborder;
+        .flex-row-between;
+        input[type='checkbox']{
+            width: 20px;
+            height: 20px;
+        }
+        input[type='text']{
+            border: 0;
+            flex: 1;
+            font-size: 14px;
+            padding: 5px;
+            text-align: right;
+        }
+    }
+    .textareadiv{
+        padding: 10px;
+        border-bottom: @defaultborder;
+        label{
+            color:#8E8E93;
+        }
+        textarea{
+            font-size: 14px;
+            width: 97%;
+            border: 0;
+        }
+
+    }
+    .attchdiv{
+        padding: 10px;
+        border-bottom: @defaultborder;
+        display: flex;
+        align-items: center;
+
+    }
+}
+</style>

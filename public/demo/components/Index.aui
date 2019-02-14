@@ -1,0 +1,22 @@
+
+
+<script>
+
+function Index(){
+	
+}
+
+Index.prototype = {
+	created: function(){
+        const $el = $(this.$el), $parent = $el.parent(), pid = $parent.attr('id');
+        $el.html(`<div class="description">这是${pid}</div>`);
+	}
+}
+
+Index.tag = 'index';
+
+define(function(){
+	return Index;
+});
+
+</script>

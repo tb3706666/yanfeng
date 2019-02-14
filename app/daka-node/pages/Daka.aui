@@ -1,0 +1,197 @@
+<ui>
+<aui-scroller id="auiscroller" class="content dakacont" style="position: absolute; top: 0pxp; right: 0px; bottom: 0px;left: 0px;text-align: center;border-top:0;">
+    <div style="display: inline-block; width:100%">
+            <form id="demo" style="display:none" mbsc-form>
+                <div class="mbsc-form-group">
+                    <aui-text class="dakatext">日期 Date</aui-text>
+                    <label>
+                    <aui-datetime  class="dakadate" v-on:change="func.datechange" type="date" v-bind:value="defaultDateStr">
+                    
+                    </aui-datetime>
+                    </label>
+                </div>
+            </form>
+    </div>
+
+    <aui-list id="dakalist">
+        <list-cell class="grid" v-for="item in items">
+            <grid-cell>
+                <img class="media-object pull-left" style="width:24px;height:24px" src="./assets/imgs/qd.png">
+            </grid-cell>
+            <grid-cell class="flex-1 padded">
+                <aui-text>{{item.login_time}}</aui-text>
+                <p>{{item.are_name}}</p>
+            </grid-cell>
+        </list-cell>
+    </aui-list>
+</aui-scroller>
+<div class="tipinfo">
+    <aui-text class="tiptext">仅限7天内考勤打卡查询</aui-text>
+</div>
+</ui>
+
+
+<script>
+import '@auicomp/grid/Grid.aui';
+import '@auicomp/text/Text.aui';
+import '@auicomp/list/List.aui';
+import '@auicomp/action/Action.aui';
+import '@auicomp/scroller/Scroller.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auicomp/datetime/DateTime.aui';
+import '@auiutil/mobiscroll3/css/mobiscroll.javascript.min.css';
+import mobiscroll from '@auiutil/mobiscroll3/js/mobiscroll.javascript.min';
+import fetch from '@comm/utils/nfetch';
+import Alert from '@auicomp/alert/Alert.aui';
+import { router } from '@auicomp/action/Action.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+
+import moment from 'moment';
+
+
+
+export default class Daka{
+    static get tag(){
+        return 'daka';
+    }
+
+    created () {
+        var badge = router.getQueryObj().badge;//获取用户工号
+        //请求
+        var dakacout=[];
+        auiLoading.show();
+            fetch({
+                url : '/record',
+                data: {
+                    username: badge
+                },
+                success: function(data1){
+                    auiLoading.hide();
+                    if(data1.list.length==0){
+                        Alert.show({
+                            content: '没有数据'
+                        });
+                    }else{
+                        obj.items.$reset(data1.list);
+                    }
+                },
+                error: function(rs){
+                    auiLoading.hide();
+                    Alert.show({
+                        content: '请求错误',
+                    });
+                }
+            });
+
+
+        const $el = $(this.$el);
+        const obj = this.$obj = {
+            items : [],
+            defaultDateStr:moment().format('YYYY-MM-DD'),
+            func:{
+                datechange:function(e){
+                    auiLoading.show();
+                    fetch({
+                        url : '/record',
+                        data: {
+                            username: badge,
+                            date:e.target.value
+                        },
+                        success: function(data1){
+                            auiLoading.hide();
+                              if(data1.list.length==0){
+                                    Alert.show({
+                                        content: '没有数据'
+                                    });
+                                    obj.items.$reset([]);
+                                 
+                               }else{
+                                   obj.items.$reset(data1.list);
+                               }
+                        },
+                        error: function(rs){
+                            auiLoading.hide();
+                             Alert.show({
+                                   content: '请求错误',
+                                    
+                                });
+                            // alert(rs.errmsg+'未请求成功');
+                        }
+                    });
+                }
+            }
+        };
+       
+        $el.render(obj);
+
+
+        //日期组件
+        mobiscroll.settings = {
+            theme: 'ios',
+            lang: 'zh',
+        };
+
+        var date, select, widget,
+            now = new Date(),
+            form = document.getElementById("demo");
+
+        mobiscroll.form('#demo');
+
+    }
+}
+
+
+</script>
+
+<style>
+    
+    .mbsc-form-group{
+        margin: 0;
+    }
+.flex-1{
+    text-align: left;
+}
+.flex-1 p{
+    color:#B9B9B9;
+}
+aui-datetime>input{
+    font-size: 16px;
+}
+.tipinfo{
+    position: fixed;
+    bottom: 0px;
+    right: 0px;
+    width: 100%;
+    height: 40px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.tiptext{
+    position: absolute;
+    left:10px;
+    color: #005baa;
+}
+.dakacont{
+    position: absolute; 
+    top: 0px; 
+    right: 0px; 
+    bottom: 0px;
+    left: 0px;
+    text-align: center;
+    padding:5px;
+}
+.dakadate{
+    padding:15px;
+    display:block;
+    background:#EBEBEB;
+    width:60%;
+    float:right;
+    border-radius: 5px;
+}
+.dakatext{
+    padding:15px;
+    float:left;
+    margin-right:10px;
+}
+</style>

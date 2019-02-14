@@ -1,0 +1,78 @@
+<ui>
+    <div id="tags">
+        <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>标签云</aui-text>
+                </caption-area>
+            </aui-titlebar>
+        </aui-header>
+
+        <aui-scroller class="content" id="taglist" style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;padding-left:5px;padding-right:5px;">
+                <card-content  v-for="item in items" v-on:click="func.listclick(item.text)">
+                    <aui-button class="btn btn-primary" >{{item.text}}</aui-button>
+                </card-content>
+        </aui-scroller>
+    </div>
+</ui>
+
+
+<script>
+    import fetch from '@comm/utils/xfetch';
+    import { router } from '@auicomp/action/Action.aui';
+    import Toast from '@auicomp/toast/Toast.aui';
+    import auiLoading from '@auicomp/loading/Loading.aui';
+    import '@auicomp/button/Button.aui';
+    export default class Biaoqianyun {
+
+        static get tag() {
+            return 'biaoqianyun';
+        }
+
+        created() {
+            var tags=[];
+            auiLoading.show();
+            fetch({
+                appId: 'iexpress',
+                url : 'http://IEXPRESS/tag_list.jsp',
+                success: function(rsp){
+                   if(rsp.tagInfo.length>0){
+                       $.each(rsp.tagInfo,function(e,e1){
+                           tags.push(e1);
+                       });
+                   }else{
+                       $("#taglist").append("<img src='./assets/imgs/nodata.png'>")
+                       Toast.show('查无数据', function(){
+                        });
+                   }
+                   auiLoading.hide();
+                },
+                error: function(rs){
+                    auiLoading.hide();
+                    Toast.show(rs.errmsg, function(){
+                        });
+                }
+            });
+            
+            var obj = {
+                items : tags,
+                func:{
+                    listclick:function(text){
+                        router.go('/searchtag?tag='+text);
+                    }
+
+                }
+            };
+            $("#tags").render(obj);
+        }
+    }
+</script>
+
+<style>
+aui-button{
+    margin-top: 15px;
+}
+</style>

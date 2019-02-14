@@ -1,0 +1,255 @@
+<ui>
+<div id="hllist_content">
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+            <!-- 待我处理 -->
+                <aui-text>合理化列表</aui-text>
+            </caption-area>
+        </aui-titlebar>
+        <aui-tabbar class="tabbar tabbar-line animated">
+            <tabbar-cell class="active" href="#toggle" v-on:click="func.tabclick(1)">
+                <label class="tab-label">待我处理的</label>
+            </tabbar-cell>
+            <tabbar-cell href="#control" v-on:click="func.tabclick(2)">
+                <label class="tab-label" >超期未处理</label>
+            </tabbar-cell>
+        </aui-tabbar>
+    </aui-header>
+
+    <aui-refresher   class="search-refresher-hllist " style="position: absolute; top: 84px; right: 0px; bottom: 0px;left: 0px;text-align: center; background-color:white;" v-on:pulldown="func.doPullDown" v-on:pullup="func.doPullUp" >
+        <!-- 待我处理的 -->
+        <div id="toggle" >
+            <aui-list style="text-align:left;">
+                <list-cell class="grid" v-for="item in listDatas" v-on:click="func.listclick(item.SERI_ID,item.NOW_STATUS_ID,item.stepId)">
+                    <grid-cell class="flex-1 padded">
+                        {{item.PROP_NAME}}<br>
+                        <p style="color:#ccc;">提出日期：{{item.PROP_DATE}} 状态：{{item.NOW_STATUS_NAME}}</p>
+                    </grid-cell>
+                </list-cell>
+            </aui-list>
+            <div v-if="!hasData" style="text-align:center;padding:10px;color:#ddd;">没有更多数据</div>
+            <img src='./assets/imgs/nodata.png' v-show="nodata"/>
+        </div id>
+        <!-- 超期未处理 -->
+        <div id="control" style="display:none;">
+            <aui-list style="text-align:left;">
+                <list-cell class="grid" v-for="item in listDatas2" v-on:click="func.listclick(item.SERI_ID,item.NOW_STATUS_ID,item.stepId)">
+                    <grid-cell class="flex-1 padded">
+                        {{item.PROP_NAME}}<br>
+                        <p style="color:#ccc;">提出日期：{{item.PROP_DATE}} 状态：{{item.NOW_STATUS_NAME}}</p>
+                    </grid-cell>
+                </list-cell>
+            </aui-list>
+            <div v-if="!hasData" style="text-align:center;padding:10px;color:#ddd;">没有更多数据</div>
+            <img src='./assets/imgs/nodata.png' v-show="nodata"/>
+        </div>
+    </aui-refresher>
+    </div>
+</ui>
+
+
+<script>
+import '@auicomp/tabbar/Tabbar.aui';
+
+import Action from '@auicomp/action/Action.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import mobiscroll from '@auiutil/mobiscroll3/js/mobiscroll.javascript.min';
+import Refresher from '@auicomp/refresher/Refresher.aui';
+import fetch from '@comm/utils/xfetch';
+import Toast from '@auicomp/toast/Toast.aui';
+import { router } from '@auicomp/action/Action.aui';
+import './Frame.aui';
+// import $ from 'agile-ce';
+
+export default class HLListPage{
+    
+    static get tag(){
+        return 'hllist';
+    }
+
+    created(){
+        const $el = $(this.$el);
+        //删除缓存的详情页面
+        $(this.$el).on('enter',function(){
+            $("aui-hl_detail").remove();
+            $("aui-hlhedit").remove();
+        });
+        Refresher.init(".search-refresher-hllist",{});
+        var nowpage=1;
+        const obj = this.$obj ={
+            nodata:false,
+            currentPage:1,
+            totalPage:1,
+            listDatas:[],
+            listDatas2:[],
+            hasData:true,
+            func:{
+                searchData:function(cb){
+                    auiLoading.show();
+                    fetch({
+                        appId: 'ci',
+                        url : 'http://ciurl/hlh_list.jsp',
+                        data: {
+                            pageNo:obj.currentPage
+                        },
+                        success:function(rsp){
+                            window.logininfo.daibanNum=rsp.total;
+                            nowpage=obj.currentPage;
+                             cb && cb(rsp);
+                             auiLoading.hide();
+                        },
+                        error: function(rsp){
+                            auiLoading.hide();
+                            Toast.show(rsp.errmsg, function(){
+                                console.log('Toast Close');
+                            });
+                        }
+                    });
+                },
+                searchData2:function(cb){
+                    auiLoading.show();
+                     fetch({
+                        appId: 'ci',
+                        url : 'http://ciurl/hlh_chaoqi_list.jsp',
+                        data: {
+                            pageNo:obj.currentPage
+                        },
+                        success:function(rsp2){
+                            nowpage=obj.currentPage;
+                             cb && cb(rsp2);
+                             auiLoading.hide();
+                        },
+                        error: function(rsp2){
+                            auiLoading.hide();
+                            Toast.show(rsp2.errmsg, function(){
+                                console.log('Toast Close');
+                            });
+                        }
+                    });
+                },
+                doPullDown:function(e, $refresh){
+                    obj.currentPage = 1;
+                    obj.totalPage = 1;
+                    obj.hasData=true;
+                    obj.listDatas.$reset([]);
+                    obj.listDatas2.$reset([]);
+                    obj.func.searchData(function(rsp){
+                        if(nowpage == Math.ceil((rsp.total/20))){
+                            obj.hasData=true;
+                        }
+                        obj.currentPage = nowpage;
+                        obj.totalPage=Math.ceil((rsp.total/20));
+                        if(rsp.rows.length > 0){
+                            obj.nodata = false;
+                            obj.listDatas.$reset(rsp.rows);
+                            $refresh.refresh();
+                        }else{
+                            obj.nodata = true;
+                            return $refresh.end();
+                        }
+                    });
+
+                    obj.func.searchData2(function(rsp){
+                        if(nowpage == Math.ceil((rsp.total/20))){
+                            obj.hasData=true;
+                        }
+                        obj.currentPage = nowpage;
+                        obj.totalPage=Math.ceil((rsp.total/20));
+                        if(rsp.rows.length > 0){
+                            obj.nodata = false;
+                            obj.listDatas2.$reset(rsp.rows);
+                            $refresh.refresh();
+                        }else{
+                             obj.nodata = true;
+                             return $refresh.end();
+                        }
+                    });
+                },
+                doPullUp:function(e, $refresh){
+                    console.log('pull down');
+                    if(obj.totalPage > obj.currentPage){
+                        obj.currentPage += 1;
+                        obj.func.searchData(function(rsp){
+                            obj.currentPage = nowpage;
+                            obj.totalPage = Math.ceil((rsp.total/20));
+                            if(rsp.rows.length > 0){
+                                $.each(rsp.rows, function(i,e) {
+                                    obj.listDatas.push(e);
+                                });  
+                                $refresh.refresh();
+                            }else{
+                                Toast.show('没有更多数据');
+
+                            }
+                        });
+                        obj.func.searchData2(function(rsp){
+                            obj.currentPage = nowpage;
+                            obj.totalPage = Math.ceil((rsp.total/20));
+                            if(rsp.rows.length > 0){
+                                $.each(rsp.rows, function(i,e) {
+                                    obj.listDatas2.push(e);
+                                });  
+                                $refresh.refresh();
+                            }else{
+                                Toast.show('没有更多数据', function(){
+                                    console.log('Toast Close');
+                                });
+
+                            }
+                        });
+                    }else{
+                        obj.hasData = false;
+                        return $refresh.end();
+                    }
+                },
+                 listclick:function(seriId,status,stepId){
+                     window.seriId=seriId;
+                     window.status=status;
+                     window.stepId=stepId;
+                     if(status == "20100" || status == "10000"){
+                         router.go('/hlhedit');
+                     }else{
+                         router.go('/hl_detail');
+                     }
+                },
+                tabclick:function(flg){
+                    if(flg==1){
+                        $el.find("#toggle").css("display","block");
+                        $el.find("#control").css("display","none");
+                    }else{
+                        $el.find("#toggle").css("display","none");
+                        $el.find("#control").css("display","block");
+                    }
+                }
+            }
+        }
+        this.$vm = $el.find('#hllist_content').render(obj);
+        
+
+        Action.listener($el.find('tabbar-cell').attr('type', 'control'));
+    }
+
+    detached(){
+        this.$elvm && this.$elvm.destroy();
+    }
+}
+
+</script>
+
+<style>
+[type="toggle"].active .icon-arrowdown::before,
+[type="control"].active .icon-arrowdown::before{
+    content: '\e694';
+}
+.content-tips{
+    font-size: 13px;
+    color: #7F8C8D;
+    margin: 10px;
+}
+</style>
+
+

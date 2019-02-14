@@ -1,0 +1,206 @@
+<ui>
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>点检</aui-text>
+            </caption-area>
+            <right-area>
+                <a ><i class="icon auicon icon-qrcode"></i></a>
+            </right-area>
+        </aui-titlebar>
+    </aui-header>
+    <aui-scroller class="content" style="position: absolute; top: 45px; right: 0px; bottom: 45px;left: 0px;">
+        <div>
+            <div class="dj-baseInfo">
+                <font class="label-left">工单</font>
+                <div class="input-1"><input type="text" class="dj-text" readonly value="SP1811381"/></div>
+                <a class="midarrow">></a>
+                <div class="input-2"><input type="text" class="dj-text" readonly value="点检工单"/></div>
+            </div>
+            <div class="dj-baseInfo">
+                <font class="label-left">位置</font>
+                <div class="input-1"><input type="text" class="dj-text" readonly value="LINE2-1"/></div>
+                <a class="midarrow">></a>
+                <div class="input-2"><input type="text" class="dj-text" readonly value="POLO前排生产线"/></div>
+            </div>
+            <div class="dj-baseInfo">
+                <font class="label-left">资产</font>
+                <div class="input-1"><input type="text" class="dj-text" readonly value="7000040200"/></div>
+                <a class="midarrow">></a>
+                <div class="input-2"><input type="text" class="dj-text" readonly value="2#线电功能测试设备（保护装置"/></div>
+            </div>
+
+            <div class="dj-baseInfo">
+                <font class="label-left">报告人</font>
+                <div class="input-1" ><input type="text" class="dj-text" readonly value="83324"/></div>
+                <a class="midarrow"></a>
+                <div class="input-2" ><input type="text" class="dj-text" readonly value="2018-11-09"/></div>
+            </div>
+        </div>
+
+        <div class="dj-item">
+            <div class="dj-item-title">
+                <p>任务项：1/4</p>
+            </div>
+            <div class="dj-item-detail">
+                <p>5S：检查设备表面是否有积灰 操作按钮是否破损。</p>
+                <p>检查方法：目视。</p>
+            </div>
+            <div class="dj-check">
+                <img src="./assets/imgs/slide3.jpg" />
+                <div class="dj-radioarea">
+                    <grid-cell class="col-6">
+                        <input type="radio" id="djrd1" class="magic-radio"  name="djradio"/><label for="djrd1">状态良好√</label>
+                    </grid-cell>
+                    <grid-cell class="col-6">
+                        <input type="radio" id="djrd2" class="magic-radio"  name="djradio"/><label for="djrd2">状态不好或损坏×</label>
+                    </grid-cell>
+                    <grid-cell class="col-6">
+                        <input type="radio" id="djrd3" class="magic-radio"  name="djradio"/><label for="djrd3">正在处理○</label>
+                    </grid-cell>
+                    <grid-cell class="col-6">
+                        <input type="radio" id="djrd4" class="magic-radio"  name="djradio"/><label for="djrd4">停机状态△</label>
+                    </grid-cell>
+                </div>
+            </div>
+        </div>
+    </aui-scroller>
+    <aui-footer>
+        <div class="dj-footer">
+            <aui-button class="btn btn-outlined btn-primary">上一项</aui-button>
+            <aui-button class="btn btn-outlined btn-primary">下一项</aui-button>
+            <aui-button class="btn btn-outlined btn-primary">保存</aui-button>
+        </div>
+    </aui-footer>
+</ui>
+<script>
+import '@auicomp/header/Header.aui';
+import '@auicomp/footer/Footer.aui';
+import '@auicomp/scroller/Scroller.aui';
+import '@auicomp/text/Text.aui';
+import '@auicomp/grid/Grid.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auicomp/list/List.aui';
+import '@auicomp/button/Button.aui';
+import 'magic-check/css/magic-check.min.css';
+
+import Action,{ router } from '@auicomp/action/Action.aui';
+
+export default class DianJian {
+
+    static get tag() {
+        return 'dianjian';
+    }
+
+    created() {
+        const $el = $(this.$el);
+        const obj = this.$obj = {
+            func:{
+                
+            }
+        }
+    }
+}
+</script>
+<style type="less">
+@defaultborder:1px solid #ddd;
+@bluetborder:1px solid #428bca;
+
+.dj-text{
+    width: 100%;
+    height: 30px;
+    border:0;
+    // border-radius: 5%;
+    background-color: #ececee;
+    padding-left:5px; 
+    font-size: 14px;
+}
+aui-dianjian{
+    .dj-footer{
+        height: 45px;
+        padding: 0 5px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        aui-button{
+            flex: 1;
+            margin: 0 5px;
+        }
+    }
+    .dj-baseInfo{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 5px 10px;
+        &:first-child{
+            padding-top: 10px;
+        }
+        .midarrow{
+            width:20px;
+            height:20px;
+            text-align: center;
+            color: #428bca;
+        }
+        .input-1{
+            flex: 4;
+            display: flex;
+        }
+        .input-2{
+            flex: 7;
+            display: flex;
+        }
+        .label-left{
+            width: 50px;
+            font-size: 14px;
+            text-align: left;
+            color: #8E8E93;
+        }
+    }
+    .dj-item{
+        border: @defaultborder;
+        border-radius: 4%;
+        margin: 10px;
+        .dj-item-title{
+            border-bottom: @bluetborder;
+            padding: 10px;
+            p{
+                font-size: 14px;
+                color: #428bca;
+            }
+        }
+        .dj-item-detail{
+            border-bottom: @defaultborder;
+            padding: 10px;
+            p{
+                font-size: 14px;
+            }
+        }
+        .dj-check{
+            width: 100%;
+            text-align: center;
+            img{
+                width: 90%;
+                height: 180px;
+                margin: 10px 0;
+            }
+            .dj-radioarea{
+                display: flex;
+                flex-wrap: wrap;
+                padding:5px 15px;
+                grid-cell{
+                    padding: 5px 0;
+                    label[for]{
+                        text-align: left;
+                    }
+                    label:before,label:after{
+                        box-sizing:border-box;
+                    }
+                }
+            }
+        }
+    }
+}
+</style>

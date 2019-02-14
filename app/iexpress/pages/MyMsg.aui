@@ -1,0 +1,122 @@
+<ui>
+   <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>我的消息</aui-text>
+            </caption-area>
+        </aui-titlebar>
+    </aui-header>
+
+    <aui-refresher delay class="search-refresher-msg" style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;text-align: center; background-color:white;" v-on:pulldown="func.doPullDown" v-on:pullup="func.doPullUp" auto>
+         <aui-list style="text-align:left;">
+                <list-cell class="grid" v-for="item in listDatas" v-on:click="func.listclick(item.SERI_ID)">
+                    <grid-cell class="flex-1 padded">
+                        {{item.text}}<br>
+                        <p style="color:#ccc;">{{item.date}}</p>
+                    </grid-cell>
+                </list-cell>
+        </aui-list>
+        <div v-if="!hasData" style="text-align:center;padding:10px;color:#ddd;">没有更多数据</div>
+        <img src="./assets/imgs/nodata.png" style="width:100%;"v-if="!noimg">
+    </aui-refresher>
+
+</ui>
+<style type='less'>
+</style>
+
+<script>
+import Refresher from '@auicomp/refresher/Refresher.aui';
+import fetch from '@comm/utils/xfetch';
+import Toast from '@auicomp/toast/Toast.aui';
+import Action,{ router } from '@auicomp/action/Action.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+
+
+export default class MyMsg {
+
+    static get tag() {
+        return 'mymsg';
+    }
+    created() {
+        Refresher.init(".search-refresher-msg",{});
+        var members=[];
+        var nowpage=1;
+        const obj = this.$obj ={
+            currentPage:1,
+            totalPage:1,
+            listDatas:[],
+            hasData:true,
+            noimg:true,
+            func:{
+                getlist:function(cb){
+                    auiLoading.show();
+                    fetch({
+                        appId: 'iexpress',
+                        url : 'http://IEXPRESS/notice_list.jsp',
+                        data: {
+                            page:obj.currentPage
+                        },
+                        success:function(rsp){
+                            nowpage=obj.currentPage;
+                             cb && cb(rsp);
+                             auiLoading.hide();
+                        },
+                        error: function(rsp){
+                            auiLoading.hide();
+                            Toast.show(rsp.errmsg);
+                        }
+                    });
+                },
+                doPullDown:function(e, $refresh){
+                    obj.currentPage = 1;
+                    obj.totalPage = 1;
+                    obj.hasData=true;
+                    obj.listDatas.$reset([]);
+                    obj.func.getlist(function(rsp){
+                        if(nowpage == rsp.total){
+                            obj.hasData=true;
+                        }
+                        obj.currentPage = nowpage;
+                        obj.totalPage=rsp.total;
+                        if(rsp.list.length > 0){
+                            obj.listDatas.$reset(rsp.list);
+                            $refresh.refresh();
+                        }else{
+                            obj.noimg=false;
+                            Toast.show('未查询到数据');
+                        }
+                    });
+                },
+                doPullUp:function(e, $refresh){
+                    if(obj.totalPage > obj.currentPage){
+                        obj.currentPage += 1;
+                        obj.func.getlist(function(rsp){
+                            obj.currentPage = nowpage;
+                            obj.totalPage = rsp.total;
+                            if(rsp.list.length > 0){
+                                $.each(rsp.list, function(i,e) {
+                                    obj.listDatas.push(e);
+                                });  
+                                $refresh.refresh();
+                            }else{
+                                Toast.show('没有更多数据');
+                            }
+                        });
+                    }else{
+                        obj.hasData = false;
+                        return $refresh.end();
+                    }
+                },
+            }
+        }
+        this.$vm = $(this.$el).find('.search-refresher-msg').render(obj);
+    }
+
+    detached(){
+        this.$vm && this.$vm.destroy();
+    }
+}
+</script>

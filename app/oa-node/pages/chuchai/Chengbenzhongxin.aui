@@ -1,0 +1,144 @@
+<ui>
+    <div class="Chengbenzhongxin">
+       <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>部门选择</aui-text>
+                </caption-area>
+                <right-area>
+                </right-area>
+            </aui-titlebar>
+            <div class="search-box">
+                <form class="subjectarea" action="" v-on:submit="func.submit">
+                    <input class="subject"  type="search" v-like="text" v-model="searchInfo" placeholder="请输入关键字" autocomplete="off" >
+                </form>
+            </div>
+        </aui-header>
+        <aui-scroller  class="scroll aui-refresher-Chengbenzhongxin">
+            <aui-list class="list" v-if="isAjaxed&&hasData">
+                <list-cell v-for="item in list" >
+                    <a v-on:click="func.selectUser($index)">
+                        {{item.name}}
+                    </a>
+                </list-cell>
+            </aui-list>
+            <div v-if="isAjaxed&&!hasData" class="nodata">
+                    <img src="./assets/imgs/nodata.png">
+                </div>
+        </aui-refresher>
+    </div>
+</ui>
+<script>
+    import '@auicomp/refresher/Refresher.aui';
+    import '@auicomp/list/List.aui';
+    import fetch from "@libs/fetch";
+    import common from '@libs/common';
+    import { router } from '@auicomp/action/Action.aui';
+    import 'magic-check/css/magic-check.min.css';
+
+    export default class Chengbenzhongxin {
+
+        static get tag() {
+            return 'Chengbenzhongxin';
+        }
+        created() {
+            var self = this;
+            const obj = this.$obj = {
+                searchInfo:"",
+                isAjaxed:false,
+                hasData:false,
+                list:[],
+                func:{
+                    submit(e){
+                        self.doSearch();
+                        $('.subject').blur();
+                        e.preventDefault();
+                    },
+                   selectUser(myindex){
+                        var prePageData = document.querySelector('aui-ChuchaiNew').component.$obj;
+                        var index = router.getQueryObj().index;
+                        common.confirm('是否确定选择'+obj.list[myindex].name+'?',null,null,function(){
+
+                            prePageData.tickets[index].FD_WF_CC_NAME = obj.list[myindex].name;
+                            prePageData.tickets[index].FD_WF_CC_CODE = obj.list[myindex].id;
+                            
+                            history.go(-1);
+                        })
+                   }
+                }
+            }
+            this.$vm = $(this.$el).render(this.$obj);
+            this.onload();
+        }
+        detached(){
+            this.$vm && this.$vm.destroy();
+        }
+        onload(){
+           
+        }
+        doSearch(){
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : common.oaUrl+'/chengbenzhongxin.jsp',
+                data: {
+                    username:this.$obj.searchInfo,
+                    chengbenzhongxinurl:encodeURIComponent(localStorage.getItem('chengbenzhongxinurl'))
+                },
+                type: 'post',
+                success: function(data){
+                    console.log(data);
+                    self.$obj.isAjaxed = true;
+                    self.$obj.hasData = data.listdata.length>0;
+                    self.$obj.list.$reset(data.listdata);
+                }
+            });
+        }
+    }
+</script>
+<style type='less'>
+@import url('../../assets/less/theme/default/common.less');
+.Chengbenzhongxin{
+    .search-box{
+        width: 100%;
+        padding: 5px;
+        .subjectarea{
+                width:100%;
+                border: 1px solid @border-color;
+                border-radius: 4px;
+                .subject{
+                    border: 0;
+                    width:100%;
+                    padding:10px;
+                    font-size: fts-normal;
+                    -webkit-appearance: textfield;    
+                }
+            }
+            input::-webkit-search-decoration,
+            input::-webkit-search-cancel-button {
+            display: none;
+            }
+    }
+    
+    .aui-refresher-Chengbenzhongxin{
+        position:absolute;
+        top:95px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        .list{
+            .list-item{
+                padding: 8px;
+            }
+        }
+    }
+    label:before,label:after{
+        box-sizing:border-box;
+    }
+
+}
+
+</style>

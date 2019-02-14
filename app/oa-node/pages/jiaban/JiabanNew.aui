@@ -1,0 +1,357 @@
+<ui>
+    <div class="JiabanNew">
+        <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>新建申请</aui-text>
+                </caption-area>
+                <right-area>
+                    <a v-on:click="func.submit">
+                        <i class="icon auicon icon-rdook"></i>
+                    </a>
+                </right-area>
+            </aui-titlebar>
+        </aui-header>
+        <aui-scroller class="content" v-show="ajaxed" >
+            <ul>
+                <li>
+                    <div class="label-l">工号</div>
+                    <div class="label-r">{{data.listData1.empcode}}</div>
+                </li>
+                
+            </ul>
+            <ul>
+               
+                 <li>
+                    <div class="label-l">开始时间</div>
+                    <div class="label-r">
+                        <aui-datetime id="start" formate="yy-mm-dd HH:ii" value="" type="datetime" placeholder="请输入开始时间"></aui-datetime>
+                    </div>
+                </li>
+                 <li>
+                    <div class="label-l">结束时间</div>
+                    <div class="label-r">
+                        <aui-datetime id="end" formate="yy-mm-dd HH:ii"  type="datetime"  placeholder="请输入结束时间"></aui-datetime>
+                    </div>
+                </li>
+                 <li>
+                    <div class="label-l">加班地点</div>
+                    <div class="label-r" v-on:click="func.openSelect">
+                        <div class="select">{{OTPLACE_NAME}}</div>
+                        <i class="icon auicon icon-arrowright"></i>
+                    </div>
+                </li>
+            </ul>
+            <ul>
+               
+                 <li>
+                   <textarea class="REMARK" placeholder="加班原因" rows="4" v-model="OTREASON"></textarea>
+                </li>
+            </ul>
+            <div class="attach-box">
+                <div class="attach-title">附件</div>
+                <div class="attach-list clearfix">
+                    <div  class="attach-add" v-for="item in file">
+                        <img v-bind:src="item.data" class="attachimg" v-on:click="func.preview($index)">
+                        <i class="icon auicon icon-rdoclose" v-on:click="func.delImg($index)"></i>
+                    </div>
+                    <div class="attach-add" v-on:click="func.chooseImg">
+                        <img src="./assets/imgs/add.png" class="addbt">
+                    </div>
+                </div>
+            </div>
+        </aui-scroller>
+    </div>
+</ui>
+<script>
+    import fetch from "@libs/fetch";
+    import common from '@libs/common';
+    import '@auicomp/datetime/DateTime.aui';
+    import Selectsheet from '@comm/components/Selectsheet.aui';
+    import Actionsheet from '../../components/Actionsheet.aui';
+    export default class JiabanNew {
+
+        static get tag() {
+            return 'JiabanNew';
+        }
+        created() {
+           
+
+            let self = this;
+            const obj = this.$obj = {
+                data:{
+                   listData1:{
+                       empcode:"",
+                   }
+                },
+                file:[],
+                FUJIANs:'',
+                ajaxed:false,
+                OTREASON:"",
+                OTPLACE_NAME:"",
+                OTPLACE:"",
+                OTPLACES:[
+                    {
+                        "name":"公司内",
+                        "value":"1",
+                    },{
+                        "name":"公司外",
+                        "value":"2",
+                    }
+                ],
+                func:{
+                    openSelect(){
+                         Selectsheet.show({
+                            list: obj.OTPLACES.map(function(item){
+                                return item.name
+                            }),
+                            func:function(index){
+                                obj.OTPLACE = obj.OTPLACES[index].value;
+                                obj.OTPLACE_NAME = obj.OTPLACES[index].name;
+                            }
+                        });
+                    },
+                    submit(){
+                        if(obj.data.listData1.empcode==""){
+                            common.toast("请填写工号");
+                            return;
+                        }
+                        if(obj.OTPLACE_NAME==""){
+                            common.toast("请填写加班地点");
+                            return;
+                        }
+                       
+                        //判断附件长度
+                        if(obj.file.length>0){
+                            self.submitAttach()
+                        }else{
+                            self.submitform();
+                        }
+                    },
+                    chooseImg(){
+                        if(obj.file.length>5){
+                            common.toast('最多只能上传5张照片')
+                            return;
+                        }
+                        Actionsheet.show({
+                            list: [
+                                {
+                                    text: '直接拍照获取',
+                                    handler: function () {
+                                        common.openCamera(function(res){
+                                            obj.file.push({
+                                                imagePath:res.imagePath,
+                                                thumbnailPath:res.thumbnailPath,
+                                                data:res.data
+                                            });
+                                        });
+                                    }
+                                },
+                                {
+                                    text: '从相册中直接选取',
+                                    handler: function () {
+                                        common.customAlbum(obj.file.length,function(res){
+                                          obj.file.push(...res);
+                                        })
+                                     }
+                                }
+                            ],
+                            doCancel: function () {
+                            }
+                        });
+                    },
+                    preview(index){
+                        common.previewImg(obj.file.map(function(item){
+                            return item.imagePath;
+                        }),index);
+                    },
+                    delImg(index){
+                        obj.file.splice(index, 1)
+                    }
+                }
+            }
+            this.$vm = $(this.$el).render(this.$obj);
+            
+            this.onload();
+        }
+        detached(){
+            this.$vm && this.$vm.destroy();
+        }
+        submitform(){
+            let self = this;
+            fetch({ 
+                appId: common.appId,
+                url : common.hrNewUrl+'/newjiaban',
+                data: {
+                    BADGE: this.$obj.data.listData1.empcode,
+                    PlanStartTime:$('#start input').val(),
+                    PlanEndTime:$('#end input').val(),
+                    OTREASON:this.$obj.OTREASON,
+                    FUJIANs:this.$obj.FUJIANs,
+                    OTPLACE:this.$obj.OTPLACE,
+                },
+                dataType:'text',
+                type: 'post',
+                success: function(datas){
+                    if(datas.split("|")[0]!='1'){
+						common.toast(datas.split("|")[1]);
+						return;
+					}else{
+						common.toast(datas.split("|")[1],function(){
+                            history.go(-1);
+                        });
+					}
+                }
+            });
+        }
+        onload(){
+            let self = this;
+            let start = common.getCurrData()+' 07:30';
+            let end = common.getCurrData()+' 16:30';
+            $('#start').attr('value',start);
+            $('#end').attr('value',end);
+            fetch({
+                appId: common.appId,
+                url : common.hrUrl+'/getQingjianew',
+                data: {
+                    name:localStorage.getItem("username"),
+                },
+                headers:{
+                    "Accept-Language":"zh-cn"
+                },
+                type: 'post',
+                success: function(infos){
+                    $.extend(true,self.$obj.data , infos)
+                    self.$obj.ajaxed=true;
+                }
+            });
+        }
+        submitAttach(){
+            let self = this;
+            let data = [];
+            this.$obj.file.map(function(item){
+                data.push({
+                    type:1,
+                    name:'FILE_NAME',
+                    value:item.imagePath
+                })
+            })
+            fetch({
+                appId: common.appId,
+                url : common.hrNewUrl+'/file/addfile',
+                data: data,
+                dataType:'text',
+                success: function(datas){
+                   if(datas.split("|")[0]&&datas.split("|")[0]=='1'){
+						self.$obj.FUJIANs = datas.split("|")[1];
+						self.submitform();
+					}else{
+						common.toast(datas.split("|")[1]);
+					}
+                }
+            });
+        }
+    }
+</script>
+<style type='less'>
+@import url('../../assets/less/theme/default/common.less');
+.JiabanNew{
+    .content{
+        position: absolute;
+        top: 44px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        background: #EFEFF4;
+        ul{
+            background: #ffffff;
+            margin-top:16px;
+            padding-left: 15px;
+            li{
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                padding: 10px 15px 10px 0;
+                border-bottom: 1px solid  @border-color;
+                .label-l{
+                    flex:3;
+                }
+                .label-r{
+                    flex:7;
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: flex-end;
+                    align-items: center;
+                    .select{
+                        flex: 1;
+                        text-align: right;
+                        margin-right: 5px;
+                    }
+                     .input{
+                        text-align: right;
+                        padding: 0;
+                    }
+                    aui-datetime{
+                        input{
+                            padding: 0;
+                            text-align: right;
+                        }
+                    }
+                }
+
+                &:last-child{
+                    border:0;
+                }
+                .LEAVEREASON{
+                    padding:0;
+                }
+                .REMARK{
+                    border:0;
+                    width: 100%;
+                }
+            }
+        }
+        .attach-box{
+            background: #ffffff;
+            margin-top:16px;
+            padding: 10px 15px;
+            .attach-title{
+                padding: 0px 0px 10px 0px;
+            }
+            .attach-list{
+                .attach-add{
+                    width: 75px;
+                    height: 75px;
+                    border:1px dashed #cccccc;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    float:left;
+                    margin-right: 5px;
+                    margin-bottom: 5px;
+                    position: relative;
+                    .addbt{
+                        width: 40px;
+                        height: 40px;
+                    }
+                    .attachimg{
+                        height: 100%;
+                    }
+                    .icon-rdoclose{
+                        color: red;
+                        position:absolute;
+                        top: -12px;
+                        right: -12px;
+                        font-size: 24px;
+                    }
+                }
+            }
+            
+        }
+    }
+}
+
+</style>

@@ -1,0 +1,66 @@
+<ui>
+<img class="loadimg" src="./assets/imgs/loading.png">
+</ui>
+
+
+<script>
+import '@auicomp/scroller/Scroller.aui';
+import '@auiutil/mobiscroll3/css/mobiscroll.javascript.min.css';
+import mobiscroll from '@auiutil/mobiscroll3/js/mobiscroll.javascript.min';
+import Alert from '@auicomp/alert/Alert.aui';
+import tool from '@comm/utils/tool';
+import fetch from '@comm/utils/xfetch';
+import { router } from '@auicomp/action/Action.aui';
+
+import './Frame.aui';
+
+var curHash;
+
+export default class InitLoading{
+    static get tag(){
+        return 'initloading';
+    }
+    
+    created(){
+        fetch.plusready(function(){
+            tool.closeModal();//监听Android返回键，强制关闭所有模态窗口
+            var outerParams = router.getQueryObj(location.search);//获取平台传参
+            appnest.config.getUserInfo({//获取用户信息
+                success:function(r){
+                    r.badge = outerParams.badge;
+                    window.userInfo = r;//用户信息挂到window，方便后面页面引用
+                },
+                fail:function(r){
+                    alert(r.errMsg);
+                }
+            });
+            fetch({
+                appId: 'dakajilu',
+                url : 'https://dzzw/personrecordQuery.jsp',
+                data: {
+                    username: outerParams.badge
+                },
+                success: function(json){
+                    window.member = json;
+                    $('#app').html('<aui-frame></aui-frame>');
+                },
+                error: function(rs){
+                    Alert.show({
+                        content: '请求错误',
+                        doOk: function(){
+                            appnest.navigation.closeWindow();
+                        }
+                    });
+                }
+            });
+        });
+    }
+}
+</script>
+
+<style>
+.loadimg{
+    width: 100%;
+    height: 100%;
+}
+</style>

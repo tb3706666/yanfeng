@@ -1,0 +1,61 @@
+<ui>
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft-fill"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>AMD About</aui-text>
+            </caption-area>
+        </aui-titlebar>
+    </aui-header>
+    <aui-scroller class="content" style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;">
+        <div>
+            <div class="description normal">当使用AMD方式使用agile框架时，可以直接对aui-h5框架执行npm run build之后再dist得到js和css文件(默认已经把aui-loader框架加入编译后的代码)。并在require.config中配置aui文件的加载器</div>
+            <pre><code>
+    require.config({
+        paths: {
+            aui: '${root}/dist/aui.h5.js'
+        }
+    })
+            </code></pre>
+            <div class="description normal">
+                也可以像本工程一样在app/demo/aui.js中引入aui-loader和其他必要模块进行打包，生成的js文件也可以作为requirejs中的aui加载器
+            </div>
+
+        </div>
+    </aui-scroller>
+</ui>
+
+<script>
+
+function AboutPage(){
+	
+}
+
+AboutPage.prototype = {
+	created: function(){
+        
+	}
+}
+
+AboutPage.tag = 'aboutpage';
+
+define(function(x){
+	return AboutPage;
+});
+
+</script>
+
+<style type="less">
+aui-aboutpage{
+    .content > div{
+        padding: 10px;
+        text-align:left;
+    }
+
+    .normal{
+        text-align: left !important;
+    }
+}
+</style>

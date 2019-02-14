@@ -1,0 +1,319 @@
+<ui>
+    <div class="XiaoiNew1">
+        <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>新建工单</aui-text>
+                </caption-area>
+                <right-area>
+                    <a v-on:click="func.submit">
+                        <i class="icon auicon icon-rdook"></i>
+                    </a>
+                </right-area>
+            </aui-titlebar>
+        </aui-header>
+        <aui-scroller class="content" v-show="ajaxed" >
+            <ul>
+                <li>
+                    <div class="label-l">提交用户</div>
+                    <div class="label-r">{{user}}</div>
+                </li>
+                <li>
+                    <div class="label-l">所属部门/工厂</div>
+                    <div class="label-r">{{dept}}</div>
+                </li>
+                <li>
+                    <div class="label-l">登录ID</div>
+                    <div class="label-r">{{loginid}}</div>
+                </li>
+                <li>
+                    <div class="label-l">摘要*</div>
+                    <div class="label-r">
+                        <input class="input" type="text" v-model="Title" placeholder="请输入摘要">
+                    </div>
+                </li>
+                <li>
+                    <div class="label-l">详细信息</div>
+                    <div class="label-r">
+                        <textarea class="input" type="text" rows="4" v-model="Description"  placeholder="请输入详细信息"></textarea>
+                    </div>
+                </li>
+            </ul>
+            <div class="attach-box">
+                <div class="attach-title">附件</div>
+                <div class="attach-list clearfix">
+                    <div  class="attach-add" v-for="item in file">
+                        <img v-bind:src="item.data" class="attachimg" v-on:click="func.preview($index)">
+                        <i class="icon auicon icon-rdoclose" v-on:click="func.delImg($index)"></i>
+                    </div>
+                    <div class="attach-add" v-on:click="func.chooseImg">
+                        <img src="./assets/imgs/add.png" class="addbt">
+                    </div>
+                </div>
+            </div>
+        </aui-scroller>
+    </div>
+</ui>
+<script>
+    import fetch from "@libs/xfetch";
+    import common from '@libs/common';
+    import '@auicomp/datetime/DateTime.aui';
+    import Selectsheet from '@comm/components/Selectsheet.aui';
+    import Actionsheet from '../components/Actionsheet.aui';
+    import { router } from '@auicomp/action/Action.aui';
+    export default class XiaoiNew1 {
+
+        static get tag() {
+            return 'XiaoiNew1';
+        }
+        created() {
+            let self = this;
+            const obj = this.$obj = {
+                hiddens:[],
+                user:'',
+                dept:"",
+                loginid:"",
+                file:[],
+                FUJIANs:'',
+                ajaxed:false,
+                Title:'',
+                Description:"",
+                func:{
+                    submit(){
+                        if(obj.Title==""){
+                            common.toast("带*字段(摘要)不能为空");
+                            return;
+                        }
+                        self.submitform();
+                    },
+                    chooseImg(){
+                        if(obj.file.length>5){
+                            common.toast('最多只能上传5张照片')
+                            return;
+                        }
+                        Actionsheet.show({
+                            list: [
+                                {
+                                    text: '直接拍照获取',
+                                    handler: function () {
+                                        common.openCamera(function(res){
+                                            obj.file.push({
+                                                imagePath:res.imagePath,
+                                                thumbnailPath:res.thumbnailPath,
+                                                data:res.data
+                                            });
+                                        });
+                                    }
+                                },
+                                {
+                                    text: '从相册中直接选取',
+                                    handler: function () {
+                                        common.customAlbum(obj.file.length,function(res){
+                                          obj.file.push(...res);
+                                        })
+                                     }
+                                }
+                            ],
+                            doCancel: function () {
+                            }
+                        });
+                    },
+                    preview(index){
+                        common.previewImg(obj.file.map(function(item){
+                            return item.imagePath;
+                        }),index);
+                    },
+                    delImg(index){
+                        obj.file.splice(index, 1)
+                    }
+                }
+            }
+            this.$vm = $(this.$el).render(this.$obj);
+            
+            this.onload();
+        }
+        detached(){
+            this.$vm && this.$vm.destroy();
+        }
+        submitform(){
+            let self = this;
+            let postData = [];
+            
+            postData.push({
+                type:0,
+                name:'Title',
+                value:this.$obj.Title
+            })
+            postData.push({
+                type:0,
+                name:'Description',
+                value:this.$obj.Description
+            })
+            this.$obj.file.map(function(item,index){
+                let path = item.imagePath;
+                let name = path.substring(path.lastIndexOf("/")+1);
+                postData.push({
+                    type:1,
+                    name:'_Attachment1',
+                    value:path
+                })
+                postData.push({
+                    type:0,
+                    name:'indexs',
+                    value:index
+                })
+                postData.push({
+                    type:0,
+                    name:'files'+index,
+                    value:name
+                })
+            })
+            for(let i = 0;i<this.$obj.hiddens.length;i++){
+                postData.push({
+                    type:0,
+                    name:this.$obj.hiddens[i].name,
+                    value:this.$obj.hiddens[i].value.replace(/&quot;/g,'"')
+                })
+            }
+            fetch({ 
+                appId: common.appId,
+                url : common.oaUrl+'/addevent',
+                data: postData,
+                type: 'post',
+                reqCharset:'UTF-8',
+                success: function(Data){
+                    if (Data.status == "fail") {
+                        common.toast("新建事件失败！");
+                        return;
+                    }
+                    document.querySelector('.aui-refresher-XiaoiList').component.refresher.triggerDownScroll();
+                    history.go(-1);
+                }
+            });
+        }
+        onload(){
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : common.oaUrl+'/event',
+                data: {
+                },
+                headers:{
+                    "Accept-Language":"zh-cn"
+                },
+                success: function(infos){
+                    console.log(JSON.stringify(infos));
+                    self.$obj.hiddens= infos.list;
+                    self.$obj.user= infos.user;
+                    self.$obj.dept= infos.dept;
+                    self.$obj.loginid= infos.loginid;
+                    self.$obj.ajaxed=true;
+                }
+            });
+        }
+        
+    }
+</script>
+<style type='less'>
+@import url('../assets/less/theme/default/common.less');
+.XiaoiNew1{
+    .content{
+        position: absolute;
+        top: 44px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        background: #EFEFF4;
+        ul{
+            background: #ffffff;
+            padding-left: 15px;
+            li{
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                padding: 10px 15px 10px 0;
+                border-bottom: 1px solid  @border-color;
+                .label-l{
+                    flex:3;
+                }
+                .label-r{
+                    flex:7;
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: flex-end;
+                    align-items: center;
+                    .select{
+                        flex: 1;
+                        text-align: right;
+                        margin-right: 5px;
+                    }
+                     .input{
+                        text-align: right;
+                        padding: 0;
+                        border: 0;
+                        width: 100%;
+                    }
+                    aui-datetime{
+                        input{
+                            padding: 0;
+                            text-align: right;
+                        }
+                    }
+                }
+
+                &:last-child{
+                    border:0;
+                }
+                .LEAVEREASON{
+                    padding:0;
+                }
+                .REMARK{
+                    border:0;
+                    width: 100%;
+                }
+            }
+        }
+        .attach-box{
+            background: #ffffff;
+            margin-top:16px;
+            padding: 10px 15px;
+            .attach-title{
+                padding: 0px 0px 10px 0px;
+            }
+            .attach-list{
+                .attach-add{
+                    width: 75px;
+                    height: 75px;
+                    border:1px dashed #cccccc;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    float:left;
+                    margin-right: 5px;
+                    margin-bottom: 5px;
+                    position: relative;
+                    .addbt{
+                        width: 40px;
+                        height: 40px;
+                    }
+                    .attachimg{
+                        height: 100%;
+                    }
+                    .icon-rdoclose{
+                        color: red;
+                        position:absolute;
+                        top: -12px;
+                        right: -12px;
+                        font-size: 24px;
+                    }
+                }
+            }
+            
+        }
+    }
+}
+
+</style>

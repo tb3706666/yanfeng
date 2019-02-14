@@ -1,0 +1,209 @@
+<ui>
+    <div class="LizhiList">
+        <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>待办事宜</aui-text>
+                </caption-area>
+                <right-area>
+                    <a v-on:click="func.more">
+                        <i class="icon auicon icon-rdoadd"></i>
+                    </a>
+                </right-area>
+            </aui-titlebar>
+        </aui-header>
+         <aui-refresher  class="scroll aui-refresher-LizhiList" v-on:pulldown="func.doPullDown" v-on:pullup="func.doPullUp">
+            <aui-list class="list" v-if="isAjaxed&&hasData">
+                <list-cell  v-for="item in list" >
+                    <a v-on:click="func.doDetail(item.rs5,item.isFirst)">
+                        <div class="caption">离职人:{{item.rs3}}</div>
+                        <div class="snd-title">发起人:{{item.rs1}}  状态:{{item.rs4}}</div>
+                    </a>
+                </list-cell>
+            </aui-list>
+            <div v-if="isAjaxed&&!hasData" class="nodata">
+                    <img src="./assets/imgs/nodata.png">
+                </div>
+        </aui-refresher>
+    </div>
+</ui>
+<script>
+    import '@auicomp/refresher/Refresher.aui';
+    import '@auicomp/list/List.aui';
+    import Actionsheet from '../../components/Actionsheet.aui';
+    import Alert from '@auicomp/alert/Alert.aui';
+    import fetch from "@libs/xfetch";
+    import common from '@libs/common';
+    import { router } from '@auicomp/action/Action.aui';
+    import { Base64 } from "js-base64";
+    export default class LizhiList {
+
+        static get tag() {
+            return 'LizhiList';
+        }
+        created() {
+            $(this.$el).on('enter',function(){
+                 common.removeCachePage();//删除缓存的详情页面
+                 common.removeCacheListSearchPage();//删除缓存的列表页面
+            });
+            const self = this;
+            const obj = this.$obj = {
+                hasData: false,
+                list: [],
+                start:0,
+                count:"",
+                isAjaxed:false,
+                func: {
+                    doPullDown: function(e, $refresh){
+                        self.$obj.start = 0;
+                        self.getList(function(data){
+                            obj.isAjaxed=true;
+                            if(data.dbList.length>0){
+                                obj.hasData=true;
+                            }else{
+                                obj.hasData=false;
+                            }
+                            obj.list.$reset(data.dbList);
+                            if(data.dbList.length<15){
+                                $refresh.end();
+                            }else{
+                                $refresh.refresh();
+                            }
+                        })
+                        
+                    },
+                    doPullUp: function(e, $refresh){
+                        self.$obj.start++;
+                        self.getList(function(data){
+                            obj.list.push(...data.dbList);
+                            if(data.dbList.length<15){
+                                $refresh.end();
+                            }else{
+                                $refresh.refresh();
+                            }
+                        })
+                    },
+                    more:function(){
+                         Actionsheet.show({
+                            list: [
+                                {
+                                    text: '已批申请',
+                                    handler: function () {
+                                         router.go({path: '/LizhiSearch', isForce: true}); 
+                                     }
+                                },
+                            ],
+                            doCancel: function () {
+                                console.log('点了取消');
+                            }
+                        });
+                    },
+                    doDetail:function(unid, isFirst) {
+                        console.log(unid+"<<>>"+isFirst);
+                        if (isFirst=='true') {
+                           common.alert("暂不支持新建以及新建环节!");
+                        } else {
+                           router.go({path: '/LizhiDetail?unid='+unid, isForce: true}); 
+                        }
+                    }
+                }
+            }
+            this.$vm = $(this.$el).render(obj);
+        }
+        
+        getList(cb){
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : common.hrUrl+"/flow/runtime/TaskList.aspx?flowid=2310&pageindex=" + this.$obj.start + "&sortColumn=" + this.$obj.count,
+                data: {
+                },
+                hideLoading:this.$obj.isAjaxed,
+                type: 'get',
+                success: function(infos){
+                    infos.dbList.forEach(function(item){
+                        item.checked = false;
+                    })
+                    console.log(infos)
+                    cb(infos)
+                }
+            });
+            
+        
+        }
+        detached(){
+            this.$vm && this.$vm.destroy();
+        }
+    }
+</script>
+<style type='less'>
+@import url('../../assets/less/theme/default/common.less');
+.LizhiList{
+    width: 100%;
+    height: 100%;
+    position: relative;
+    .scroll { 
+        position: absolute;
+        top: 44px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        .list{
+            list-cell{
+                padding:0;
+                a{
+                    margin:0;
+                    padding:5px 10px;
+                }
+                .caption{
+                    font-size: 16px;
+                }
+                .rcaption{
+                    font-size: 14px;
+                    color: #8E8E93;
+                    margin-top: 3px;
+                }
+                .snd-title{
+                    font-size: 14px;
+                    color: #8E8E93;
+                    margin-top: 5px;
+                }
+            }
+           .list-item{
+               padding:5px 10px;
+               display: flex;
+               flex-direction: row;
+               align-items: center;
+               .check-box{
+                   width: 25px;
+                   height: 25px;
+                   margin-right: 5px;
+                   margin-left: 3px;
+               }
+           }
+        }
+        
+    } 
+    .footer{
+        position: absolute;
+        height: 44px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        display: flex;
+        flex-direction: row;
+        .bt{
+            background: #2371AF;
+            color: white;
+            flex: 1;
+            margin: 5px;
+            line-height: 34px;
+            text-align: center;
+        }
+    }
+}
+
+</style>

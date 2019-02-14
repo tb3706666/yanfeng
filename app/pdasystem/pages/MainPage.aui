@@ -1,0 +1,283 @@
+<ui>
+    <div class="mainpage">
+        <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <div v-on:click="func.closeWindow"><i class="icon auicon icon-arrowleft"></i></div>
+                </left-area>
+                <caption-area>
+                    <aui-text>巡检清单</aui-text>
+                </caption-area>
+                <right-area>
+                    <a v-on:click="func.showPop">
+                        <i class="icon auicon icon-gear"></i>
+                    </a>
+                </right-area>
+            </aui-titlebar>
+             <div class="search-box">
+                <form class="subjectarea" action="" v-on:submit="func.submit">
+                    <input class="subject"  type="search" v-like="text" v-model="searchInfo" placeholder="请输入查询关键字" autocomplete="off" >
+                </form>
+            </div>
+        </aui-header>
+
+        <aui-scroller class="content">
+            <ul class="list" v-if="isAjaxed&&hasData">
+                <li class="fd-row align-c border-bt1 padding10"  v-for="item in list" v-on:click="func.getDetail(item.shorterform)">
+                    <div class="point"></div>
+                    <div class="flex1">
+                        <div class="caption">{{item.id}}:  {{item.shorterform}}</div>
+                        <div class="snd-title">{{item.remark}} | {{item.department}}</div>
+                    </div>
+                    <i class="icon auicon icon-arrowright"></i>
+                </li>
+            </ul>
+            <div v-if="isAjaxed&&!hasData" class="nodata">
+                <img src="./assets/imgs/nodata.png">
+            </div>
+        </aui-scroller>
+        <div class="popup" v-bind:class="{show:showPop}" >
+            <div class="popup-center anim" v-bind:class="{bounceIn:showPop,bounceOut:!showPop}">
+                <div class="pop-title">请选择</div>
+                <div class="padding-lr10">
+                    <div class="fd-row  align-c padding10">
+                        <div  class="flex3">数据库</div>
+                        <div  class="flex7  fd-row align-c" v-on:click="func.openSelect">
+                            <div class="flex1">{{dbName}}</div>
+                            <i class="icon auicon icon-arrowright"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="confirm-handler">
+                    <a class="confirm-handler-ok" v-on:click="func.doOk">确定</a>
+                    <a class="confirm-handler-cancel" v-on:click="func.doCancel">取消</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</ui>
+
+
+<script>
+import '@auicomp/scroller/Scroller.aui';
+    import '@auicomp/header/Header.aui';
+    import '@auicomp/text/Text.aui';
+    import '@auicomp/grid/Grid.aui';
+    import '@auicomp/titlebar/Titlebar.aui';
+    import '@auiutil/mobiscroll3/css/mobiscroll.javascript.min.css';
+    import Actionsheet from '../components/Actionsheet.aui';
+    import {
+        router
+    } from '@auicomp/action/Action.aui';
+    import common from '@libs/common';
+    import fetch from "@libs/xfetch";
+    import { Base64 } from "js-base64";
+    import Popup from '@auicomp/popup/Popup.aui';
+    import Selectsheet from '@comm/components/Selectsheet.aui';
+
+    export default class MainPage {
+
+        static get tag() {
+            return 'MainPage';
+        }
+        created() {
+            $(this.$el).on('enter',function(){
+                appnest.seekcyBeacon.stopScan();
+                $("aui-detail").remove();
+                $("aui-templates").remove();
+            });
+            let self = this;
+            const obj = this.$obj = {
+                searchInfo:"",
+                isAjaxed:false,
+                hasData:false,
+                showPop:false,
+                shorterform:"",
+                dbName:"",
+                dbValue:"",
+                db:[
+                    {
+                        "name":"沈阳数据库",
+                        "value":"pdadb1"
+                    }
+                ],
+                list:[],
+                func:{
+                    openSelect(){
+                        Selectsheet.show({
+                            list: obj.db.map(function(item){
+                                return item.name
+                            }),
+                            func:function(index){
+                                obj.dbValue = obj.db[index].value;
+                                obj.dbName = obj.db[index].name;
+                            }
+                        });
+                    },
+                    doOk(){
+                        if(obj.dbValue==""){
+                            common.toast("请选择数据库");
+                            return;
+                        }
+                        localStorage.setItem('sel_DB',obj.dbValue);
+                        appnest.worktable.reloadApp();
+                    },
+                    doCancel(){
+                       obj.showPop = false;
+                    },
+                    showPop(){
+                        obj.showPop = true;
+                    },
+                    closeWindow(){
+                        appnest.navigation.closeWindow();
+                    },
+                    submit(e){
+                        self.loadData();
+                        $('.subject').blur();
+                        e.preventDefault();
+                    },
+                    getDetail(shorterform){
+                        // obj.shorterform = shorterform;
+                        // router.go('/Detail'); 
+                        router.go('/Detail?shorterform='+shorterform.trim()); 
+                    }
+                }
+            }
+            this.$vm = $(this.$el).render(this.$obj);
+            this.loadData();
+        }
+        detached() {
+            this.$vm && this.$vm.destroy();
+        }
+        loadData(){
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : common.oaUrl+"/isLists.jsp",
+                data: {
+                    username:localStorage.getItem("pad_username"),
+                    session_DB:localStorage.getItem("sel_DB"),
+                    searchfont:this.$obj.searchInfo,
+                },
+                type: 'post',
+                success: function(infos){
+                    self.$obj.isAjaxed=true;
+                    self.$obj.hasData = infos.size!="0";
+                    self.$obj.list = infos.list;
+                }
+            });
+        }
+    }
+</script>
+<style type="less">
+    @import url('../assets/less/theme/default/common.less');
+    .mainpage {
+        width: 100%;
+        height: 100%;
+        .search-box{
+            width: 100%;
+            padding: 5px;
+            .subjectarea{
+                width:100%;
+                border: 1px solid @border-color;
+                border-radius: 4px;
+                .subject{
+                    border: 0;
+                    width:100%;
+                    padding:10px;
+                    font-size: fts-normal;
+                    -webkit-appearance: textfield;    
+                }
+            }
+            input::-webkit-search-decoration,
+            input::-webkit-search-cancel-button {
+            display: none;
+            }
+        }
+        .content {
+            position: absolute;
+            top: 95px;
+            right: 0px;
+            bottom: 0px;
+            left: 0px;
+            padding: 5px;
+            ul{
+                li{
+                    padding:5px 10px;
+                    .point{
+                        background: url(../assets/imgs/point.png) center center / 20px 20px no-repeat;
+                        width: 20px;
+                        height: 20px;
+                        margin-right: 10px;
+                    }
+                    .caption{
+                        font-size: 16px;
+                    }
+                    .rcaption{
+                        font-size: 14px;
+                        color: #8E8E93;
+                        margin-top: 3px;
+                    }
+                    .snd-title{
+                        font-size: 14px;
+                        color: #8E8E93;
+                        margin-top: 5px;
+                    }
+                    &:active{
+                        background: #eee;
+                    }
+                }
+            }
+        }
+        .popup{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.3);
+            z-index: 80;
+            visibility: hidden;
+            .popup-center{
+                background: #e8e8e8;
+                width: 80%;
+                border-radius: 6px;
+                box-shadow: 0px 1px 10px rgba(0, 0, 0, 0.6);
+                .pop-title {
+                    padding: 15px 15px 15px 25px;
+                    font-weight: 500;
+                    font-size: 18px;
+                    color:  #428bca;
+                }
+                .confirm-handler {
+                    margin-top: 16px;
+                    line-height: 40px;
+                    text-align: center;
+                    display: block;
+                    color: #222;
+                    border-top: 1px solid rgba(0, 0, 0, 0.2);
+                    color: @primary-color;
+                    font-size: 16px;
+                }
+
+                .confirm-handler-ok {
+                    border-right: 1px solid rgba(0, 0, 0, 0.2);
+                }
+
+                .confirm-handler-ok,
+                .confirm-handler-cancel {
+                    display: inline-block;
+                    width: 48%;
+                    cursor: pointer;
+                }
+            }
+        }
+        .show{
+            visibility: visible;
+        }
+    }
+</style>

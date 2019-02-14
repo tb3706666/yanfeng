@@ -1,0 +1,136 @@
+<ui>
+    <div id="personlist">
+        <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft-fill"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>人员选择</aui-text>
+                </caption-area>
+            </aui-titlebar>
+            <form id="searcharea" action="">
+                <input id="searchPerson" type="search" placeholder="请输入姓名" >
+            </form>
+        </aui-header>
+
+        <aui-scroller id="scrollerarea">
+            <aui-list >
+                <list-cell class="grid" v-for="item in list" v-on:click="func.setBack(item.id,item.text)">
+                    {{item.text}}
+                </list-cell>
+            </aui-list>
+        </aui-scroller>
+    </div>
+</ui>
+<style type='less'>
+#searcharea{
+    width:100%;
+    padding: 10px;
+    #searchPerson{
+        width:100%;
+        padding:5px;
+        font-size: 14px;
+        border:0;
+        -webkit-appearance: textfield;    
+    }
+}
+input::-webkit-search-decoration,
+input::-webkit-search-cancel-button {
+    display: none;
+}
+#scrollerarea{
+    position:absolute;top:90px;right: 0px;bottom: 0px;left: 0px;
+    // list-cell&:active{
+    //     background: rgb(209, 207, 207);
+    // }
+}
+</style>
+<script>
+import '@auicomp/text/Text.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auicomp/list/List.aui';
+
+import fetch from '@comm/utils/nfetch';
+import Toast from '@auicomp/toast/Toast.aui';
+import Action,{ router } from '@auicomp/action/Action.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import Confirm from '@auicomp/confirm/Confirm.aui';
+
+import 'magic-check/css/magic-check.min.css';
+
+export default class ChoosePerson_hlh {
+    static get tag() {
+        return 'chooseperson_hlh';
+    }
+
+    created(){
+        var deptId=router.getQueryObj(location.search).deptId||router.getQueryObj().deptId;
+        var flg=router.getQueryObj(location.search).flag||router.getQueryObj().flag;
+        var flg2=router.getQueryObj(location.search).flag2||router.getQueryObj().flag2;
+        $("#searcharea").on("submit",function(e){
+            $('#searchPerson').blur();
+            e.preventDefault();
+        });
+        $("#searchPerson").on("blur",function(e){
+            // if(e.target.value.length > 0){               
+                auiLoading.show();
+                var searchval = e.target.value.trim();
+                fetch({
+                    appId: 'ci',
+                    url : '/search.jsp ',
+                    data: {
+                        key:searchval,
+                        deptId:deptId
+                    },
+                    success:function(rsp){    
+                        auiLoading.hide();  
+                        if(rsp.list.length > 0){
+                            obj.list.$reset(rsp.list);
+                        }else{
+                            Toast.show("未查询到数据", function(){
+                                obj.list.$reset([]);
+                            });
+                        }              
+                        
+                    },
+                    error: function(rsp){
+                        auiLoading.hide();
+                        Toast.show(rsp.errmsg, function(){});
+                    }
+                });
+            // }else{
+            //     Toast.show("请输入搜索条件", function(){});
+            // }
+
+        });
+        const $el = $(this.$el);
+
+        const obj = this.$obj = {
+            list:[],
+            func:{
+                setBack:function(pid,pname){
+                    Confirm.show({
+                        content: '确定选择'+pname+'吗？',
+                        doOk: function(){
+                            if(flg2=='"hl"'){//
+                                document.querySelector('aui-hl_detail').component.selectperson(pid,pname,flg);
+                                history.go(-1);
+                            }
+                            if(flg2=='"other"'){//
+                                document.querySelector('aui-other_detail').component.selectperson(pid,pname,flg);
+                                history.go(-1);
+                           }
+                        }
+                    });
+                }
+            }
+        }
+        $el.find("#scrollerarea").render(obj);
+    }
+
+    detached(){
+        this.$vm && this.$vm.destroy();
+    }
+}
+</script>

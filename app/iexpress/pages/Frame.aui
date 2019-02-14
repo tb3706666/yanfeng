@@ -1,0 +1,34 @@
+<ui>
+    <aui-page transition="slide"></aui-page>
+</ui>
+
+
+<script>
+import router from '../routers';
+import '@auifont/iconfont.css';
+
+export default class Frame{
+    
+    static get tag(){
+        return 'frame';
+    }
+
+    created(){
+        router.go('/iex', true);
+    }
+}
+
+</script>
+
+<style type="less">
+
+/* 引用皮肤 */
+@import url('~@theme/common.less');
+
+#app, aui-frame{
+    display: block;
+    height: 100%;
+}
+</style>
+
+

@@ -1,0 +1,519 @@
+<ui>
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft-fill"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>详情detail</aui-text>
+            </caption-area>
+            <right-area>
+                <a id="subIcon"><i class="icon auicon icon-hook-fill"></i></a>
+            </right-area>
+        </aui-titlebar>
+        <aui-tabbar class="tabbar tabbar-line tabbar-line-width70 animated" style="width:100%;margin-top:4px">
+            <tabbar-cell class="active" href="#baseInfo">
+                <label class="tab-label">基本信息</label>
+            </tabbar-cell>
+            <tabbar-cell href="#process">
+                <label class="tab-label">流程办理</label>
+            </tabbar-cell>
+        </aui-tabbar>
+    </aui-header>
+    <div id="detailTpl">
+
+        <aui-scroller id="baseInfo" action-target class="content detail-scroller active" >
+            <aui-list >
+                <aui-action class="list-cell" href="#authorinfo" type="toggle">
+                    <a>
+                        申请者信息 <i class="icon auicon icon-arrowdown"></i>
+                    </a>
+                </aui-action>
+                <div id="authorinfo" action-target class="togdiv">
+                    <div class="item-div">
+                        <aui-text class="line1">填单人</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.tdr"></aui-text>
+                    </div>
+                    <div class="item-div">
+                        <aui-text class="line1">部门/工厂</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.bmgc"></aui-text>
+                    </div>
+                </div>
+            </aui-list>
+            <aui-list >
+                <aui-action class="list-cell" href="#filechangeinfo" type="toggle">
+                    <a>
+                        文件更改信息 <i class="icon auicon icon-arrowdown"></i>
+                    </a>
+                </aui-action>
+                <div id="filechangeinfo" action-target class="togdiv active">
+                    <div class="item-div">
+                        <aui-text class="line1">主题</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.zt"></aui-text>
+                    </div>
+                    <div class="item-div">
+                        <aui-text class="line1">文件级别</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.wjjb"></aui-text>
+                    </div>
+                    <div class="fileset" v-if="hasfileInfo">
+                        <div class="file-desc"><aui-text>附件</aui-text></div>
+                        <aui-list v-for="atitem in formDetailData.fileInfo" v-filter="func.getAttachShowInfo">
+                            <list-cell>
+                                <a class="attach"><i v-class="atitem.class" v-style="{color:atitem.color}"></i>{{atitem.fname}}</a>
+                            </list-cell>
+                        </aui-list>
+                    </div>
+                    <div class="item-div">
+                        <aui-text class="line1">过程类别</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.gclb+formDetailData.gclbdiv"></aui-text>
+                    </div>
+                    <div v-if="arrlength.hasinArr" >
+                        <div class="fileset" v-for="fileset in formDetailData.inArr">
+                            <div class="file-desc"><aui-text v-text="fileset.td2"></aui-text></div>
+                            <aui-list v-for="item in fileset.td4" v-filter="func.getAttachShowInfo">
+                                <list-cell>
+                                    <a class="attach"><i v-class="item.class" v-style="{color:item.color}"></i>{{item.fname}}</a>
+                                </list-cell>
+                            </aui-list>
+                        </div>
+                    </div>
+                    <div class="item-div">
+                        <aui-text class="line1">是否涉及参考文件的更新？</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.sfwjgx"></aui-text>
+                    </div>
+                    <div class="item-div">
+                        <aui-text class="line1">是否涉及IT系统的更新？</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.sfitgx"></aui-text>
+                    </div>
+                    <div class="item-div">
+                        <aui-text class="line1">更改益处</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.ggyc"></aui-text>
+                    </div>
+                    <div class="item-div">
+                        <aui-text class="line1">更改原因</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.ggyy"></aui-text>
+                    </div>
+                    <div class="item-div">
+                        <aui-text class="line1">背景描述</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.bjms"></aui-text>
+                    </div>
+                    <div class="item-div">
+                        <aui-text class="line1">备注</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.bzbz"></aui-text>
+                    </div>
+                </div>
+            </aui-list>
+            <aui-list >
+                <aui-action class="list-cell" href="#doprocess" type="toggle">
+                    <a>
+                        文件执行过程 <i class="icon auicon icon-arrowdown"></i>
+                    </a>
+                </aui-action>
+                <div id="doprocess" action-target class="togdiv">
+                    <div class="item-div">
+                        <aui-text class="line1">文件实施方式</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.wjssfs"></aui-text>
+                    </div>
+                    <div class="item-div">
+                        <aui-text class="line1">培训师</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.pxs"></aui-text>
+                    </div>
+                    <div class="item-div">
+                        <aui-text class="line1">培训时间</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.pxsj"></aui-text>
+                    </div>
+                    <div class="item-div">
+                        <aui-text class="line1">要求参加培训人员</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.yqry"></aui-text>
+                    </div>
+                </div>
+            </aui-list>
+        </aui-scroller>
+        <aui-scroller id="process" action-target class="content detail-scroller" >
+            <aui-list >
+                <aui-action class="list-cell" href="#dclog" type="toggle">
+                    <a>
+                        审批记录 Display circulation log <i class="icon auicon icon-arrowdown"></i>
+                    </a>
+                </aui-action>
+                <div id="dclog" action-target class="dclog" v-for="item in formDetailData.shenPiInfo">
+                    <aui-list >
+                        <list-cell>
+                            {{item.czz}}
+                            <p>于 {{item.sj}} 在 {{item.jdmc}}环节 {{item.cz}}</p>
+                        </list-cell>
+                        <list-cell>
+                            处理意见 Process opinion
+                            <div v-for="yj in item.clyj">
+                                <p >{{yj.text}}</p>
+                            </div>
+                            <div v-for="fileatt in item.file" v-filter="func.getProcessFileShowInfo">
+                                <p><a class="attach"><i v-class="fileatt.class" v-style="{color:fileatt.color}"></i> {{fileatt.fileName}}</a></p>
+                            </div>
+                        </list-cell>
+                    </aui-list>
+                </div>
+            </aui-list>
+            <aui-list >
+                <aui-action class="list-cell" href="#pharea" type="toggle">
+                    <a>
+                        流程办理 Procedure handling <i class="icon auicon icon-arrowdown"></i>
+                    </a>
+                </aui-action>
+                <div id="pharea" action-target>
+                    <div id="procedure" v-if="arrlength.hasbutton">                   
+                        <div class="nopt">操作 Next operation</div>
+                        <div class="radio-area" v-for="radio in formDetailData.buttonInfo" >
+                            <div v-if="$index==0" ><input type="radio" checked class="magic-radio"  v-bind:id="radio.buttonValue" v-bind:value="radio.buttonValue+':'+radio.buttonName" v-model="handlerval"  name="oprGroup"></input><label v-bind:for="radio.buttonValue">{{radio.buttonName}}</label></div>
+                            <div v-else><input type="radio" class="magic-radio"  v-bind:id="radio.buttonValue" v-bind:value="radio.buttonValue+':'+radio.buttonName" v-model="handlerval"  name="oprGroup"></input><label v-bind:for="radio.buttonValue">{{radio.buttonName}}</label></div>
+                        </div>
+                        <div class="p10-bt" v-show="handlerval=='handler_pass:通过 Approve' && formDetailData.isPass=='1'" >                   
+                            <p class="line1">即将流向</font><br>
+                            <p class="line2" v-if="arrlength.haspass" v-text="formDetailData.pass[0].nodeid+'.'+formDetailData.pass[0].nodeusername"></p>
+                        </div>
+                        
+                        <div v-show="handlerval=='handler_refuse:驳回 Refuse'">
+                            <div v-if="formDetailData.isRefuse=='1'">
+                                <p class="line1 p10-bt">驳回到</font><br>
+                                <div class="p10-bt flex-row-between select" style="border-top:0" v-on:click="func.selectRefuse">
+                                    <input type="hidden" name="jumpToNodeIdSelectObj" v-bind:value="submitData.jumpToNodeIdSelectObj"/>
+                                    <font v-text="submitData.refuseSelect.value+'.'+submitData.refuseSelect.text"></font>
+                                    <i class="icon auicon icon-rdodown"></i>
+                                </div>
+                                <div class="radio-area" style="padding-top:10px">
+                                    <div><input type="checkbox" class="magic-checkbox"  value="true"  id="refusePassedToThisNode"/><label for="refusePassedToThisNode">驳回的节点通过后直接返回本人</label></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p10-bt"   v-show="handlerval=='handler_commission:转办 Forward'" >
+                            <div v-if="formDetailData.isForward=='1'">
+                                <p class="line1">转办 Forward人员</font><br>
+                                <div class="flex-row-between">
+                                    <input type="text" id="ForwardtoOtherHandlerIds" v-model="submitData.ForwardtoOtherHandlerIds" readonly ></input>
+                                    <aui-button id="forward_btn" class="btn btn-primary" v-on:click="func.forwardChoose">选择人员</aui-button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p10-bt"   v-show="handlerval=='handler_communicate:沟通 Communicate'" >
+                            <div v-if="formDetailData.isCommunicate=='1'">
+                                <p class="line1">沟通 Communicate人员</font><br>
+                                <div v-if="formDetailData.isCancelCommunicate=='1'">
+                                    <div v-for="coms in formDetailData.communicate">
+                                        <p style="padding-top:5px" v-text="coms.userName"></p>
+                                    </div>
+                                </div>
+                                <div class="flex-row-between">
+                                    <input type="text" id="CommunicatetoOtherHandlerIds" readonly v-model="submitData.CommunicatetoOtherHandlerIds"></input>
+                                    <aui-button id="communicate_btn" class="btn btn-primary">选择人员</aui-button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div v-if="formDetailData.isCommunicate=='1'|| formDetailData.isForward == '1'">
+                            <input type="hidden" id="toOtherHandlerIds" name="toOtherHandlerIds" v-like="text" v-model="submitData.toOtherHandlerIds"/>
+                            <input type="hidden" id="toOtherHandlerNames" name="toOtherHandlerNames" v-like="text" v-model="submitData.toOtherHandlerNames"/>
+                        </div>
+
+                        <div class="p10-bt"   v-show="handlerval=='handler_cancelCommunicate:取消沟通 cancelCommunicate'" >
+                            <div v-if="formDetailData.isCancelCommunicate=='1'">
+                                <p class="line1">取消沟通 Communicate人员</font><br>
+                                <div class="radio-area" style="padding:10px 0">
+                                    <div><input type="checkbox" class="magic-checkbox" id="WorkFlow_CelRelationWorkitems0" name="WorkFlow_CelRelationWorkitems"></input><label for="WorkFlow_CelRelationWorkitems0">王海伟Wang haiwei</label></div>
+                                    <div><input type="checkbox" class="magic-checkbox" id="WorkFlow_CelRelationWorkitems1" name="WorkFlow_CelRelationWorkitems"></input><label for="WorkFlow_CelRelationWorkitems1">徐依迪Xu yidi</label></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="nopt select" v-on:click="func.selectUsageContent">
+                            处理意见 Process opinion
+                            <input type="hidden" name="commonUsages" v-like="text" v-model="submitData.fdUsageContent"/>
+                            <i class="icon auicon icon-rdodown"></i>
+                        </div>
+                        <div style="text-align:center">
+                            <textarea rows="3" v-model="submitData.fdUsageContent" name="fdUsageContent"></textarea>
+                        </div>
+                        <div id="hiddenDiv" v-for="hidparam in formDetailData.hidden">
+                            <input type="hidden" v-bind:id="hidparam.hiddenName" v-bind:name="hidparam.hiddenName" v-bind:value="hidparam.hiddenValue"></input>
+                        </div>
+                        <input type="hidden" id="taskId" name="taskId" v-bind:value="formDetailData.submitjson[0].taskId"</input>
+                        <input type="hidden" id="istongyongflag" name="istongyongflag" value="1"></input>
+                        <input type="hidden" id="userkey" v-bind:value="formDetailData.userkey" />
+                        <input type="hidden" id="sj_taskId" v-bind:value="formDetailData.submitjson[0].sj_taskId"></input>
+                        <input type="hidden" id="sj_processId" v-bind:value="formDetailData.submitjson[0].sj_processId"></input>
+                        <input type="hidden" id="sj_activityType" v-bind:value="formDetailData.submitjson[0].sj_activityType"></input>
+                        <input type="hidden" id="sj_notifyLevel" v-bind:value="formDetailData.submitjson[0].sj_notifyLevel"></input>
+                    </div>
+                    <p v-else style="color:red;padding:0 0 15px 15px;">没有操作选项</font>
+                </div>
+            </aui-list>
+        </aui-scroller>
+    </div>
+
+</ui>
+<script>
+import '@auicomp/text/Text.aui';
+import '@auicomp/grid/Grid.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auicomp/list/List.aui';
+import '@auicomp/tabbar/Tabbar.aui';
+import '@auicomp/button/Button.aui';
+import fetch from '@comm/utils/xfetch';
+import tool from '@comm/utils/tool';
+import Alert from '@auicomp/alert/Alert.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+import Action,{ router } from '@auicomp/action/Action.aui';
+
+import Selectsheet from '@comm/components/Selectsheet.aui';
+import 'magic-check/css/magic-check.min.css';
+import testdata from '@libs/testdata';
+
+export default class WorkDetail {
+
+    static get tag() {
+        return 'workdetail';
+    }
+
+    created(){
+        const $el = $(this.$el);
+        Action.listener($el.find('tabbar-cell').attr('type', 'control'));
+        const obj = this.$obj = {
+            handlerval:'',
+            arrlength:{
+                hasfileInfo:false,
+                hasinArr:false,
+                haspass:false,
+                hasbutton:false
+            },
+            formDetailData:{},
+            submitData:{
+                fdUsageContent:"同意",
+                refuseSelect:{text:'',value:''},
+                jumpToNodeIdSelectObj:'',
+                CommunicatetoOtherHandlerIds:'',
+                ForwardtoOtherHandlerIds:'',
+                toOtherHandlerIds:'',
+                toOtherHandlerNames:''
+
+            },
+            func:{
+                forwardChoose:function(){
+                    router.go({path:"/choseperson",isForce:true});
+                },
+                getAttachShowInfo:function(index,item){
+                    var atinfo = tool.getAttachIcon(item.fname);
+                    item.class = atinfo.class;
+                    item.color = atinfo.color;
+                },
+                getProcessFileShowInfo:function(index,item){
+                    var atinfo = tool.getAttachIcon(item.fileName);
+                    item.class = atinfo.class;
+                    item.color = atinfo.color;
+                },
+                selectUsageContent:function(){
+                    Selectsheet.show({
+                        list: obj.formDetailData.select.map(function(item){
+                            return item.selectVale
+                        }),
+                        func:function(index){
+                            obj.submitData.fdUsageContent = obj.formDetailData.select[index].selectVale;
+                        }
+                    });
+                },
+                selectRefuse:function(){
+                    Selectsheet.show({
+                        list: obj.formDetailData.refuse.map(function(item){
+                            return item.value+"."+item.text;
+                        }),
+                        func:function(index){
+                            $.extend(true,obj.submitData.refuseSelect,obj.formDetailData.refuse[index]);
+                        }
+                    });
+                }
+            }
+        };
+        obj.formDetailData = testdata;
+        obj.submitData.refuseSelect = obj.formDetailData.refuse[0];
+        // $.extend(true,obj.submitData.refuseSelect,obj.formDetailData.refuse[0]);
+        console.log(obj.submitData.refuseSelect);
+        if(testdata.fileInfo.length > 0){
+            obj.arrlength.hasfileInfo = true;
+        }
+        if(testdata.inArr.length > 0){
+            obj.arrlength.hasinArr = true;
+        }
+        if(testdata.pass.length > 0){
+            obj.arrlength.haspass = true;
+        }
+        if(testdata.buttonInfo.length > 0){
+            obj.arrlength.hasbutton = true;
+        }
+        this.$vm = $(this.$el).find('#detailTpl').render(obj);
+    }
+
+
+    detached(){
+        this.$vm && this.$vm.destroy();
+    }
+}
+</script>
+<style type="less">
+@defaultborder:1px solid #ddd;
+.select{
+    background: rgb(243, 243, 243);
+    &:active{
+        background: rgb(209, 207, 207);
+    }
+}
+textarea{
+    border: 0;
+    width: 95%;
+    margin: 5px 0px;
+    padding: 5px;
+}
+.attach{
+    display: flex;
+    align-items: center;
+    i{
+        color: #428bca;
+        position: static;
+        transform: none;
+        font-size: 20px;
+        margin-right: 5px;
+    }
+};
+.flex-col{
+    display: flex;
+    flex-direction: column;
+}
+.flex-row-between{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.line1{
+    text-align: left;
+    color:#8E8E93;
+    line-height: 14px;
+}
+.line2{
+    text-align: right;
+    font-size: 15px;
+    color:#000000;
+    line-height: 20px;
+}
+.p10-bt{
+    padding: 10px;
+    border-top: @defaultborder;
+}
+input[type=text]:read-only{
+    // background-color: #428bca;
+    border: 0;
+}
+.radio-area{
+    .flex-col;
+    padding: 0 10px 10px 10px;
+    div{
+        padding: 5px 0;
+        &:first-child{
+            padding-top: 0;
+        }
+        &:last-child{
+            padding-bottom: 5px 0 10px 0;
+        }
+        label:before,label:after{
+            box-sizing:border-box;
+        }
+    }
+}
+.detail-scroller{
+    position: absolute; 
+    top: 80px; right: 0px; bottom: 0px;left: 0px;
+    padding: 5px 0px; 
+    background-color: transparent;
+    aui-list{
+        margin-top:5px;
+        aui-action{
+            text-align: left;
+        }
+    }
+    #procedure{
+        border: @defaultborder;
+        margin: 5px 10px;
+        .nopt{
+            .p10-bt;
+            .flex-row-between;
+            &:first-child{
+                border-top:0;
+            }
+        }
+        
+    }
+    .dclog{
+        padding: 10px;
+        aui-list{
+            border: @defaultborder;
+            background-color:#f7f7f7;
+            border-radius: 8px;
+            list-cell{
+                padding: 11px 15px;
+                border-bottom: @defaultborder;
+                border-top: 0;
+                p{
+                    display: flex;
+                    justify-content: flex-end;
+                    align-items: center;
+                    .attach;
+                }
+                &:first-child{
+                    p{color:rgb(126, 124, 124);}
+                }
+                &:last-child{
+                    border-bottom: 0;
+                }
+                
+            }
+        }
+    }
+    .togdiv{
+        margin-left: 16px;
+        .item-div{
+            padding: 11px 16px 11px 0px;
+            .flex-col;
+            border-bottom: @defaultborder;
+            &:last-child{
+                border-bottom: 0;
+            }
+
+
+        }
+    }
+}
+
+.fileset{
+    margin: 10px 10px 10px 0;
+    .flex-col;
+    background-color:#f7f7f7;
+    .file-desc{
+        border-bottom:@defaultborder;
+        display: flex;
+        padding: 10px;
+        font-size: 14px;
+    }
+    aui-list{
+        margin-bottom: 0;
+        border-bottom: 0;
+        border-top: 0;
+        list-cell{
+            a{
+                .attach;
+            }
+        }
+    }
+}
+[type="toggle"].active .icon-arrowdown::before,
+[type="control"].active .icon-arrowdown::before{
+    content: '\e694';
+}
+</style>

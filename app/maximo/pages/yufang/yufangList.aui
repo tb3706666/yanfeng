@@ -1,0 +1,118 @@
+<ui>
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>我的任务列表</aui-text>
+            </caption-area>
+        </aui-titlebar>
+    </aui-header>
+    <aui-scroller class="content" style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;">
+        <aui-list>
+            <list-cell v-for="item in datalists" v-on:click="func.clickScan(item.index)" v-filter="func.listEach">
+                <p class="listline1" v-text="item.description"></p>
+                <p class="listline2">工单号：{{item.wonum}}</p>
+                <p class="listline2">开始时间：{{item.TARGSTARTDATE}}</p>
+            </list-cell>
+        </aui-list>
+    </aui-scroller>
+</ui>
+<script>
+import auiLoading from '@auicomp/loading/Loading.aui';
+import fetch from '@comm/utils/xfetch';
+import Alert from '@auicomp/alert/Alert.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+import Action,{ router } from '@auicomp/action/Action.aui';
+
+export default class yufangList {
+    static get tag() {
+        return 'yufanglist';
+    }
+
+    created() {
+        auiLoading.show();
+        fetch({
+            appId: 'maximo',
+            url: 'http://baseurl/yufang/list.jsp',
+            data: {
+                badge: window.userInfo.badge,
+                maxSITEID: window.lgInfo.maxSITEID,
+                WORKTYPE :'PM',
+                STATUS : 'APPR'
+            },
+            dataType: 'text',
+            success:function(rsp){
+                auiLoading.hide();
+                var rspObj = $.JSON.parse(rsp.trim());
+                if(rspObj.list.length > 0){
+                    obj.datalists.$reset((rspObj.list));
+                }else{
+                    Toast.show("未查询到数据", function(){});
+                }
+            },
+            error:function(rsp){
+                auiLoading.hide();
+                Toast.show(rsp.errmsg, function(){});
+            }
+        });
+        const $el = $(this.$el);
+        $el.on("enter",function(){
+            $("aui-yufangdetail").remove();
+        });
+        const obj = this.$obj = {
+            datalists:[],
+            func:{
+                listEach:function(index,item){
+                    item.index = index;
+                },
+                clickScan:function(eachIndex){
+                    var clickData = obj.datalists[eachIndex];
+                    window.yufangDetail = JSON.parse(JSON.stringify(clickData));
+                    appnest.barcode.scan({
+                        success:function(res){
+                            if(res.result.indexOf("assetnum=") > -1 && res.result.indexOf("jpnum=") > -1){
+                                var assetnumCode = res.result.trim().split("|")[0].split("=")[1].trim();
+                                if(clickData.assetnum == assetnumCode){
+                                    router.go("/yufangdetail");
+                                }else{
+                                    Toast.show("请扫描正确的二维码！");
+                                }
+                            }else{
+                                Toast.show("请扫描正确的二维码！");
+                            }
+                        },
+                        fail:function(res){
+                            Toast.show(res.errMsg);
+                        }
+                    });
+                }
+            }
+        }
+        this.$vm = $el.find("aui-scroller").render(obj);
+    }
+    detached(){
+        this.$vm && this.$vm.destroy();
+    }
+}
+</script>
+<style type="less">
+aui-yufanglist{
+    aui-list{
+        border-top: 0 !important;
+        margin-top: 0 !important;
+        list-cell{
+            &:active{
+                background: rgb(236, 234, 234);
+            }
+        }
+    }
+    .listline1{
+        font-size: 15px;
+    }
+    .listline2{
+        color:#8E8E93;
+    }
+}
+</style>

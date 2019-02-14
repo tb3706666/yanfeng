@@ -1,0 +1,97 @@
+<ui>
+    <div class="GdsjWlxx">
+        <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>物料信息</aui-text>
+                </caption-area>
+                <right-area>
+                    
+                </right-area>
+            </aui-titlebar>
+        </aui-header>
+         <aui-scroller class="content">
+            <div  v-if="isAjaxed&&hasData">
+                <ul v-for="item in list">
+                    <li class="border-bt1 padding10">
+                        <div class="caption">物料名称:{{item.Name}}</div>
+                        <div class="snd-title">当期数量:{{item.Amount}}</div>
+                    </li>
+                </ul>
+            </div>
+            <div v-if="isAjaxed&&!hasData" class="nodata">
+                <img src="./assets/imgs/nodata.png">
+            </div>
+        </aui-scroller>
+    </div>
+</ui>
+<script>
+    import '@auicomp/refresher/Refresher.aui';
+    import '@auicomp/list/List.aui';
+    import Actionsheet from '../components/Actionsheet.aui';
+    import Alert from '@auicomp/alert/Alert.aui';
+    import fetch from "@libs/xfetch";
+    import common from '@libs/common';
+    import { router } from '@auicomp/action/Action.aui';
+
+    export default class GdsjWlxx {
+
+        static get tag() {
+            return 'GdsjWlxx';
+        }
+        created() {
+            const list = JSON.parse(localStorage.getItem("wlxx"));
+            const self = this;
+            const obj = this.$obj = {
+                hasData: list.length>0,
+                list: list,
+                isAjaxed:true,
+                func: {
+                   
+                }
+            }
+            this.$vm = $(this.$el).render(obj);
+        }
+        
+        detached(){
+            this.$vm && this.$vm.destroy();
+        }
+    }
+</script>
+<style type='less'>
+@import url('../assets/less/theme/default/common.less');
+.GdsjWlxx{
+    width: 100%;
+    height: 100%;
+    position: relative;
+    .content { 
+        position: absolute;
+        top: 44px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        ul{
+            li{
+                 padding:5px 10px;
+                .caption{
+                    font-size: 16px;
+                }
+                .rcaption{
+                    font-size: 14px;
+                    color: #8E8E93;
+                    margin-top: 3px;
+                }
+                .snd-title{
+                    font-size: 14px;
+                    color: #8E8E93;
+                    margin-top: 5px;
+                }
+            }
+        }
+    } 
+}
+
+</style>

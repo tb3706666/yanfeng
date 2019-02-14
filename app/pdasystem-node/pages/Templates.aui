@@ -1,0 +1,300 @@
+<ui>
+    <div class="Templates">
+        <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <div v-on:click="func.closeWindow"><i class="icon auicon icon-arrowleft"></i></div>
+                </left-area>
+                <caption-area>
+                    <aui-text>巡检项</aui-text>
+                </caption-area>
+                <right-area>
+                
+                    <a v-on:click="func.goList">
+                        <i class="icon auicon icon-rdomenu"></i>
+                    </a>
+                    <a v-on:click="func.sures">
+                        <i class="icon auicon icon-rdook"></i>
+                    </a>
+                </right-area>
+            </aui-titlebar>
+            <div class="mytitle">{{sheetname}}</div>
+        </aui-header>
+        
+        <aui-scroller class="content">
+            <ul class="list" v-if="isAjaxed&&hasData">
+                <li class="fd-row align-c border-bt1 padding10"  v-for="item in list" v-filter="func.addIndex" v-on:click="func.getDetail(item.id,item.position,item.content,item.method,item.index)">
+                    <div class="flex1">
+                        <div class="caption">{{item.id}}:  {{item.content}}</div>
+                        <div class="snd-title">{{item.sndcaption}}</div>
+                    </div>
+                     <div class="point" v-show="item.showIcon"></div>
+                </li>
+            </ul>
+            <div v-if="isAjaxed&&!hasData" class="nodata">
+                <img src="./assets/imgs/nodata.png">
+            </div>
+        </aui-scroller>
+    </div>
+</ui>
+
+
+<script>
+    import '@auicomp/scroller/Scroller.aui';
+    import '@auicomp/header/Header.aui';
+    import '@auicomp/text/Text.aui';
+    import '@auicomp/grid/Grid.aui';
+    import '@auicomp/titlebar/Titlebar.aui';
+    import '@auiutil/mobiscroll3/css/mobiscroll.javascript.min.css';
+    import Actionsheet from '../components/Actionsheet.aui';
+    import {
+        router
+    } from '@auicomp/action/Action.aui';
+    import common from '@libs/common';
+    import fetch from "@libs/fetch";
+    import { Base64 } from "js-base64";
+    import Popup from '@auicomp/popup/Popup.aui';
+    import Selectsheet from '@comm/components/Selectsheet.aui';
+    import Loading from "@auicomp/loading/Loading.aui";
+
+    export default class Templates {
+
+        static get tag() {
+            return 'Templates';
+        }
+        created() {
+            $(this.$el).on('enter',function(){
+                // console.log(this.$obj.list);
+            });
+            var prePageData = document.querySelector('aui-Detail').component.$obj
+            let self = this;
+            const obj = this.$obj = {
+                isAjaxed:false,
+                hasData:false,
+                list:[],
+                macList:[],
+                sheetname:prePageData.sheetname,
+                sqlname:prePageData.sqlname,
+                sqldataname:prePageData.sqldataname,
+                position:prePageData.position,
+                bluetooth:prePageData.bluetooth,
+                func:{
+                    closeWindow(){
+                        common.confirm("确定关闭当前页面？",null,null,function(){
+                            history.go(-1);
+                        })
+                    },
+                    goList(){
+                        history.go(-2);
+                    },
+                    getDetail(id,position,content,method,index){
+                         router.go('/Oneitem?id='+id+'&position='+position+'&content='+content+'&method='+method+"&sheetname="+obj.sheetname+"&index="+index); 
+                    },
+                    addIndex(index,item){
+                        item.index = index;
+                    },
+                    sures(){
+                        for(let i =0;i<obj.list.length;i++){
+                            if(!obj.list[i].showIcon){
+                                common.toast('请全部巡检项全部完成后，再提交');
+                                return;
+                            }
+                        }
+                        if(obj.bluetooth == ""){
+                            self.tijiao();
+                        }else{
+                            self.isOpenBlueTooth();
+                        }
+                    }
+                }
+            }
+            this.$vm = $(this.$el).render(this.$obj);
+            this.loadData();
+        }
+        detached() {
+            this.$vm && this.$vm.destroy();
+        }
+        tijiao(){
+            for(let i =0;i<this.$obj.list.length;i++){
+                if(!this.$obj.list[i].showIcon){
+                    common.toast('请全部巡检项全部完成后，再提交');
+                    return;
+                }
+            }
+            var contentvalue=[];//往数据库里面contentX插入的数值
+            var hidngcontent=[];//往数据库里面巡检内容插入的数值
+            var hidng=[];//往数据库里面NG内容插入的数值
+            this.$obj.list.forEach(item=>{
+                contentvalue.push(item.contentvalue);
+                if(item.hidng!=''){
+                    hidngcontent.push(item.content);
+                    hidng.push(item.hidng);
+                }
+            })
+            let self = this;
+            console.log({
+                    username:localStorage.getItem("pad_username"),
+                    session_DB:localStorage.getItem("sel_DB"),
+                    contentvalue:contentvalue.join('_vvcontentvv_'),
+                    hidngcontent:hidngcontent.join('_vvcontentvv_'),
+                    hidng:hidng.join('_vvcontentvv_'),
+                    sqldataname:this.$obj.sqldataname,
+                    sheetname:this.$obj.sheetname,
+                    sqlname:this.$obj.sqlname,
+                    department:localStorage.getItem('pad_department')
+                });
+                
+            fetch({
+                appId: common.appId,
+                url : common.oaUrl+"/inserts.jsp",
+                data: {
+                    username:localStorage.getItem("pad_username"),
+                    session_DB:localStorage.getItem("sel_DB"),
+                    contentvalue:contentvalue.join('_vvcontentvv_'),
+                    hidngcontent:hidngcontent.join('_vvcontentvv_'),
+                    hidng:hidng.join('_vvcontentvv_'),
+                    sqldataname:this.$obj.sqldataname,
+                    sheetname:this.$obj.sheetname,
+                    sqlname:this.$obj.sqlname,
+                    department:localStorage.getItem('pad_department')
+                },
+                type: 'post',
+                success: function(infos){
+                    console.log(infos)
+                    common.toast("操作成功");
+                    history.go(-1);
+                }
+            });
+        }
+       
+        isOpenBlueTooth(){
+            let self = this;
+            appnest.seekcyBeacon.isOpenBlueTooth({
+                success: function (res) {
+                    var result = res.code; //0：未打开；1：打开
+                    if(result==1){
+                        self.startScan();
+                    }else{
+                        common.toast('请打开蓝牙');
+                    }
+                }
+            });
+
+        }
+        startScan(){
+            let self = this;
+            Loading.show();
+            appnest.seekcyBeacon.startScan({
+                repeatCallback: function (res) {
+                    var code = res.code;
+                    if(code == 0){
+                        //成功
+                        var deviceInfos = res.deviceInfos ; // 返回搜索设备相关信息数组
+                        for(var i=0;i<deviceInfos.length;i++)
+                        {
+                            var macAddress = deviceInfos[i].macAddress.replace(/:/g,"").replace(/：/g,"") ; //设备mac地址
+                            console.log(macAddress);
+                            if(self.$obj.macList.includes(macAddress)){
+
+                            }else{
+                                self.$obj.macList.push(macAddress);
+                            }
+                        }
+                    }else{
+                   
+                    }
+                },
+            });
+            setTimeout(function(){
+                Loading.hide();
+                self.stopScan();
+                console.log(self.$obj.macList);
+                if (self.$obj.macList.includes(self.$obj.bluetooth)) {
+                   self.tijiao();
+                }else{
+                    common.toast("请靠近对应的蓝牙设备进行后续操作");
+                }
+                self.$obj.macList = [];
+            },1500);
+        }
+        stopScan(){
+            appnest.seekcyBeacon.stopScan();
+        }
+        loadData(){
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : common.oaUrl+"/templates.jsp",
+                data: {
+                    username:localStorage.getItem("pad_username"),
+                    session_DB:localStorage.getItem("sel_DB"),
+                    sheetname:this.$obj.sheetname,
+                    sqlname:this.$obj.sqlname,
+                    sqldataname:this.$obj.sqldataname,
+                    position:this.$obj.position,
+                },
+                type: 'post',
+                success: function(infos){
+                    console.log(infos);
+                    self.$obj.isAjaxed=true;
+                    self.$obj.hasData = infos.size!="0";
+                    infos.list.forEach(element => {
+                        //添加需要提交的隐藏参数
+                        element.contentvalue = '';
+                        element.hidng = '';
+                        element.sndcaption = '待巡检';
+                        element.showIcon = false;
+                    });
+                    self.$obj.list = infos.list;
+                }
+            });
+        }
+    }
+</script>
+<style type="less">
+    @import url('../assets/less/theme/default/common.less');
+    .Templates {
+        width: 100%;
+        height: 100%;
+        .mytitle{
+            background: #C4E1E2;
+            padding:10px;
+            color: #008BE8;
+        }
+        .content {
+            position: absolute;
+            top: 85px;
+            right: 0px;
+            bottom: 0px;
+            left: 0px;
+            padding: 5px;
+            ul{
+                li{
+                    padding:5px 10px;
+                    .point{
+                        background: url(../assets/imgs/accept.png) center center / 20px 20px no-repeat;
+                        width: 20px;
+                        height: 20px;
+                        margin-right: 10px;
+                    }
+                    .caption{
+                        font-size: 16px;
+                    }
+                    .rcaption{
+                        font-size: 14px;
+                        color: #8E8E93;
+                        margin-top: 3px;
+                    }
+                    .snd-title{
+                        font-size: 14px;
+                        color: #8E8E93;
+                        margin-top: 5px;
+                    }
+                    &:active{
+                        background: #eee;
+                    }
+                }
+            }
+        }
+    }
+</style>

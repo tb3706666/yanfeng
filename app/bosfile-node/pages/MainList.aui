@@ -1,0 +1,213 @@
+<ui>
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <a id="backIcon"><i class="icon auicon icon-arrowleft"></i></a>
+            </left-area>
+            <caption-area>
+                <aui-text>文件更改流程</aui-text>
+            </caption-area>
+            <right-area>
+                <a id="searchIcon"><i class="icon auicon icon-search"></i></a>
+            </right-area>
+        </aui-titlebar>
+    </aui-header>
+    <div id="main-list">
+        <aui-list>
+            <list-cell class="grid" v-for="item in listDatas" v-on:click="func.goDetail(item.fdId)">
+                <grid-cell>
+                    <i class="icon auicon icon-notepad"></i>
+                </grid-cell>
+                <grid-cell class="flex-1 padded">
+                    {{item.title}}
+                    <p>{{item.createtime}}&nbsp;&nbsp;{{item.declPerson}}</p>
+                </grid-cell>
+                <grid-cell class="grid-cell-middle">
+                    <i class="icon auicon icon-arrowright"></i>
+                </grid-cell>
+            </list-cell>
+        </aui-list>
+    </div>
+
+
+</ui>
+<style type='less'>
+aui-titlebar{
+    background:#004ea2 !important;
+    i{
+        color: #ffffff !important;
+    }
+    aui-text{
+        color: #ffffff !important;
+    }
+}
+
+#main-list{
+    position:absolute; 
+    top:45px; 
+    right: 0px; 
+    bottom: 0px; 
+    left: 0px;
+    overflow:auto;  
+    aui-list{
+        border-top: 0px;
+        list-cell{
+            &:active{
+                background: rgb(236, 234, 234);
+            }
+            grid-cell{
+                p{
+                    color:#B9B9B9;
+                }
+                
+            }
+        }
+    }
+}
+</style>
+<script>
+import '@auicomp/header/Header.aui';
+import '@auicomp/text/Text.aui';
+import '@auicomp/grid/Grid.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auicomp/list/List.aui';
+
+import auiLoading from '@auicomp/loading/Loading.aui';
+import fetch from '@comm/utils/nfetch';
+import Toast from '@auicomp/toast/Toast.aui';
+import Action,{ router } from '@auicomp/action/Action.aui';
+
+import MeScroll from 'mescroll.js'
+import 'mescroll.js/mescroll.min.css'
+
+let mescroll;
+
+export default class MainList {
+
+    static get tag() {
+        return 'mainlist';
+    }
+    created() {
+        const $el = $(this.$el);
+        $el.on("enter",function(){
+             $("aui-searchlist").remove();
+             $("aui-workdetail").remove();
+        });
+        $("#backIcon").click(function(){
+            appnest.navigation.closeWindow();
+        });
+        $("#searchIcon").click(function(){
+            // mescroll.hideTopBtn();        
+            router.go('/searchlist');
+        });
+        
+        const obj = this.$obj ={
+            currentPage:1,
+            totalPage:1,
+            listDatas:[],
+            func:{
+                goDetail:function(fdId){                   
+                    router.go({path: '/workdetail?fdId='+fdId});
+                },
+                getListData:function(cb){
+                    auiLoading.show();
+                    fetch({
+                        appId: 'bosfile',
+                        url : '/list.jsp',
+                        data: {
+                            page: obj.currentPage
+                        },
+                        success:function(rsp){
+                            auiLoading.hide();
+                            cb && cb(rsp);
+                        },
+                        error: function(rsp){
+                            auiLoading.hide();
+                            //请求接口失败,隐藏下拉刷新和上拉加载的状态;
+                            mescroll.endErr();
+                            Toast.show(rsp.errmsg, function(){
+                                console.log('Toast Close');
+                            });
+                        }
+                    });
+                },
+                downcallback:function(){
+                    obj.currentPage = 1;
+                    obj.totalPage = 1;
+                    obj.listDatas.$reset([]);
+                    obj.func.getListData(function(rsp){
+                        obj.currentPage = Number(rsp.currentPage);
+                        obj.totalPage = Number(rsp.totalPage);
+                        if(rsp.list.length > 0){
+                            obj.listDatas.$reset(rsp.list);
+                            //隐藏下拉刷新的状态
+					        mescroll.endSuccess(rsp.list.length,Number(rsp.currentPage)!=Number(rsp.totalPage));
+
+                        }else{
+                            Toast.show('没有数据');
+                        }
+                    });
+                },
+                upcallback:function(){
+                    if(obj.totalPage > obj.currentPage){
+                        obj.currentPage += 1;
+                        obj.func.getListData(function(rsp){
+                            obj.currentPage = Number(rsp.currentPage);
+                            obj.totalPage = Number(rsp.totalPage);
+                            if(rsp.list.length > 0){
+                                $.each(rsp.list, function(i,e) {
+                                    obj.listDatas.push(e);
+                                });  
+                                // obj.listDatas.$reset(rsp.list);
+                                //方法一(推荐): 后台接口有返回列表的总页数 totalPage
+                                //mescroll.endByPage(curPageData.length, totalPage); //必传参数(当前页的数据个数, 总页数)
+                                
+                                //方法二(推荐): 后台接口有返回列表的总数据量 totalSize
+                                //mescroll.endBySize(curPageData.length, totalSize); //必传参数(当前页的数据个数, 总数据量)
+
+                                //方法三(推荐): 您有其他方式知道是否有下一页 hasNext
+                                //mescroll.endSuccess(curPageData.length, hasNext); //必传参数(当前页的数据个数, 是否有下一页true/false)
+                                
+					            mescroll.endSuccess(rsp.list.length);
+                                
+                            }else{
+
+                                Toast.show('没有更多数据', function(){
+                                    console.log('Toast Close');
+                                });
+                            }
+                        });
+                    }else{
+                        mescroll.endSuccess(false);
+                    }
+                }
+            }
+        }
+
+        mescroll = new MeScroll("main-list",{
+            down: {
+                auto: true, //是否在初始化完毕之后自动执行下拉回调callback; 默认true
+                callback: obj.func.downcallback //下拉刷新的回调
+            },
+            up:{
+                auto: false, //是否在初始化完毕之后自动执行下拉回调callback; 默认true
+                callback: obj.func.upcallback, //下拉刷新的回调
+                toTop:{ //配置回到顶部按钮
+                    wrapId:'main-list',
+                    src:'./assets/imgs/mescroll-totop.png',
+                    offset : 300
+                },
+                htmlNodata:'<p class="upwarp-nodata">--没有更多数据--</p>'
+            }
+        });
+        // console.log(mescroll);
+        this.$vm = $el.render(obj);
+        
+    }
+
+    detached(){
+        mescroll.hideTopBtn();
+        this.$vm && this.$vm.destroy();
+    }
+}
+</script>

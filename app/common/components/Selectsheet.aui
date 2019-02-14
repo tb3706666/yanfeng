@@ -1,0 +1,135 @@
+<ui>
+    <div class="actionsheet-mask " v-bind:class="{active:isActive}" v-on:click="doClose">
+        <div class="anim-box" v-bind:class="{scaleIn:isAnim, scaleOut:!isAnim}">
+            <div class="anim-title">请选择</div>
+            <div class="anim" >
+                <ul class="actionsheet-content">
+                    <li class="actionsheet-item" v-for="item in list" v-on:click="func($index)" v-html="item"></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</ui>
+
+<script>
+
+
+// import $ from 'agile-ce';
+
+export default class Selectsheet{
+
+    static get tag(){
+        return 'selectsheet';
+    }
+
+    static show (options) {
+        if (!Selectsheet.$el) {
+            Selectsheet.$el = $('<aui-selectsheet></aui-selectsheet>').appendTo(document.body);
+        }
+        var el = Selectsheet.$el[0], component = el.component, obj = component.$obj;
+        let oldList = obj.list;
+        obj.list = options.list;
+        obj.func = options.func;
+        obj.isActive = true;
+        obj.isAnim = true;
+        if(oldList.toString() != options.list.toString()){//切换为其他select时，滚动条滚动到顶部
+            $('.anim').scrollTop(0);
+        }
+
+    }
+
+    constructor(){
+        this.init();
+    }
+
+    init () {
+        var actionsheet = this;
+        this.$obj = {
+            isAnim: false,
+            isActive: false,
+            list: [],
+            func: {},
+            doClose: function () {
+                var obj = actionsheet.$obj;
+                obj.isAnim = false;
+                setTimeout(function () {
+                    obj.isActive = false;
+                }, 100);
+            }
+            
+        };
+    }
+    created () {
+        this.$vm = $(this.$el).render(this.$obj);
+    }
+    detached () {
+        this.$vm && this.$vm.destroy();
+        delete Selectsheet.$el;
+    }
+
+}
+
+</script>
+
+<style type="less">
+
+aui-selectsheet{
+
+    & > .actionsheet-mask {
+        display: none;
+    }
+
+    & > .actionsheet-mask.active {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 90;
+        background-color: rgba(0, 0, 0, .4);
+    }
+    .anim-box{
+        width: 80%;
+        .anim-title{
+            background: #ffffff;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            border-bottom: 1px solid #d2d2d6;
+            padding: 10px 0px 10px 25px;
+            color:  #428bca;
+        }
+    }
+    .anim {
+        width: 100%;
+        max-height: 188px;
+        overflow-y: auto;
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+    }
+
+    .actionsheet-content li,
+    .actionsheet-cancel {
+        display: block;
+        background: #ffffff;
+        line-height: 46px;
+        font-size: 16px;
+        color: #444444;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        border-bottom: 1px solid #d2d2d6;
+        padding-left: 15px;
+        &:active{
+            background: #eee;
+        }
+    }
+    .actionsheet-cancel {
+        border-radius: 0px;
+        margin: 6px 0px 0 0;
+    }
+}
+    
+</style>

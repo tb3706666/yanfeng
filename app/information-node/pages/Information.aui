@@ -1,0 +1,473 @@
+<ui>
+    <aui-header>
+        <aui-titlebar id="upinfo">
+            <left-area>
+                <a id="backIcon"><i class="icon auicon icon-arrowleft-fill"></i></a>
+            </left-area>
+            <caption-area>
+                <aui-text>个人信息更新</aui-text>
+            </caption-area>
+            <right-area v-on:click="fupdate.yzinfo">
+                <a><i class="icon auicon icon-hook-fill"></i></a>
+            </right-area>
+        </aui-titlebar>
+    </aui-header>
+    <aui-scroller class="content" id="inforlist" style="position: absolute;top: 45px;right: 0px;bottom: 0px;left: 0px;">
+        <aui-list class="informtop pdt16">
+            <input type="hidden" name="fdPersonId" subval />
+            <input type="hidden" name="fdId" subval />
+            <input type="hidden" name="method_GET" subval />
+            <input type="hidden" name="attachmentForms.information.fdModelId" subval />
+            <input type="hidden" name="attachmentForms.information.extParam" subval />
+            <input type="hidden" name="attachmentForms.information.fdModelName" subval />
+            <input type="hidden" name="attachmentForms.information.fdKey" subval />
+            <input type="hidden" name="attachmentForms.information.fdAttType" subval />
+            <input type="hidden" name="attachmentForms.information.fdMulti" subval />
+            <input type="hidden" name="attachmentForms.information.deletedAttachmentIds" subval />
+            <input type="hidden" name="attachmentForms.information.attachmentIds" subval /> 
+            <list-cell>
+                <aui-text class="fl">工号</aui-text><input name="fdNumber" subval readonly type="tel" class="lisinput cur pnone"></list-cell>
+            <list-cell>
+                <aui-text class="fl">姓名</aui-text><input name="fdName" subval readonly type="text" class="lisinput pnone"></list-cell>
+            <list-cell>
+                <aui-text class="fl">身份证号</aui-text><input name="fdCard" subval readonly type="text" class="lisinput pnone"></list-cell>
+            <list-cell>
+                <aui-text class="fl">手机号码*</aui-text><input name="fdPhone" vmsg="手机号码不能为空" subval type="tel" maxlength="11" class="lisinput"></list-cell>
+
+            <list-cell class="mgt16">
+                <aui-text class="fl">学历*</aui-text>
+                <label style="float:right;">
+                    <select id="md-xueli" name="fdEducation"  subval vmsg="请选择学历">
+                        <option value="">==请选择==</option>
+                        <option value="博士研究生">博士研究生</option>
+                        <option value="硕士研究生">硕士研究生</option>
+                        <option value="本科">本科</option>
+                        <option value="大专">大专</option>
+                        <option value="中专">中专</option>
+                        <option value="中技">中技</option>
+                        <option value="高中">高中</option>
+                        <option value="高中以下">高中以下</option>
+                    </select>
+                </label>
+            </list-cell>
+
+
+            <list-cell id="upimg">
+                <aui-text class="fl filetext" style="padding">学历变更上传照片</aui-text>
+                <aui-button class="btn btn-primary btcss" v-on:click="fupimg.fimg">点击上传图片</aui-button>
+                <div id="filediv" style="display:none" v-html="filedivInner"></div>
+                <img class="fileimg" src="./assets/imgs/xueli.jpg" v-on:click="fupimg.fimg">
+            </list-cell>
+
+
+            <list-cell>
+                <aui-text class="fl">政治面貌*</aui-text>
+                <label style="float:right;">
+                    <select id="md-zhengzhi" name="fdPolitical" subval vmsg="请选择政治面貌">
+                        <option value="">==请选择==</option>
+                        <option value="中共党员">中共党员</option>
+                        <option value="群众">群众</option>
+                        <option value="共青团员">共青团员</option>
+                        <option value="民族党派人士">民族党派人士</option>
+                    </select>
+                 </label>
+            </list-cell>
+            <list-cell class="mgt16">
+                <aui-text class="fl">婚姻状况*</aui-text>
+                <label style="float:right;">
+                    <select id="md-hunyin" name="fdMarriage" subval vmsg="请选择婚姻状况">
+                        <option value="">==请选择==</option>
+                        <option value="已婚">已婚</option>
+                        <option value="未婚">未婚</option>
+                        <option value="离异">离异</option>
+                        <option value="丧偶">丧偶</option>
+                    </select>
+                </label>
+            </list-cell>
+            <list-cell>
+                <aui-text class="fl">户籍性质*</aui-text>
+                <label style="float:right;">
+                    <select id="md-huji" name="fdRegister" subval vmsg="请选择户籍性质">
+                        <option value="">==请选择==</option>
+                        <option value="城市">城市</option>
+                        <option value="农村">农村</option>
+                        <option value="家庭户">家庭户</option>
+                    </select>
+                </label>
+            </list-cell>
+            <list-cell class="mgt16">
+                <aui-text class="fl">通讯地址*</aui-text><input name="fdAddress" subval type="text" class="dizhi" vmsg="通讯地址不能为空"></list-cell>
+            <list-cell class="pdr40">
+                <aui-text class="fl">紧急联系人姓名*</aui-text><input name="fdEmergency" subval type="text" class="lisinput" vmsg="紧急联系人姓名不能为空"></list-cell>
+            <list-cell class="pdr40">
+                <aui-text class="fl">紧急联系人电话*</aui-text><input name="fdEmergencyphone" subval type="tel" class="lisinput" vmsg="紧急联系人电话不能为空"></list-cell>
+            <list-cell>
+                <aui-text class="bgfff">友情提示<br/> 1.如需修改首次工作时间，请登录HRIS网页端或联系对口HR。
+                    <br/> 2.此次更新的信息会隔天在HRIS系统内生效
+                    <br/> 3.如有多次更新以最后一次信息为准
+                    <br/>
+                </aui-text>
+            </list-cell>
+
+        </aui-list>
+    </aui-scroller>
+</ui>
+<script>
+    import '@auicomp/button/Button.aui';
+    import '@auicomp/scroller/Scroller.aui';
+    import '@auicomp/titlebar/Titlebar.aui';
+    import '@auicomp/text/Text.aui';
+    import '@auicomp/list/List.aui';
+    import auiLoading from '@auicomp/loading/Loading.aui';
+    import Alert from '@auicomp/alert/Alert.aui';
+    import Actionsheet from '@auicomp/actionsheet/Actionsheet.aui';
+    import fetch from '@comm/utils/nfetch';
+    import {router} from '@auicomp/action/Action.aui';
+
+    export default class Information {
+        static get tag() {
+            return 'information';
+        }
+
+        created() {
+            $("#backIcon").click(function(){
+                appnest.navigation.closeWindow();
+            });
+
+            var tobadge = window.userInfo.badge;
+            var username = window.userInfo.userName;
+            auiLoading.show();
+            fetch({//请求个人信息
+                appId: 'permessupdate',
+                url: '/searchs',
+                data: {
+                    badge: tobadge
+                },
+                success: function(data1) {
+                    window.fdEducation = data1['fdEducation'];//学历情况存入window，方便后面提交前校验比较
+                    $("[subval]").each(function(i,e){
+                        $(this).val(data1[$(this).attr('name')]);
+                    })
+                    auiLoading.hide();
+                },
+                error: function(rs) {
+                    auiLoading.hide();
+                    Alert.show({
+                        content: rs.errmsg,
+                        doOk: function(){
+                            appnest.navigation.closeWindow();
+                        }
+                    });
+                }
+            });
+            //信息更新
+            var obj = {
+                fupdate: {
+                    yzinfo: function() {
+                        let vmsg = '',validateResult=false;
+                        //非空校验--start
+                        $("[vmsg]").each(function(i,e){
+                             if($(this).val() == ''){
+                                vmsg = $(this).attr('vmsg');
+                                validateResult = true;
+                                return false;
+                             }
+                        })
+                        if(validateResult){
+                            Alert.show({content: vmsg,});
+                            return false;
+                        }
+                        if (window.fdEducation != $('select[name="fdEducation"]').val() && $('[name="Filedata"]').length < 1) {
+                            Alert.show({ content: '学历改变，必须上传学历照片',});
+                            return false;
+                        }
+                        //非空校验--end
+                        appnest.ui.confirm({
+                            content:'是否确认提交？',
+                            confirmButton:'确认',
+                            cancelButton:'取消',
+                            success:function(rc){
+                                if(rc.buttonType == 'confirm')
+                                        obj.fupdate.suresub();
+                            }
+                        });
+                    },
+                    suresub:function(){
+                        auiLoading.show();
+                        if(objfile.fujiantjurl == ""){//未改变学历直接提交
+                            obj.fupdate.finalsub();
+                        }else{
+                            fetch({
+                                appId: 'permessupdate',
+                                url: objfile.fujiantjurl,
+                                type: 'get',
+                                success:function(rsp){
+                                    $("[name='attachmentForms.information.attachmentIds']").val(rsp.attid);
+                                    obj.fupdate.finalsub();
+                                },
+                                fail: function(r) {
+                                    auiLoading.hide();
+                                    Alert.show({
+                                        content: r.errMsg
+                                    });
+                                }
+                            });
+                        }   
+                    },
+                    finalsub: function() {
+                        var subdata = {};
+                        $("[subval]").each(function(i,e){//拼接提交参数为json
+                             subdata[$(this).attr('name').replace(/\./g,'#')] =  $(this).val();
+                        })
+                        fetch({
+                            appId: 'permessupdate',
+                            url: '/save',
+                            type: 'post',
+                            data: subdata,
+                            reqCharset:'utf-8',
+                            success: function(data1) {
+                                auiLoading.hide();
+                                var rspmsg = data1.state == 1?data1.tjmsg:data1.errormsg;
+                                Alert.show({
+                                    content: rspmsg,
+                                    doOk: function() {
+                                        appnest.navigation.closeWindow();
+                                    }
+                                });
+                            },
+                            fail: function(r) {
+                                auiLoading.hide();
+                                Alert.show({
+                                    content: r.errMsg
+                                });
+                            }
+
+                        });
+                    }
+                }
+            }
+            $('#upinfo').render(obj);
+
+
+            //拍照上传
+            var objimg = {
+                filedivInner:'',
+                fupimg: {
+                    fimg: function() {
+                        Actionsheet.show({
+                            list: [{
+                                    text: '拍照上传',
+                                    handler: function() {
+                                        appnest.photo.camera({
+                                            width: 1080, // 拍照后生成图片宽度
+                                            success: function(res) {
+                                                var img = res.imagePath;
+                                                var thumbnailPath = res.thumbnailPath;
+                                                // $("filediv").html('<input type="hidden" name="Filedata" subval value="'+img+'"/>');
+                                                objimg.filedivInner = '<input type="hidden" name="Filedata" subval value="'+img+'"/>';
+                                                appnest.photo.getBase64Image({
+                                                    imagePath: img, // 图片全路径
+                                                    success: function(res) {
+                                                        var base64Image = res.data;
+                                                        // 返回图片的base64编码数据
+                                                        $('.fileimg').attr('src', base64Image);
+                                                        auiLoading.show();
+                                                        objfile.file.upfile(img)
+                                                    },
+                                                    fail: function(res) {
+                                                        Alert.show({
+                                                            content: res.errMsg
+                                                        });
+                                                    }
+                                                });
+                                            },
+                                            fail: function(res) {
+                                                Alert.show({
+                                                    content: res.errMsg
+                                                });
+                                            }
+                                        });
+                                    }
+                                },
+                                {
+                                    text: '图库选择',
+                                    handler: function() {
+                                        appnest.photo.album({
+                                            crop: true,
+                                            cropWidth: 300,
+                                            success: function(res) {
+                                                var img = res.imagePath;
+                                                var thumbnailPath = res.thumbnailPath;
+                                                // $("filediv").html('<input type="hidden" name="Filedata" subval value="'+img+'"/>');
+                                                objimg.filedivInner = '<input type="hidden" name="Filedata" subval value="'+img+'"/>';
+                                                appnest.photo.getBase64Image({
+                                                    imagePath: img, // 图片全路径
+                                                    success: function(res) {
+                                                        var base64Image = res.data;
+                                                        // 返回图片的base64编码数据
+                                                        $('.fileimg').attr('src', base64Image);
+                                                        auiLoading.show();
+                                                        objfile.file.upfile(img);
+                                                    },
+                                                    fail: function(res) {
+                                                        Alert.show({
+                                                            content: res.errMsg
+                                                        });
+                                                    }
+                                                });
+                                            },
+                                            fail: function(res) {
+                                                Alert.show({
+                                                    content: res.errMsg
+                                                });
+                                            }
+                                        });
+                                    }
+                                }
+                            ]
+                        });
+                    }
+                }
+            }
+            $('#upimg').render(objimg);
+
+
+
+            var objfile = {
+                fujiantjurl:'',
+                file: {
+                    upfile: function(img) {
+                        //发起请求
+                        fetch({
+                            appId: 'permessupdate',
+                            url: '/getuserkey',
+                            type:'get',
+                            success: function(data1) {
+                                fetch({
+                                    appId: 'permessupdate',
+                                    url: "/uploaderServlet?userkey=" + data1.userkey,
+                                    data: [{
+                                        type: 1,
+                                        name: 'Filedata',
+                                        value: img
+                                    }],
+                                    success: function(data2) {
+                                        //截取所选图片名称
+                                        var filename = img.substring(img.lastIndexOf("/") + 1);
+                                        objfile.fujiantjurl = "/handleAttUpload?filekey=" + data2.filekey + "&filename=" + username + "_" + tobadge + "_" + filename;
+                                        auiLoading.hide();
+                                    },
+                                    error: function(rs2) {
+                                        auiLoading.hide();
+                                        Alert.show({
+                                            content: rs2.errMsg
+                                        });
+                                    }
+                                })
+                            },
+                            error: function(rs) {
+                                auiLoading.hide();
+                                Alert.show({
+                                    content: rs.errMsg
+                                });
+                            }
+                        });
+                    }
+                }
+            }
+
+        }
+    }
+</script>
+
+<style type="less">
+aui-titlebar{
+    background:#004ea2 !important;
+    left-area{
+        i{color: #ffffff !important;}
+    }
+    right-area{
+        i{color: #ffffff !important;}
+    }
+    aui-text{
+        color: #ffffff !important;
+    }
+}
+    .dizhi {
+        width: 100%;
+        margin-top: 10px;
+        padding: 3px;
+        border: 0;
+        font-size: 15px;
+        outline: none;
+    }
+
+    select{
+        height: 20px;
+        font-size: 15px;
+        border: 0;
+        -moz-appearance:none;
+        -webkit-appearance:none;
+        padding-right: 14px;
+        padding-left:10px;
+        background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAJCAYAAAAGuM1UAAAAH0lEQVR42mNgoDnQ13f7TwiTpIkkm0hyHkl+YhhQAABcfyjsqSyTLgAAAABJRU5ErkJggg==) no-repeat scroll right center transparent;
+    }
+    .lisinput {
+        height: 20px;
+        line-height: 20px;
+        border: 0;
+        padding: 2px;
+        font-size: 15px;
+        outline: none;
+        float: right !important;
+        text-align: center;
+    }
+
+    .pnone {
+        pointer-events: none;
+    }
+
+    .fl {
+        float: left;
+        font-size: 15px;
+    }
+    .informtop {
+        margin-top: 0 !important;
+        border-top: none;
+        background-color: #EFEFF4;
+    }
+
+    .informtop list-cell {
+        background-color: #fff;
+    }
+
+    .mgt16 {
+        margin-top: 16px;
+    }
+
+    .pdt16 {
+        padding-top: 16px;
+    }
+
+    .pdr40 {
+        padding-right: 40px;
+    }
+
+    .btcss {
+        top: 10px !important;
+        right: 25% !important;
+        transform: none !important;
+    }
+
+    .fileimg {
+        width: 100px;
+        height: 100px;
+        margin-top: 40px;
+        margin-left: 50px;
+    }
+
+    list-cell,
+    .list-cell {
+        padding: 11px 45px 11px 15px;
+    }
+</style>

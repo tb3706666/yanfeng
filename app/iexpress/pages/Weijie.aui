@@ -1,0 +1,197 @@
+<ui>
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>未解题集</aui-text>
+            </caption-area>
+        </aui-titlebar>
+    </aui-header>
+    <aui-refresher delay  class="search-refresher-weijie" style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;text-align: center; background-color:white;" v-on:pulldown="func.doPullDown" v-on:pullup="func.doPullUp" auto>
+        <aui-list style="margin-top:0;border-top:0;background-color:#EFEFF4;">
+            <div v-for="item in listDatas">
+            <!-- 未解题集 -->
+            <list-cell class="grid wjfff">
+                <grid-cell>
+                    <img class="media-object pull-left touxiang" v-bind:src="item.headImg">
+                </grid-cell>
+                <grid-cell class="flex-1 padded">
+                    <p style="color: lightseagreen;font-size: medium;">{{item.author}}</p>
+                    <small style="margin-top:10px;">{{item.date}}</small>
+                </grid-cell>
+            </list-cell>
+            <!-- 问题提出 -->
+            <list-cell class="grid wjfff" style="border-top:0;padding-top:0;margin-bottom:15px;">
+                <grid-cell>
+                    
+                </grid-cell>
+                <grid-cell class="flex-1 padded">
+                    <h4 style="color:green;">{{item.title}}</h4>
+                    <p style="color:#000;margin-top:10px;text-indent:2em;">{{item.content}}</p>
+                </grid-cell>
+            </list-cell>
+            </div>
+        </aui-list>
+        <div v-if="!hasData" style="text-align:center;padding:10px;color:#ddd;">没有更多数据</div>
+        <img src="./assets/imgs/nodata.png" style="width:100%;" v-if="!noimg">
+    </aui-refresher>
+</ui>
+
+
+<script>
+import '@auicomp/grid/Grid.aui';
+import Refresher from '@auicomp/refresher/Refresher.aui';
+import fetch from '@comm/utils/xfetch';
+import { router } from '@auicomp/action/Action.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+// import $ from 'agile-ce';
+
+export default class Weijie{
+    
+    static get tag(){
+        return 'weijie';
+    }
+    created(){
+        const $el = $(this.$el);
+        Refresher.init(".search-refresher-weijie",{});
+        var weijielist=[];
+        var nowpage=1;
+        const obj = this.$obj ={
+            currentPage:1,
+            totalPage:1,
+            listDatas:[],
+            hasData:true,
+            noimg:true,
+            func:{
+                searchData:function(cb){
+                    auiLoading.show();
+                    fetch({
+                        appId: 'iexpress',
+                        url : 'http://IEXPRESS/question_list.jsp',
+                        data: {
+                            page:obj.currentPage
+                        },
+                        success:function(rsp){
+                            nowpage=obj.currentPage;
+                            if(rsp.list.length > 0){
+                            $.each(rsp.list, function(i,e) {
+                                var imgSrc=e.headImg;
+                                var imgName=imgSrc.replace(/http:/g,"").replace(/https:/g,"").replace(/\//g,"&");//拼接图片名字
+                                appnest.file.isFileExist({//防止重复下载图片内容
+                                    path:"res:download/"+imgName,
+                                    success:function(rs){
+                                        if(rs.code == 0){
+                                            fetch.download({//下载图片内容
+                                                appId: 'iexpress',
+                                                url: imgSrc,
+                                                fileName: imgName,
+                                                path: "res:download",
+                                                success: function(rs) {
+                                                    obj.func.getBase64(rs.path,function(base64Res){
+                                                        e.headImg=base64Res.data
+                                                    });
+                                                },
+                                                error: function(rsp){
+                                                    Toast.show(rsp.errMsg);
+                                                }
+                                            });
+                                        }else{
+                                            obj.func.getBase64("res:download/"+imgName,function(base64Res){
+                                                e.headImg=base64Res.data
+                                            });
+                                        }
+                                    }
+                                });
+                            }); 
+                            }
+                             cb && cb(rsp);
+                             auiLoading.hide();
+                        },
+                        error: function(rsp){
+                            auiLoading.hide();
+                            Toast.show(rsp.errmsg, function(){
+                            });
+                        }
+                    });
+                },
+
+                doPullDown:function(e, $refresh){
+                    obj.currentPage = 1;
+                    obj.totalPage = 1;
+                    obj.hasData=true;
+                    obj.listDatas.$reset([]);
+                    obj.func.searchData(function(rsp){
+                        if(nowpage == rsp.total){
+                            obj.hasData=true;
+                        }
+                        obj.currentPage = nowpage;
+                        obj.totalPage=rsp.total;
+                        if(rsp.list.length > 0){
+                            obj.listDatas.$reset(rsp.list);
+                            $refresh.refresh();
+                        }else{
+                            obj.noimg=false;
+                            Toast.show('未查询到数据', function(){
+                            });
+                        }
+                    });
+                },
+                doPullUp:function(e, $refresh){
+                    if(obj.totalPage > obj.currentPage){
+                        obj.currentPage += 1;
+                        obj.func.searchData(function(rsp){
+                            obj.currentPage = nowpage;
+                            obj.totalPage = rsp.total;
+                            if(rsp.list.length > 0){
+                                $.each(rsp.list, function(i,e) {
+                                    obj.listDatas.push(e);
+                                });  
+                                $refresh.refresh();
+                            }else{
+                                Toast.show('没有更多数据', function(){
+                                });
+
+                            }
+                        });
+                    }else{
+                        obj.hasData = false;
+                        return $refresh.end();
+                    }
+                },
+                getBase64:function(imgPath,cb){
+                    appnest.photo.getBase64Image({
+                        imagePath:imgPath,
+                        success:function(base64Res){
+                            cb&&cb(base64Res);
+                        },
+                        fail:function(base64Res){
+                        }
+                    });
+                },
+            }
+        }
+          this.$vm = $(this.$el).render(obj);
+
+    }
+    detached(){
+        this.$vm && this.$vm.destroy();
+    }
+}
+
+</script>
+
+<style type="less">
+
+
+.auicon{
+    font-size: 26px;
+}
+.wjfff{
+    background-color: #fff;
+}
+</style>
+
+

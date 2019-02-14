@@ -1,0 +1,263 @@
+<ui>
+<div >
+<aui-header>
+    <aui-titlebar>
+        <left-area>
+            <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+        </left-area>
+        <caption-area>
+            <aui-text>Idea详情</aui-text>
+        </caption-area>
+    </aui-titlebar>
+</aui-header>
+<aui-list >
+    <list-cell id="xiangqing">
+        <a href="#2">P1-S1</a><a>/</a><a href="#3">P1-S2</a><a>/</a><a href="#4">P1-S3</a><a>/</a><a href="#5">P2</a><a>/</a><a href="#6">P3</a>
+    </list-cell>
+</aui-list>
+<aui-scroller id="ideas" class="content" style="display:none;position: absolute; top: 90px; right: 0px; bottom: 0px;left: 0px;text-align: center;border-top:0;">
+    
+    <div v-for="item in data.detail">
+        <div v-if="item.type=='fromInfo'" style="text-align:left;">
+            <div class="title"><span>{{item.title}}</span></div>
+            <div v-for="lists in item.list" class="contents">
+                <div v-if="lists.type=='text'" class="contents2">
+                    <div class="div1">{{lists.name}}</div>
+                    <div class="div2">{{lists.value}}</div>
+                </div>
+
+                <div v-if="lists.type=='file'" class="contents2">
+                    <div class="div1">{{lists.name}}</div>
+                    <div class="div2">
+                        <div v-for="files in lists.fileList" v-on:click="func.downloads(files.fileName,files.fileHref)" v-filter="func.getAttachShowInfo">
+                            <i v-class="files.class" v-style="{color:files.color}"></i>{{files.fileName}}
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="lists.type=='author'" class="contents2">
+                    <div class="div1">{{lists.name}}</div>
+                    <div class="div2" >
+                        <div v-for="authors in lists.authorList" class="author">
+                            <div style="border-bottom:1px solid #ccc"><p style="margin:5px 0px;">{{authors.caption}}</p></div>
+                            <div><p>贡献比（%）{{authors.info1}}</p></div>
+                            <div><p>后期开发{{authors.info2}}</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="item.type=='Innovation'" style="text-align:left;">
+            <div class="title"><span>{{item.title}}</span></div>
+            <div v-for="infos in item.info" class="contents">
+                <div v-if="infos.isbold" class="contents2">
+                    <div style="font-weight:bold">{{infos.name}}</div>
+                    <div>{{infos.value}}</div>
+                </div>
+                <div v-else class="contents2">
+                    <div class="div1">{{infos.name}}</div>
+                    <div class="div2">{{infos.value}}</div>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="item.type=='Phase-Step'" v-bind:id="$index" style="text-align:left;">
+            <div class="title"><span>{{item.title}}</span></div>
+            <div v-for="infolist in item.info" >
+                <div v-if="infolist.type=='slider'" style="margin:5px 15px;display:table;">
+                    <div class="title2">{{infolist.title}}</div>
+                    <div class="title2_right" >
+                        <div style="display:inline-block;">{{infolist.user}}</div>
+                        <div style="display:inline-block;color:#4E93F7 !important;">{{infolist.state}}</div>
+                        <div class="slider" v-bind:value="infolist.slider"></div>
+                    </div>
+                </div>
+                <div v-if="infolist.type=='suggest'" class="contents">
+                    <div class="contents2">
+                        <div class="div1">建议</div>
+                        <div class="div2">{{infolist.suggest}}</div>
+                    </div>
+                </div>
+                <div v-if="infolist.type=='userAndSuggest'" style="margin:5px 15px;">
+                    <div class="contents2">
+                        <div class="div1" style="color:#ccc;width:135px">{{infolist.user}}</div>
+                        <div class="div2" style="width:200px">{{infolist.time}}</div>
+                    </div>
+                    <div class="contents2">
+                        <div class="div1">建议</div>
+                        <div class="div2">{{infolist.suggest}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="item.type=='Phase1-Step3'" v-bind:id="$index" style="text-align:left;">
+            <div class="title"><span>{{item.title}}</span></div>
+        </div>
+    </div>
+
+
+</aui-scroller>
+</div>
+</ui>
+
+
+<script>
+import fetch from '@comm/utils/xfetch';
+import Alert from '@auicomp/alert/Alert.aui';
+import { router } from '@auicomp/action/Action.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import tool from '@comm/utils/tool';
+export default class Xiangqing{
+    static get tag(){
+        return 'xiang';
+    }
+
+    created() {
+
+        var self = this;
+        auiLoading.show();
+        fetch({
+            appId: 'iexpress',
+            url : 'http://IEXPRESS/myidea/mywaitdeal_detail_json.jsp',
+            data: {
+                id:router.getQueryObj().id,
+            },
+            dataType:"text",
+            success: function(data){
+                obj.data =$.JSON.parse(data.trim());
+                self.$vm = $(self.$el).render(obj);
+                //获取所有slider数值，创建滑块组件
+                $(".slider").each(function(){
+                    $(this).slider({
+                        range: "min",
+                        value: $(this).attr("value"),
+                        min: 0,
+                        max: 100,
+                    });
+                });
+                $("#ideas").css("display","block");
+                auiLoading.hide();
+            },
+            error: function(rs){
+                auiLoading.hide();
+                Toast.show(rs.errmsg, function(){
+                });
+            }
+        });
+
+        const obj = this.$obj = {
+            data:{},             
+            func:{
+                downloads:function(fname,hrefs){
+                    auiLoading.show();
+                    fetch.download({
+                        appId: "iexpress",
+                        url:hrefs,
+                        fileName: fname,
+                        path: "res:download",
+                        success: function(rs) {
+                            appnest.native.openFile({
+                                path: rs.path 
+                                });
+                                auiLoading.hide();
+                        },
+                        error: function(rs) {
+                            auiLoading.hide();
+                        Toast.show(rs.errmsg);
+                        }
+                    });
+                },
+                getAttachShowInfo:function(index,files){
+                    var atinfo = tool.getAttachIcon(files.fileName);
+                    files.class = atinfo.class;
+                    files.color = atinfo.color;
+                },
+            }
+        };
+        
+    }
+}
+
+
+</script>
+
+<style type="less">
+@display:inline-block;
+    #xiangqing{
+        width: 100%;
+        position: absolute;
+        top: 45px;
+        left: 0;
+        right: 0;
+        a{
+            display: @display;
+            margin-right: -57px;
+            color: #4E93F7 !important;
+            font-size: 16px;
+            font-weight: bold;
+        }
+    }
+    
+    aui-xiang{
+        .slider{
+            border-radius: 50px 50px;
+        }
+        .title{
+            text-align: left;
+            height: 30px;
+            line-height: 30px;
+            background: #4E93F7 !important;
+            color: white;
+            span{
+                margin-left: 5px
+            }
+        }
+        .div1{
+            color: #D3998F;
+            display: table-cell;
+            width: 95px;
+            text-align: left;
+            vertical-align: middle;
+        }
+        .div2{
+            display: @display;
+            color: black;
+            text-align: left;
+            width: 250px;
+        }
+        .title2{
+            display: table-cell;
+            font-size: 12px;
+            font-weight: bold;
+            width:235px;
+            vertical-align: middle;
+        }
+        .title2_right{
+            display: table-cell;
+            vertical-align: middle;
+            font-size: 12px;
+            width:130px;
+        }
+        .contents{
+            margin: 0px 15px;
+            border-bottom: 1px solid #ccc;
+        }
+        .contents2{
+            margin: 5px 0px;
+            display:table;
+        }
+        .author{
+            border: 1px solid;
+            margin: 5px 0px;
+            div{
+                margin: 10px 5px;
+            }
+        }
+
+    }
+
+
+</style>

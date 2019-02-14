@@ -1,0 +1,65 @@
+<ui>
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>我的任务列表</aui-text>
+            </caption-area>
+        </aui-titlebar>
+    </aui-header>
+    <aui-scroller class="content" style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;">
+        <aui-list>
+            <list-cell v-on:click="func.goDetail">
+                <p class="listline1">1#前座椅装配线 巡检</p>
+                <p class="listline2">工单号：SP1811373&nbsp;&nbsp;开始时间：2018-06-25 08:00</p>
+            </list-cell>
+            <list-cell v-on:click="func.goDetail">
+                <p class="listline1">1#线FL电检设备 巡检</p>
+                <p class="listline2">工单号：SP1811375&nbsp;&nbsp;2018-06-26 08:00</p>
+            </list-cell>
+        </aui-list>
+    </aui-scroller>
+</ui>
+<script>
+import auiLoading from '@auicomp/loading/Loading.aui';
+import fetch from '@comm/utils/xfetch';
+import Alert from '@auicomp/alert/Alert.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+import Action,{ router } from '@auicomp/action/Action.aui';
+
+export default class yufangList {
+    static get tag() {
+        return 'yufanglist';
+    }
+
+    created() {
+        
+        const $el = $(this.$el);
+        const obj = this.$obj = {
+            datalists:[],
+            func:{
+                goDetail:function(){
+                    router.go("/yufangdetail");
+                }
+            }
+        }
+        this.$vm = $el.find("aui-scroller").render(obj);
+    }
+    detached(){
+        this.$vm && this.$vm.destroy();
+    }
+}
+</script>
+<style type="less">
+aui-yufanglist{
+    .listline1{
+        font-size: 15px;
+    }
+    .listline2{
+        color:#8E8E93;
+        margin-top: 4px;
+    }
+}
+</style>

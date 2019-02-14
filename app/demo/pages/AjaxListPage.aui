@@ -1,0 +1,123 @@
+<ui>
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft-fill"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>Ajax List</aui-text>
+            </caption-area>
+        </aui-titlebar>
+        <div class="demo-note">此处数据通过网络获取</div>
+    </aui-header>
+
+    <aui-refresher style="position:absolute; top:110px; right: 0px; bottom: 0px; left: 0px;">
+        <div>
+            <aui-list>
+                <list-cell v-for="item in list">
+                    <a>
+                        {{item.title}} <i class="icon auicon icon-arrowright"></i>
+                    </a>
+                </list-cell>
+            </aui-list>
+        </div>
+    </aui-refresh>
+</ui>
+
+
+<script>
+
+import '@auicomp/refresher/Refresher.aui';
+import '@auicomp/list/List.aui';
+
+import fetch from '@comm/utils/fetch';
+
+export default class AjaxListPage{
+
+    constructor(){
+        const obj = this.$obj = {
+            list: [],
+            paginationInfo: {
+                pageSize: 20,
+                pageNum: 0,
+                total: 0
+            }
+        };
+    }
+    
+    static get tag(){
+        return 'ajaxlistpage';
+    }
+
+    init(){
+        const obj = this.$obj;
+        this.$vm = $(this.$el).find('aui-list').render(obj);
+
+        this.getListFirst();
+
+    }
+
+    getListFirst(cb){
+        const obj = this.$obj;
+        $.extend(obj.paginationInfo, {
+            pageSize: 20,
+            pageNum: 0
+        });
+        this.getList(function(rs){
+            obj.list.$reset(rs.list);
+            cb&&cb();
+        });
+    }
+
+    getListNext(cb){
+        const obj = this.$obj;
+        obj.paginationInfo.pageNum++;
+        this.getList(function(rs){
+            obj.list.push.apply(obj.list, rs.list);
+            cb&&cb();
+        });
+    }
+
+    getList(cb){
+        const obj = this.$obj;
+        fetch({
+            url: 'interface/list',
+            data: obj.paginationInfo,
+            type: 'get',
+            success: function(rs){
+                
+                cb && cb(rs);
+            }
+        });
+    }
+
+    created(){
+
+        this.init();
+
+        const obj = this.$obj;
+        
+        $(this.$el).find('aui-refresher')
+        .on('pulldown', (e, $refresh)=>{
+            this.getListFirst(function(){
+                $refresh.refresh();
+            });
+        }).on('pullup', (e, $refresh)=>{
+            this.getListNext(function(){
+                $refresh.refresh();
+            });
+        });
+    }
+
+    detached(){
+        this.$vm && this.$vm.destroy();
+    }
+}
+
+</script>
+
+<style>
+
+</style>
+
+

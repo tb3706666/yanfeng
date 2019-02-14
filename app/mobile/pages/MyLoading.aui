@@ -1,0 +1,104 @@
+<ui>
+<img class="loadimg" src="./assets/imgs/loading.png">
+</ui>
+
+
+<script>
+import '@auicomp/scroller/Scroller.aui';
+import '@auicomp/header/Header.aui';
+import '@auicomp/text/Text.aui';
+import '@auicomp/grid/Grid.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auiutil/mobiscroll3/css/mobiscroll.javascript.min.css';
+import mobiscroll from '@auiutil/mobiscroll3/js/mobiscroll.javascript.min';
+import Alert from '@auicomp/alert/Alert.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+import common from "@libs/common";
+
+
+import fetch from "@libs/xfetch";
+import { router } from '@auicomp/action/Action.aui';
+
+import './Frame.aui';
+
+var curHash;
+
+export default class MyLoading{
+    static get tag(){
+        return 'MyLoading';
+    }
+    
+    created(){
+        let self = this;
+        fetch.plusready(function(){
+            //android 返回键点击 删除模态框
+            common.closeModal();
+           
+            appnest.config.getUserInfo({//获取用户信息
+                success:function(r){
+                    let username = r.loginId;
+                    let password = r.password;
+                    self.init(username,password);
+                },
+                fail:function(r){
+                    Alert.show({
+                        content: '获取平台用户信息失败，请联系管理员',
+                        doOk: function(){
+                            appnest.navigation.closeWindow();
+                        }
+                    });
+                }
+            });
+        });
+    }
+    init(username,password){
+        let self = this;
+        fetch({
+            appId: common.appId,
+            url :  common.oaUrl+'/initlogin',
+            data: {
+            },
+            hideLoading:true,
+            success: function(data){
+                self.login(username,password);
+            },
+            error: function(rs){
+                
+            }
+        }) 
+    }
+    login(username,password){
+        localStorage.setItem("mobile_username", username);
+        localStorage.setItem("mobile_password", password);
+        fetch({
+            appId: common.appId,
+            url :  common.oaUrl+'/logincheck',
+            data: {
+                username: username,
+                password:password,
+            },
+            hideLoading:true,
+            success: function(rspObj){
+                if(rspObj.flag!=""){//用户名密码不正确
+                    common.toast(rspObj.flag);
+                    appnest.navigation.closeWindow();
+                    return;
+                }
+                localStorage.setItem("haveLogini", "true")
+                localStorage.setItem("xiaoai_users", rspObj.users)
+                router.go('/XiaoiList',true)
+            },
+            error: function(rs){
+                appnest.navigation.closeWindow();
+            }
+        }) 
+    }
+}
+</script>
+
+<style>
+.loadimg{
+    width: 100%;
+    height: 100%;
+}
+</style>

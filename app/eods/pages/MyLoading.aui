@@ -1,0 +1,100 @@
+<ui>
+    <img class="loadimg" src="./assets/imgs/loading.png">
+</ui>
+
+
+<script>
+    import '@auicomp/scroller/Scroller.aui';
+    import '@auicomp/header/Header.aui';
+    import '@auicomp/text/Text.aui';
+    import '@auicomp/grid/Grid.aui';
+    import '@auicomp/titlebar/Titlebar.aui';
+    import '@auiutil/mobiscroll3/css/mobiscroll.javascript.min.css';
+    import mobiscroll from '@auiutil/mobiscroll3/js/mobiscroll.javascript.min';
+    import Alert from '@auicomp/alert/Alert.aui';
+    import Toast from '@auicomp/toast/Toast.aui';
+    import common from "@libs/common";
+
+
+    import fetch from "@libs/xfetch";
+    import {
+        router
+    } from '@auicomp/action/Action.aui';
+
+    import './Frame.aui';
+
+    var curHash;
+
+    export default class MyLoading {
+        static get tag() {
+            return 'MyLoading';
+        }
+
+        created() {
+            let self = this;
+            fetch.plusready(function() {
+                //android 返回键点击 删除模态框
+                common.closeModal();
+
+                appnest.config.getUserInfo({ //获取用户信息
+                    success: function(r) {
+                        let username = r.loginId;
+                        let password = r.password;
+                        username = "WFAUDITACCOUNT";
+                        password = "YQUWebJ6"
+                        self.login(username, password);
+                    },
+                    fail: function(r) {
+                        Alert.show({
+                            content: '获取平台用户信息失败，请联系管理员',
+                            doOk: function() {
+                                appnest.navigation.closeWindow();
+                            }
+                        });
+                    }
+                });
+            });
+        }
+
+        login(username, password) {
+            fetch({
+                appId: common.appId,
+                url: common.oaUrl + '/ek',
+                data: {
+                    username: username,
+                    password: password,
+                },
+                hideLoading: true,
+                success: function(Data) {
+                    if (Data.hr_status == "fail") {
+                        Toast.show('hr登录失败！', function() {
+                            console.log('Toast Close');
+                        });
+                    } else {
+                        localStorage.setItem("haveLoginHR", "true");
+                    }
+                    if (Data.oa_status == "fail") {
+                        Toast.show('oa登录失败！', function() {
+                            console.log('Toast Close');
+                        });
+                    } else {
+                        localStorage.setItem("haveLoginOA", "true");
+                    }
+
+                    //gosteps();
+                    router.go('/MainPage', true)
+                },
+                error: function(rs) {
+                    appnest.navigation.closeWindow();
+                }
+            })
+        }
+    }
+</script>
+
+<style>
+    .loadimg {
+        width: 100%;
+        height: 100%;
+    }
+</style>

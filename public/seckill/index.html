@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html nqbridge>
+
+<head>
+    <title>秒杀</title>
+    <meta charset="utf-8" />
+    <meta content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width" name="viewport">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+</head>
+
+<body>
+<script>
+    document.addEventListener('plusready', function(){
+            appnest.config.getUserInfo({
+                success:function(r){
+                    var locahref = 'https://app.yfjci.com/seckill/login/login?username='+r.loginId+'&password='+r.password;
+                    window.location.replace(locahref);
+                },
+                fail:function(res){
+                    appnest.ui.alert({
+                        content: res.errMsg,
+                        title: 'Error',
+                        confirmButton: '确定',
+                        success: function (res) {
+                            appnest.navigation.closeWindow();
+                        },
+                    });
+
+                }
+            });
+        });
+</script>
+</body>
+
+</html>

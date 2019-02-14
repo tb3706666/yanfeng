@@ -1,0 +1,297 @@
+<ui>
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>预防性维护</aui-text>
+            </caption-area>
+        </aui-titlebar>
+    </aui-header>
+    <aui-scroller class="content" style="position: absolute; top: 45px; right: 0px; bottom: 45px;left: 0px;">
+        <div class="yf-baseInfo">
+            <div class="baseLine">
+                <font class="label-left">工单</font>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" value="SP1811373"/>
+                </div>
+                <font class="lbtext" style="width:70px;">工单类型</font>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" value="PM"/>
+                </div>
+                <font class="label-left">状态</font>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" value="APPR"/>
+                </div>
+            </div>
+            <div class="baseLine">
+                <font class="label-left">描述</font>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" value="1#前座椅装配线 巡检"/>
+                </div>
+            </div>
+            <div class="baseLine">
+                <font class="label-left">资产</font>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" value="7000010001"/>
+                </div>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" value="1#前座椅装配线"/>
+                </div>
+            </div>
+            <div class="baseLine">
+                <font class="label-left">位置</font>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" value="LINE1-1"/>
+                </div>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" value="LAVIDA前排生产线"/>
+                </div>
+            </div>
+            <div class="baseLine">
+                <font class="label-left">PM</font>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" value="PM7001"/>
+                </div>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" value="1#前座椅装配线 巡检"/>
+                </div>
+            </div>
+            <div class="baseLine">
+                <font class="label-left">作业计划</font>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" value="ATJITP001"/>
+                </div>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" value="1#前座椅装配线 巡检"/>
+                </div>
+            </div>
+            <div class="baseLine">
+                <font class="label-left" style="width:100px">目标开始时间</font>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" value="2018-06-25 08:00"/>
+                </div>
+            </div>
+            <div class="baseLine">
+                <font class="label-left" style="width:100px">目标结束时间</font>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" value="2018-06-25 08:00"/>
+                </div>
+            </div>
+        </div>
+        <div class="flex-vcenter">
+            <font class="lbtext" style="width:40px;">员工</font>
+            <div style="flex:1;display: flex;">
+                <input type="text" readonly class="dj-text" value="83324"/>
+            </div>
+            <div class="datetime-area" style="flex:2">
+                <input type="text" readonly  placeholder="实际开始日期"/>
+                <i class="icon auicon icon-arrowleft icon-calendar"></i>
+            </div>
+        </div>
+        <div class="flex-vcenter">
+            <div class="datetime-area" style="flex:1">
+                <input type="text" readonly  placeholder="实际开始时间"/>
+                <i class="icon auicon icon-arrowleft icon-time"></i>
+            </div>
+            <div class="datetime-area" style="flex:1">
+                <input type="text" readonly  placeholder="实际结束时间"/>
+                <i class="icon auicon icon-arrowleft icon-timeend"></i>
+            </div>
+        </div>
+
+        <div class="check-area">
+            <div class="check-item-title">
+                <font style="flex:1">10</font>
+                <font style="flex:9">5S：流水线、工位托盘及线边辅助设备、设施、工装夹具表面清洁无灰尘、无杂物、无螺丝、无残缺破损。检查方法：目视</font>
+            </div>
+            <div class="check-detail">
+                <img src="./assets/imgs/slide3.jpg" />
+            </div>
+            <div class="check-edit">
+                <div style="flex:1;display: flex;">
+                    <input type="number"  class="measure-edit" placeholder="测量值"/>
+                </div>
+                <div class="mesure-choose" style="flex:1">
+                    <input type="text" readonly  placeholder="观测"/>
+                    <i class="icon auicon icon-arrowdown"></i>
+                </div>
+            </div>
+        </div>
+
+        <p style="font-size:14px;color:#428bca;padding:5px;">故障汇报</p>
+        <div class="yf-bottomInfo">
+            <div class="linkLine">
+                <a class="link-left">故障</a>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" value="ATJITF0004"/>
+                </div>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" value="前座椅装配线故障"/>
+                </div>
+            </div>
+            <div class="linkLine">
+                <a class="link-left">问题</a>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" value=""/>
+                </div>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" value=""/>
+                </div>
+            </div>
+            <div class="linkLine">
+                <a class="link-left">原因</a>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" value=""/>
+                </div>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" value=""/>
+                </div>
+            </div>
+            <div class="linkLine">
+                <a class="link-left">措施</a>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" value=""/>
+                </div>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" value=""/>
+                </div>
+            </div>
+
+        </div>
+    </aui-scroller>
+</ui>
+<script>
+import '@auicomp/footer/Footer.aui';
+import '@auicomp/button/Button.aui';
+export default class yufangDetail {
+
+    static get tag() {
+        return 'yufangdetail';
+    }
+
+    created() {
+        const $el = $(this.$el);
+        const obj = this.$obj = {
+            func:{
+                
+            }
+        }
+    }
+}
+</script>
+<style type="less">
+[readonly]{  pointer-events:none; }
+aui-yufangdetail{
+@defaultborder:1px solid #ddd;
+@blueborder:1px solid #428bca;
+.edit{
+    border:0;
+    border-bottom:@defaultborder;
+    height: 30px;
+    margin-right: 5px;
+    padding-right: 5px;
+}
+    input[type='text']{
+        margin-right: 5px;
+    }
+    .flex-vcenter{
+        display: flex;
+        align-items: center;
+        padding: 5px;
+    }
+    .datetime-area{
+        box-sizing: border-box;
+        .edit;
+        display: flex;
+        align-items: center;
+        input[type='text']{
+            width: 90%;
+            border: 0;
+            padding-left:5px; 
+            font-size: 14px;
+        }
+    }
+    
+    .lbtext{
+        text-align: left;
+        color: #8E8E93;
+    }
+    .check-area{
+        margin: 5px 10px 5px 5px;
+        border:@defaultborder;
+        .check-item-title{
+            
+            padding: 10px 10px 0 10px;
+            display: flex;
+            align-items: center;
+            font{
+                font-size: 14px;
+                color: #428bca;
+            }
+        }
+        .check-detail{
+            width: 100%;
+            text-align: center;
+            img{
+                width: 94%;
+                height: 180px;
+                margin: 10px 0;
+            }
+            border-bottom: @blueborder;
+        }
+        .check-edit{
+            .flex-vcenter;
+            .measure-edit{
+                border:0;
+                width: 90%;
+                font-size: 14px;
+                padding-left:5px; 
+                height: 30px;
+                margin-right: 5px;
+                padding-right: 5px;
+            }
+            .mesure-choose{
+                height: 30px;
+                margin-right: 5px;
+                padding-right: 5px;
+                display: flex;
+                align-items: center;
+                input[type='text']{
+                    width: 90%;
+                    border: 0;
+                    padding-left:5px; 
+                    font-size: 14px;
+                }
+            }
+        }
+    }
+    .yf-baseInfo{
+        padding: 5px 0;
+        border-bottom: @blueborder;
+        .baseLine{
+            .flex-vcenter;
+            .label-left{
+                width: 40px;
+                .lbtext;
+            }
+            
+        }
+    }
+    .yf-bottomInfo{
+        padding: 5px 0;
+        border-top: @blueborder;
+        .linkLine{
+            .flex-vcenter;
+            .link-left{
+                width: 40px;
+                text-align: left;
+                color: #428bca;
+                text-decoration: underline;
+            }
+        }
+    }
+
+}
+</style>

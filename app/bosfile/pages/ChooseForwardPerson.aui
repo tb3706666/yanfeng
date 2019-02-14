@@ -1,0 +1,201 @@
+<ui>
+    <div id="personlist">
+        <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>人员选择</aui-text>
+                </caption-area>
+                <right-area>
+                    <a id="subIcon" v-on:click="func.dosave"><i class="icon auicon icon-hook"></i></a>
+                </right-area>
+            </aui-titlebar>
+            <form id="searcharea" action="">
+                <input id="search" type="search" placeholder="请输入姓名" >
+            </form>
+        </aui-header>
+
+        <aui-scroller id="scrollerarea">
+            <aui-list >
+                <list-cell class="grid" v-for="item in list">
+                    <div v-if="item.checked == 'true'" style="width:100%">
+                        <input type="radio" checked class="magic-radio" v-bind:id="item.id" v-bind:value="item.name" name="key"></input>
+                        <label v-bind:for="item.id">
+                            {{item.name}}
+                            <p class="parentName">{{item.parentName}}</p>
+                        </label>
+                    </div>
+                    <div v-else style="width:100%">
+                        <input type="radio" class="magic-radio"  v-bind:id="item.id" v-bind:value="item.name" name="key"></input>
+                        <label v-bind:for="item.id">
+                            {{item.name}}
+                            <p class="parentName">{{item.parentName}}</p>
+                        </label>
+                    </div>
+                </list-cell>
+            </aui-list>
+        </aui-scroller>
+    </div>
+</ui>
+<style type='less'>
+#searcharea{
+    width:100%;
+    padding: 10px;
+    #search{
+        width:100%;
+        padding:5px;
+        font-size: 14px;
+        border:0;
+        -webkit-appearance: textfield;    
+    }
+}
+input::-webkit-search-decoration,
+input::-webkit-search-cancel-button {
+    display: none;
+}
+#scrollerarea{
+    position:absolute;top:90px;right: 0px;bottom: 0px;left: 0px;
+    list-cell{
+        padding:10px;
+        div{
+            width: 100%;
+            label{
+                .parentName{
+                    color:#B9B9B9;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    width:100%;
+                }
+                &:before,&:after{
+                    box-sizing:border-box;
+                }
+            }
+        }
+    }
+}
+</style>
+<script>
+import '@auicomp/text/Text.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auicomp/list/List.aui';
+import '@auicomp/scroller/Scroller.aui';
+import fetch from '@comm/utils/xfetch';
+import Alert from '@auicomp/alert/Alert.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+import Action,{ router } from '@auicomp/action/Action.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import 'magic-check/css/magic-check.min.css';
+
+export default class ChooseForwardPerson {
+    static get tag() {
+        return 'chooseforwardperson';
+    }
+
+    created(){
+        $("#searcharea").on("submit",function(e){
+            $('#search').blur();
+            e.preventDefault();
+        });
+        $("#search").on("blur",function(e){
+            if(e.target.value.trim().length > 0){
+                auiLoading.show();
+               fetch({
+                    appId: 'bosfile',
+                    url : 'http://baseurl/getpeople.jsp',
+                    data: {
+                        s_bean : "organizationDialogSearch",
+                        orgType : 12,
+                        startWith :'',
+                        key : e.target.value.trim(),
+                        cur_userid: router.getQueryObj().cur_user,
+                        handle_id : router.getQueryObj().handle_people
+                    },
+                    success:function(rsp){
+                        auiLoading.hide();
+                        if(rsp.list.length > 0){
+                            obj.list = rsp.list;
+                        }else{
+                            Toast.show("未查询到数据", function(){
+                                obj.list.$reset([]);
+                            });
+                        }
+                        
+                    },
+                    error: function(rsp){
+                        auiLoading.hide();
+                        Toast.show(rsp.errmsg);
+                    }
+                });
+            }
+
+        });
+        const $el = $(this.$el);
+        auiLoading.show();
+        fetch({
+            appId: 'bosfile',
+            url : 'http://baseurl/getpeople.jsp',
+            data: {
+                s_bean : "orgDialogRecentContactList",
+                orgType : 12,
+                cur_userid: router.getQueryObj().cur_user,
+                handle_id : router.getQueryObj().handle_people
+            },
+            success:function(rsp){
+                
+                obj.list = rsp.list;
+                $('#personlist').render(obj);
+                auiLoading.hide();
+            },
+            error: function(rsp){
+                auiLoading.hide();
+                Toast.show(rsp.errmsg, function(){
+                    console.log('Toast Close');
+                });
+            }
+        });
+
+        const obj = this.$obj = {
+            list:[],
+            func:{
+                dosave:function(){
+                    if($("[name='key']:checked").length < 1){
+                        Toast.show("请选择转办人员!", function(){});
+                        return;
+                    }
+                    var prePageObj = document.querySelector('aui-workdetail').component.$obj;
+                    prePageObj.submitData.ForwardtoOtherHandlerIds = $("[name='key']:checked").val();
+                    prePageObj.submitData.toOtherHandlerIds = $("[name='key']:checked").attr("id");
+                    prePageObj.submitData.toOtherHandlerNames = $("[name='key']:checked").val();
+                    auiLoading.show();
+                    fetch({
+                        appId: 'bosfile',
+                        url : 'http://baseurl/set_recent_people.jsp',
+                        data: {
+                            contactIds: $("[name='key']:checked").attr("id")
+                        },
+                        success:function(rsp){
+                            auiLoading.hide();
+                            history.go(-1);
+                        },
+                        error: function(rsp){
+                            auiLoading.hide();
+                            Toast.show(rsp.errmsg, function(){
+                            });
+                        }
+                    });
+
+                    
+                }
+            }
+        }
+        
+    }
+
+    detached(){
+        this.$vm && this.$vm.destroy();
+    }
+}
+</script>

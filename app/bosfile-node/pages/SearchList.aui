@@ -1,0 +1,180 @@
+<ui>
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>搜索</aui-text>
+            </caption-area>
+        </aui-titlebar>
+        <form id="subjectarea" action="">
+            <input id="subject" type="search" placeholder="主题Subject" >
+        </form>
+    </aui-header>
+
+    <aui-refresher delay class="search-refresher" v-on:pulldown="func.doPullDown" v-on:pullup="func.doPullUp" auto>
+        <aui-list >
+            <list-cell class="grid" v-for="item in listDatas" v-on:click="func.goDetail(item.fdId)">
+                <grid-cell>
+                    <i class="icon auicon icon-notepad"></i>
+                </grid-cell>
+                <grid-cell class="flex-1 padded">
+                    {{item.title}}
+                    <p>{{item.createtime}}&nbsp;&nbsp;{{item.declPerson}}</p>
+                </grid-cell>
+                <grid-cell class="grid-cell-middle">
+                    <i class="icon auicon icon-arrowright"></i>
+                </grid-cell>
+            </list-cell>
+        </aui-list>
+        <div v-if="!hasData" style="text-align:center;padding:10px;color:#ddd;">没有更多数据</div>
+    </aui-refresher>
+
+</ui>
+<style type='less'>
+#subjectarea{
+    width:100%;
+    padding: 10px;
+    // background-color:green;
+    #subject{
+        width:100%;
+        padding:5px;
+        font-size: 14px;
+        -webkit-appearance: textfield;    
+    }
+}
+input::-webkit-search-decoration,
+input::-webkit-search-cancel-button {
+display: none;
+}
+.search-refresher{
+    position:absolute;top:90px;right: 0px;bottom: 0px;left: 0px;
+}
+</style>
+
+<script>
+import '@auicomp/text/Text.aui';
+import '@auicomp/grid/Grid.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auicomp/list/List.aui';
+import Refresher from '@auicomp/refresher/Refresher.aui';
+import fetch from '@comm/utils/nfetch';
+import Alert from '@auicomp/alert/Alert.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+import Action,{ router } from '@auicomp/action/Action.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+
+
+
+export default class SearchList {
+
+    static get tag() {
+        return 'searchlist';
+    }
+    created() {
+        const $el = $(this.$el);
+        $el.on("enter",function(){
+             $("aui-workdetail").remove();
+        });
+        $("#subjectarea").on("submit",function(e){
+            $('#subject').blur();
+            e.preventDefault();
+        });
+        $("#subject").on("blur",function(e){
+            if(e.target.value.length > 0){
+                if($(".search-refresher").hasAttr('delay')){
+
+                    Refresher.init(".search-refresher",{
+                        // up:{
+                        //     toTop:{
+                        //         src:'./assets/imgs/mescroll-totop.png'
+                        //     }
+                        // }
+                    });
+                }else{
+                    document.querySelector('.search-refresher').component.refresher.triggerDownScroll();
+                }
+            }
+
+        });
+        const obj = this.$obj ={
+            currentPage:1,
+            totalPage:1,
+            listDatas:[],
+            hasData:true,
+            func:{
+                goDetail:function(fdId){
+                    router.go({path: '/workdetail?fdId='+fdId});
+                },
+                searchData:function(cb){
+                    auiLoading.show();
+                    fetch({
+                        appId: 'bosfile',
+                        url : '/queryList.jsp',
+                        data: {
+                            page: obj.currentPage,
+                            subject:  $("#subject").val().trim(),
+                            bill_no: '',
+                            status: ''
+                        },
+                        success:function(rsp){
+                            auiLoading.hide();
+                            cb && cb(rsp);
+                        },
+                        error: function(rsp){
+                            auiLoading.hide();
+                            Toast.show(rsp.errmsg);
+                        }
+                    });
+                },
+                doPullDown:function(e, $refresh){
+                    obj.currentPage = 1;
+                    obj.totalPage = 1;
+                    obj.hasData=true;
+                    obj.listDatas.$reset([]);
+                    obj.func.searchData(function(rsp){
+                        if(Number(rsp.currentPage) == Number(rsp.totalPage)){
+                            obj.hasData=false;
+                        }
+                        obj.currentPage = Number(rsp.currentPage);
+                        obj.totalPage = Number(rsp.totalPage);
+                        if(rsp.list.length > 0){
+                            obj.listDatas.$reset(rsp.list);
+                            $refresh.refresh();
+                        }else{
+                            Toast.show('未查询到数据');
+                        }
+                    });
+                },
+                doPullUp:function(e, $refresh){
+                    if(obj.totalPage > obj.currentPage){
+                        obj.currentPage += 1;
+                        obj.func.searchData(function(rsp){
+                            obj.currentPage = Number(rsp.currentPage);
+                            obj.totalPage = Number(rsp.totalPage);
+                            if(rsp.list.length > 0){
+                                $.each(rsp.list, function(i,e) {
+                                    obj.listDatas.push(e);
+                                });  
+                                $refresh.refresh();
+                            }else{
+                                Toast.show('没有更多数据');
+
+                            }
+                        });
+                    }else{
+                        obj.hasData = false;
+                        return $refresh.end();
+                    }
+                }
+            }
+        }
+        this.$vm = $(this.$el).find('.search-refresher').render(obj);
+    }
+
+    detached(){
+        this.$vm && this.$vm.destroy();
+    }
+}
+</script>

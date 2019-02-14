@@ -1,0 +1,147 @@
+<ui>
+    <div class="Gdsj">
+        <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>工单数据</aui-text>
+                </caption-area>
+                <right-area>
+                    
+                </right-area>
+            </aui-titlebar>
+        </aui-header>
+         <aui-scroller class="content" style="display:none">
+            <div  v-if="isAjaxed&&hasData">
+                <div class="fd-row padding10 border-bt1">
+                    <div class="flex3">工单编号</div>
+                    <div class="flex7">{{data.WorkOrder}}</div>
+                </div>
+                <div class="fd-row padding10 border-bt1">
+                    <div class="flex3">项目</div>
+                    <div class="flex7">{{data.Project}}</div>
+                </div>
+                <div class="fd-row padding10 border-bt1">
+                    <div class="flex3">零件号</div>
+                    <div class="flex7">{{data.PartNo}}</div>
+                </div>
+                <div class="fd-row padding10 border-bt1">
+                    <div class="flex3">零件名称</div>
+                    <div class="flex7" v-on:click="func.openWlxx">{{data.PartName}}</div>
+                </div>
+                <div class="fd-row padding10 border-bt1">
+                    <div class="flex3">计划产量</div>
+                    <div class="flex7">{{data.Plan}}</div>
+                </div>
+                <div class="fd-row padding10 border-bt1">
+                    <div class="flex3">标准PPH</div>
+                    <div class="flex7">{{data.Complete}}</div>
+                </div>
+                <div class="fd-row padding10 border-bt1">
+                    <div class="flex3">实际产量</div>
+                    <div class="flex7 bg-r" v-on:click="func.openXscl">{{data.ActualComplete}}</div>
+                </div>
+                <div class="fd-row padding10 border-bt1">
+                    <div class="flex3">开班时间</div>
+                    <div class="flex7">{{data.Begin}}</div>
+                </div>
+                <div class="fd-row padding10 border-bt1">
+                    <div class="flex3">预计完成时间</div>
+                    <div class="flex7">{{data.Finish}}</div>
+                </div>
+            </div>
+            <div v-if="isAjaxed&&!hasData" class="nodata">
+                    <img src="./assets/imgs/nodata.png">
+                </div>
+        </aui-scroller>
+    </div>
+</ui>
+<script>
+    import '@auicomp/refresher/Refresher.aui';
+    import '@auicomp/list/List.aui';
+    import Actionsheet from '../components/Actionsheet.aui';
+    import Alert from '@auicomp/alert/Alert.aui';
+    import fetch from "@libs/xfetch";
+    import common from '@libs/common';
+    import { router } from '@auicomp/action/Action.aui';
+
+    export default class Gdsj {
+
+        static get tag() {
+            return 'Gdsj';
+        }
+        created() {
+            const self = this;
+            const obj = this.$obj = {
+                hasData: false,
+                data: {},
+                isAjaxed:false,
+                func: {
+                    openWlxx:function(){
+                        localStorage.setItem("wlxx",JSON.stringify(obj.data.limeMaterialList));
+                        location = "#/GdsjWlxx";
+                    },
+                    openXscl:function() {
+                        localStorage.setItem("xscl",JSON.stringify(obj.data.pdAssemblyList));
+                        location = "#/GdsjXscl";
+                    }
+                }
+            }
+            
+            this.getList();
+        }
+        
+        getList(){
+            let self = this;
+            console.log(router.getQueryObj().address);
+            console.log(router.getQueryObj().shift);
+            fetch({
+                appId: common.appId,
+                url : common.oaUrl+"/gdsj.jsp?address="+router.getQueryObj().address+"&shift="+router.getQueryObj().shift,
+                data: {
+                    page:this.$obj.start,
+                },
+                type: 'get',
+                success: function(data){
+                    self.$obj.isAjaxed = true;
+                    console.log(data);
+                    if(data == '-1'){
+                        self.$obj.hasData = false;
+                    }else{
+                        self.$obj.hasData = true;
+                        self.$obj.data = data[0];
+                       
+                    }
+                    self.$vm = $(self.$el).render(self.$obj);
+                    $('.content').css("display","block")
+                }
+            });
+            
+        
+        }
+        detached(){
+            this.$vm && this.$vm.destroy();
+        }
+    }
+</script>
+<style type='less'>
+@import url('../assets/less/theme/default/common.less');
+.Gdsj{
+    width: 100%;
+    height: 100%;
+    position: relative;
+    .content { 
+        position: absolute;
+        top: 44px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        .bg-r{
+            background: red;
+        }
+    } 
+}
+
+</style>

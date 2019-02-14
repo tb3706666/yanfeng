@@ -1,0 +1,185 @@
+<ui>
+<div id="auiscrollerlr">
+   <aui-header>
+        <aui-titlebar >
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft" ></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>无法扫描</aui-text>
+            </caption-area>
+        </aui-titlebar>
+    </aui-header>
+
+    <aui-scroller class="content" style="position:absolute;top:45px;right: 0px;bottom: 0px;left: 0px;">
+        <div id="addform1">
+            <div class="editdiv">
+                <label for="propName" class="leftlb">资产名称：</label>
+                <input type="text" name="name"  id="name" v-model="formData.name" placeholder="必填" />
+            </div>
+             <div class="editdiv">
+                <label for="propName" class="leftlb">资产位置：</label>
+                <input type="text" name="location"  id="location" v-model="formData.location" placeholder="" />
+            </div>
+             <div class="editdiv">
+                <label for="propName" class="leftlb">资产说明：</label>
+                <input type="text" name="remark"  id="remark" v-model="formData.remark" placeholder="" />
+            </div>
+            <div class="editdiv">
+                <label for="propName" class="leftlb">序列号：</label>
+                <input type="text" name="serialNumber"  id="serialNumber" v-model="formData.serialNumber" placeholder="" />
+            </div>
+             <div class="editdiv">
+                <label for="propName" class="leftlb">使用人GID：</label>
+                <input type="text" name="gid"  id="gid" v-model="formData.gid" placeholder="" />
+            </div>
+            <div class="editdiv">
+                <label for="propName" class="leftlb">使用人电话：</label>
+                <input type="text" maxlength="11" name="phone"  id="phone" v-model="formData.phone" placeholder="" />
+            </div>
+            <div class="editdiv">
+                <label for="propName" class="leftlb">二维码状态：</label>
+                无二维码
+                <input type="radio" name="status" checked="true" v-model="formData.status" value="None" >
+                二维码破损
+                <input type="radio" name="status"  value="Failure" v-model="formData.status">
+            </div>
+            
+            
+            <aui-button class="btn btn-primary btn-block" style="background:#4E93F7 !important;margin-top:10px;margin-left:3%;width:94%;" v-on:click="func.submit()">确认</aui-button>
+            
+        </div>
+    </aui-scroller>
+</div>
+</ui>
+
+
+<script>
+import fetch from '@comm/utils/xfetch';
+import { router } from '@auicomp/action/Action.aui';
+import Actionsheet from '@auicomp/actionsheet/Actionsheet.aui';
+import './Frame.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+import tool from '@comm/utils/tool';
+export default class Add{
+    static get tag(){
+        return 'adds';
+    }
+    created () {
+        const obj = this.$obj ={
+            formData:{
+                name:"",
+                location:"",
+                remark:"",
+                serialNumber:"",
+                gid:"",
+                phone:"",
+                status:"",
+                taskId:window.task,
+                uploader:window.userInfo.loginId,
+            },
+            func:{
+                submit:function(){
+                    if(obj.formData.name==""||obj.formData.name==null){
+                        Toast.show('请输入资产名称', function(){});
+                    }else{
+                        if(!tool.mobileNoRegex(obj.formData.phone)&&obj.formData.phone!=""){
+                            Toast.show("手机号码格式不正确,请重新输入!", function(){});
+                            return false;
+                        }
+                        auiLoading.show();
+                        fetch({
+                            appId: 'yidongpandian',
+                            url : 'http://PANDIANMOBILE/findnew.jsp',
+                            data: obj.formData,
+                            success:function(rsp){
+                                if(rsp.code!=true){
+                                    Toast.show(rsp.message, function(){});
+                                    auiLoading.hide();
+                                }else{
+                                    Toast.show("提交成功", function(){});
+                                    $("aui-detail").remove();
+                                    history.go(-1);
+                                    auiLoading.hide();
+                                }
+                            },
+                            error: function(rsp){
+                                auiLoading.hide();
+                                Toast.show(rsp.errmsg, function(){});
+                            }
+                        });
+                    }
+                }
+            }
+        };
+        this.$vm = $(this.$el).render(this.$obj);
+    }
+    detached(){
+        this.$vm && this.$vm.destroy();
+    }
+}
+
+
+</script>
+
+<style type="less">
+     a[class="button-selectimg"]{
+         padding:4px 6px;
+         border:1px dashed #00A2D4;
+         border-radius:2px;
+    }
+    .pleft1{
+        padding-left: 1em !important;
+    }
+    .fileimg {
+        width: 100px;
+        height: 100px;
+        margin-top: 40px;
+        margin-left: 50px;
+    }
+    .fl{
+        float: left;
+    }
+    .btcss {
+        top: 10px !important;
+        right: 25% !important;
+        transform: none !important;
+    }
+    @defaultborder:1px solid #ddd;
+.flex-row-between{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.readonlyedit{
+    padding: 5px 0;
+    &:active{
+        background: rgb(209, 207, 207);
+    }
+}
+.leftlb{
+    color:#8E8E93;
+    width: 25%;
+}
+   #addform1{
+    .editdiv{
+        padding: 0 10px;
+        height: 46px;
+        border-bottom: @defaultborder;
+        .flex-row-between;
+        input[type='checkbox']{
+            width: 20px;
+            height: 20px;
+        }
+        input[type='text']{
+            border: 0;
+            flex: 1;
+            font-size: 14px;
+            padding: 5px;
+            text-align: right;
+        }
+    }
+}
+   
+</style>

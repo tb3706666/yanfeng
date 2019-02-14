@@ -1,0 +1,101 @@
+<ui>
+    <div id="huodong">
+        <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>活动</aui-text>
+                </caption-area>
+            </aui-titlebar>
+        </aui-header>
+
+
+        <aui-scroller  class="content " style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;text-align: center;border-top:0;">
+            <img src="./assets/imgs/nodata.png" style="width:100%;" v-if="!noimg">
+            <aui-list style="text-align:left;">
+                    <list-cell class="grid" v-for="item in items" >
+                        <grid-cell class="flex-1 padded" style="font-size:16px;" v-on:click="func.getDetail(item.detail)">
+                            {{item.title}}<br>
+                            <p style="color:#ccc;font-size:12px;">{{item.date}}</p>
+                        </grid-cell>
+                    </list-cell>
+            </aui-list>
+        </aui-scroller>
+    </div>
+</ui>
+
+<script>
+import Toast from '@auicomp/toast/Toast.aui';
+import fetch from '@comm/utils/xfetch';
+import { router } from '@auicomp/action/Action.aui';
+import './Frame.aui';
+import '@auicomp/list/List.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import { get } from 'http';
+
+export default class Huodong{
+    static get tag(){
+        return 'huodong';
+    }
+
+    
+    created () {
+        var alist=[];
+        auiLoading.show();
+        fetch({
+            appId: 'iexpress',
+            url : 'http://IEXPRESS/activity_list.jsp',
+            success:function(rsp){
+                if(rsp.activityInfo.length>0){
+                    $.each(rsp.activityInfo,function(e,e1){
+                        alist.push(e1);
+                    });
+                }else{
+                    obj.noimg=false;
+                    Toast.show("查无数据", function(){
+                    });
+                }
+                auiLoading.hide();
+            },
+            error: function(rsp){
+                auiLoading.hide();
+                Toast.show(rsp.errmsg, function(){
+                });
+            }
+        });
+
+        var obj ={
+            items:alist,
+            noimg:true,
+            func:{
+                getDetail:function(e){
+                    router.go("/detail?content="+e);
+                }
+            }
+        };
+        $("#huodong").render(obj);
+    }
+    
+}
+
+</script>
+
+<style>
+    .content > aui-list:first-child, .content > .list:first-child{
+        margin-top:0px;
+    }
+    .md-phone-num .mbsc-np-dsp {
+        min-height: 25px;
+        -webkit-box-sizing: content-box;
+        -moz-box-sizing: content-box;
+        box-sizing: content-box;
+    }
+    .mbsc-ios .mbsc-control-w:after, .mbsc-ios .mbsc-control-w:before{
+        border:none;
+    }
+    .mbsc-form-group{
+        margin:0.5em 0;
+    }
+</style>

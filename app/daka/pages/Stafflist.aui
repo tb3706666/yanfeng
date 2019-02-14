@@ -1,0 +1,124 @@
+<ui>
+<!-- <aui-header>
+    <aui-titlebar>
+        <left-area>
+            <aui-action type="back"><i class="icon auicon icon-arrowleft-fill"></i></aui-action>
+        </left-area>
+        <caption-area>
+            <aui-text>打卡记录</aui-text>
+        </caption-area>
+    </aui-titlebar>
+</aui-header> -->
+
+<aui-scroller class="content" id="stascroll" style="position: absolute; top: 0px; right: 0px; bottom: 0px;left: 0px;text-align: center;border-top:0;">
+
+<aui-list id="contentlist" class="mtop0 bt0" v-for="item in items">
+        <list-cell class="grid staf-grid" v-on:click="func.listclick(item.badge)">
+            <grid-cell>
+                <img class="media-object pull-left" src="./assets/imgs/group.png" style="width:24px;height:24px">
+            </grid-cell>
+            <grid-cell class="flex-1 padded staf">
+                <p>{{item.badge}}-{{item.name}}<i class="icon auicon icon-arrowright"></i></p >
+            </grid-cell>
+        </list-cell>
+</aui-list>
+</aui-scroller>
+</ui>
+
+<script>
+import '@auicomp/header/Header.aui';
+import '@auicomp/footer/Footer.aui';
+import '@auicomp/scroller/Scroller.aui';
+import '@auicomp/text/Text.aui';
+import '@auicomp/grid/Grid.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auicomp/list/List.aui';
+import '@auicomp/action/Action.aui';
+import fetch from '@comm/utils/xfetch';
+import Alert from '@auicomp/alert/Alert.aui';
+import { router } from '@auicomp/action/Action.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+
+export default class Stafflist{
+    static get tag(){
+        return 'stafflist';
+    }
+
+
+created(){
+    
+        var stacout=[];
+        stacout.push({name:window.userInfo.userName,badge:window.userInfo.badge});
+        auiLoading.show();
+        fetch({
+            appId: 'dakajilu',
+            url : 'https://dzzw/personrecordQuery.jsp',
+            data: {
+                username: window.userInfo.badge
+            },
+            success: function(stadata){
+                auiLoading.hide();
+                $.each(stadata.list, function(e,e1) {
+                    var stajson={name:e1.name,badge:e1.badge}
+                    stacout.push(stajson);
+                });
+            },
+            error: function(rs){
+                auiLoading.hide();
+                Alert.show({
+                    content: '请求错误',
+                });
+            }
+        });
+
+
+        var obj = {
+            items : stacout,
+            func:{
+                listclick:function(badgeParam){
+                    router.go('/daka?badge='+badgeParam);
+                }
+            }
+        };
+        $('#contentlist').render(obj);
+
+}
+}
+
+
+</script>
+
+<style type="less">
+    .md-phone-num .mbsc-np-dsp {
+        min-height: 25px;
+        -webkit-box-sizing: content-box;
+        -moz-box-sizing: content-box;
+        box-sizing: content-box;
+    }
+    .mbsc-form-group{
+        margin: 0;
+    }
+.flex-1{
+    text-align: left;
+}
+.staf p{
+    height: 30px;
+    color: #000;
+    font-size:15px;
+}
+aui-datetime>input{
+    font-size: 16px;
+}
+.icon-arrowright{
+    float: right;
+}
+.staf-grid{
+    padding: 8px !important;
+}
+.mtop0{
+    margin-top:0 !important;
+}
+.bt0{
+    border-top: 0 !important;
+}
+</style>

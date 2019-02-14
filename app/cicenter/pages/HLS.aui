@@ -1,0 +1,332 @@
+<ui>
+<div id="hlsscroller">
+   <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+            <!-- 合理化查询 -->
+                <aui-text>合理化查询</aui-text>
+            </caption-area>
+            <right-area>
+                <a >
+                    <i class="icon auicon icon-search" v-on:click="func.nlistclick()"></i>
+                </a>
+            </right-area>
+        </aui-titlebar>
+    </aui-header>
+
+
+    <aui-scroller class="content" style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;text-align: center; background-color:white;">
+        <form id="demo" style="display:none" mbsc-form>
+            <div class="mbsc-form-group">
+               
+                 <label >
+                    <span  class="stylespan">合理化名称 </span>
+                    <input name="propName" id="propName" type="text" v-model="formData.propName" placeholder="" required >
+                </label>
+              
+            </div>
+            <div class="mbsc-form-group">
+               
+                 <label>
+                    <span class="stylespan" >提出时间(开始)</span>
+                    <input name="propDateS" id="md-starttime" type="text" v-model="formData.propDateS" placeholder="开始" required >
+                </label>
+                <label>
+                <span class="stylespan" >提出时间(结束)</span>
+                     <input name="propDateE" id="md-endtime" type="text" v-model="formData.propDateE" placeholder="结束" required  >  
+                </label>
+            
+               
+                 <label >
+                    <span class="stylespan" >提出人 </span>
+                    <input name="pemp" type="text" placeholder="" v-model="formData.pemp" required >
+                </label>
+              
+               
+                 <label >
+                    <span class="stylespan" >提出部门/科室 </span>
+                    <input id="selectdept1" v-on:click="func.manclick(1)" type="text" placeholder="请选择" readonly="readonly" required>
+                    <!-- value  提出部门id -->
+                    <input  name="pdept" type="hidden" class="tcbmid" v-model="formData.pdept" value='' >
+                </label>
+              
+            </div>
+             <div class="mbsc-form-group">
+               
+                 <label >
+                    <span class="stylespan" >实施人员 </span>
+                    <input name="aemp" type="text" placeholder="" v-model="formData.aemp" required >
+                </label>
+              
+               
+                 <label >
+                    <span class="stylespan" >实施部门/科室 </span>
+                    <input type="text" id="selectdept2" v-on:click="func.manclick(2)" placeholder="请选择" readonly="readonly" required>
+                    <input name="adept" type="hidden" class="ssbmid" v-model="formData.adept" value='' >
+                </label>
+              
+            </div>
+             <div class="mbsc-form-group">
+               
+                 <label >
+                    <span class="stylespan" >节约 </span>
+                    <select name="costSaveType"  v-model="formData.costSaveType">
+                            <option value="" selected="true"></option>
+                            <option value="1">硬节约</option>
+                            <option value="2">软节约</option>
+                     </select>
+                 </label>
+               
+                 <label >
+                    <span class="stylespan" >CI转化 </span>
+                    <input name="toCiFlag" type="text" placeholder="" v-model="formData.toCiFlag" required >
+                </label>
+
+                <label >
+                    <span class="stylespan" >状态 </span>
+                    <select  name="nowStatusId"   v-model="formData.nowStatusId">
+                        <option value="" selected="true"></option>
+                        <option value="7">待提出部门分配</option>
+                        <option value="8">被驳回提出人 </option>
+                        <option value="9">被撤销</option>
+                        <option value="1">关闭</option>
+                        <option value="2">实施报告待验证</option>
+                        <option value="3">实施中</option>
+                        <option value="4">待实施人直接经理可行性评估</option>
+                        <option value="5">待实施人可行性评估</option>
+                        <option value="6">待实施部门分配</option>
+                    </select>
+                 </label>
+
+
+                 <label >
+                    <span class="stylespan" >合理化分类 </span>
+                    <select  name="ptId"   v-model="formData.ptId">
+                        <option value="" selected="true"></option>
+                        <option value="PT01">材料成本/价值分析</option>
+                        <option value="PT02">材料利用率</option>
+                        <option value="PT03">生产力/效率</option>
+                        <option value="PT04">质量</option>
+                        <option value="PT05">安全</option>
+                        <option value="PT06">供应链/交付</option>
+                        <option value="PT07">能源节约/环保</option>
+                        <option value="PT08">管理费用</option>
+                     </select>
+                 </label>
+           
+                 <label >
+                    <span class="stylespan" >是否已评奖</span>
+                    <select name="bonusFlag"  v-model="formData.bonusFlag">
+                        <option value="" selected="true"></option>
+                        <option value="1">已评奖</option>
+                        <option value="2">未评奖</option>
+                    </select>
+                 </label>
+            </div>
+
+            <div class="mbsc-form-group">
+               
+                 <label>
+                    <span class="stylespan" >关闭时间(开始)</span>
+                    <input name="closeDateS" id="md-closestarttime" v-model="formData.closeDateS" type="text" placeholder="开始" required >
+                </label>
+                <label>
+                <span class="stylespan" >关闭时间(结束)</span>
+                     <input name="closeDateE" id="md-closeendtime" v-model="formData.closeDateE" type="text" placeholder="结束" required  >  
+                </label>
+            
+            </div>
+
+            <div class="mbsc-form-group">
+                <label >
+                        <span class="stylespan" >当前处理人员 </span>
+                        <input name="nextemp" type="text" v-model="formData.nextemp" placeholder="" required >
+                </label>
+            </div>
+            <div class="mbsc-form-group">
+                <label>
+                    过期未关闭
+                    <input name="unclosed" type="checkbox" value="1" v-model="formData.unclosed">
+                </label>
+                <label>
+                    超期未处理
+                    <input name="unclosed1" type="checkbox" value="2" v-model="formData.unclosed1"> 
+                </label>
+            </div>
+        </form>
+
+       
+    </aui-scroller>
+</div>
+</ui>
+
+
+<script>
+import '@auicomp/header/Header.aui';
+import '@auicomp/button/Button.aui';
+import '@auicomp/scroller/Scroller.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auicomp/datetime/DateTime.aui';
+import '@auiutil/mobiscroll3/css/mobiscroll.javascript.min.css';
+import mobiscroll from '@auiutil/mobiscroll3/js/mobiscroll.javascript.min';
+import Toast from '@auicomp/toast/Toast.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import fetch from '@comm/utils/xfetch';
+import { router } from '@auicomp/action/Action.aui';
+import './Frame.aui';
+export default class HLS{
+    static get tag(){
+        return 'hls';
+    }
+    //提出部门
+    tcbumen(data1,data2){
+        $('#selectdept1').val(data1);
+        this.$obj.formData.pdept=data2
+    }
+    //实施部门
+    ssbumen(data1,data2){
+        $('#selectdept2').val(data1);
+        this.$obj.formData.adept=data2
+    }
+
+    created () {
+        mobiscroll.settings = {
+            theme: 'ios',
+            lang: 'zh',
+        };
+        mobiscroll.form('#demo');
+       
+       var self=this
+        auiLoading.show();
+        fetch({
+            appId: 'ci',
+            url : 'http://ciurl/hlh_query_init.jsp',
+            success: function(json){
+                self.$obj.formData.propDateS=json.propDateS;
+                self.$obj.formData.propDateE=json.propDateE;
+                self.$obj.formData.propName=json.propName;
+                self.$vm = $(self.$el).render(self.$obj);
+                auiLoading.hide();
+            },
+            error: function(rs){
+                auiLoading.hide();
+               Toast.show(rs.errmsg);
+            }
+        });
+
+        const obj = this.$obj = {
+            formData:{
+                propName:"",
+                propDateS:"",
+                propDateE:"",
+                pemp:"",
+                pdept:"",
+                aemp:"",
+                adept:"",
+                costSaveType:"",
+                toCiFlag:"",
+                nowStatusId:"",
+                ptId:"",
+                bonusFlag:"",
+                closeDateS:"",
+                closeDateE:"",
+                nextemp:"",
+                unclosed:"",
+                unclosed1:"",
+                rows:20,
+                page:1,
+                noData:0
+            },
+             func:{
+                manclick:function(num){
+                    router.go({path: '/department?flag='+num, isForce: true});//flag=1表示是合理化查询页面传送过去的，获取的提取部门
+                },
+                nlistclick:function(){
+                    //处理日期
+                    obj.formData.propDateS=obj.formData.propDateS.replace('/', "-").replace('/', "-");
+                    obj.formData.propDateE=obj.formData.propDateE.replace('/', "-").replace('/', "-");
+                    obj.formData.closeDateS=obj.formData.closeDateS.replace('/', "-").replace('/', "-");
+                    obj.formData.closeDateE=obj.formData.closeDateE.replace('/', "-").replace('/', "-");
+
+                    //处理复选框
+                    var v=$('input[name="unclosed"]');
+                    var v2=$('input[name="unclosed1"]');
+                    if(v.is(":checked")==true){
+                        obj.formData.unclosed="1";
+                    }else{
+                        obj.formData.unclosed="";
+                    }
+                    if(v2.is(":checked")==true){
+                        obj.formData.unclosed1="2";
+                    }else{
+                        obj.formData.unclosed1="";
+                    }
+
+                    window.formDatas=obj.formData;
+                    router.go('/hlslist');
+                }
+            }
+         };
+
+        var date, select, widget,
+            now = new Date(),
+            form = document.getElementById("demo");
+
+
+
+         date = mobiscroll.date('#md-starttime', {
+            defaultValue: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
+            min: new Date(now.getFullYear() - 100, 0, 1),
+            max: new Date(now.getFullYear()+100 , 0, 1)
+        });
+
+        date = mobiscroll.date('#md-endtime', {
+            defaultValue: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
+            min: new Date(now.getFullYear() - 100, 0, 1),
+            max: new Date(now.getFullYear()+100 , 0, 1)
+        });
+         date = mobiscroll.date('#md-closestarttime', {
+            defaultValue: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
+            min: new Date(now.getFullYear() - 100, 0, 1),
+            max: new Date(now.getFullYear()+100 , 0, 1)
+        });
+
+        date = mobiscroll.date('#md-closeendtime', {
+            defaultValue: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
+            min: new Date(now.getFullYear() - 100, 0, 1),
+            max: new Date(now.getFullYear()+100 , 0, 1)
+        });
+    }
+    detached(){
+        this.$vm && this.$vm.destroy();
+    }
+}
+
+</script>
+
+<style>
+
+    .md-phone-num .mbsc-np-dsp {
+        min-height: 25px;
+        -webkit-box-sizing: content-box;
+        -moz-box-sizing: content-box;
+        box-sizing: content-box;
+    }
+    .mbsc-ios .mbsc-control-w:after, .mbsc-ios .mbsc-control-w:before{
+        border:none;
+    }
+    .mbsc-form-group{
+        margin:0.5em 0;
+        /* padding: 0 5px; */
+    }
+    .stylespan{
+        height:44px;
+        line-height:44px;
+        width:110px;
+        margin-left:10px;
+        color:#8E8E93;
+    }
+</style>

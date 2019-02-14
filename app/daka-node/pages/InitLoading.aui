@@ -1,0 +1,112 @@
+<ui>
+<img class="loadimg" src="./assets/imgs/loading.png">
+</ui>
+
+
+<script>
+import '@auicomp/scroller/Scroller.aui';
+import '@auiutil/mobiscroll3/css/mobiscroll.javascript.min.css';
+import mobiscroll from '@auiutil/mobiscroll3/js/mobiscroll.javascript.min';
+import Alert from '@auicomp/alert/Alert.aui';
+import tool from '@comm/utils/tool';
+import fetch from '@comm/utils/nfetch';
+import { router } from '@auicomp/action/Action.aui';
+
+import './Frame.aui';
+
+var curHash;
+
+export default class InitLoading{
+    static get tag(){
+        return 'initloading';
+    }
+    
+    created(){
+        //chrometest-start****************************
+        // window.userInfo = {badge:'83022',userName:'王海伟'};
+        // fetch({
+        //     url : '/checklogin',
+        //     data: {
+        //         username:window.userInfo.badge
+        //     },
+        //     success: function(json){
+        //         window.member = json;
+        //         window.hasLogin = true;//添加登陆成功标志
+        //         $('#app').html('<aui-frame></aui-frame>');
+        //     },
+        //     error: function(rs){
+        //         Alert.show({
+        //             content: '请求错误',
+        //             doOk: function(){
+        //                 // appnest.navigation.closeWindow();
+        //             }
+        //         });
+        //     }
+        // });
+        //chrometest-end******************************
+
+        fetch.plusready(function(){
+            tool.closeModal();//监听Android返回键，强制关闭所有模态窗口
+            appnest.config.getUserInfo({//获取用户信息
+                success:function(r){
+                    window.userInfo = {badge:'',userName:''};
+                    appnest.contact.getMemberInfo({//从通讯录里查询员工工号
+                        loginId:r.loginId,
+                        success:function(mi){
+                            window.userInfo.userName = mi.userName;
+                            mi.userParams.forEach((e,i)=>{
+                                if(e.key == "employee_id"){
+                                    window.userInfo.badge = e.value;
+                                }
+                            })
+                            fetch({
+                                url : '/checklogin',
+                                data: {
+                                    username:window.userInfo.badge
+                                },
+                                success: function(json){
+                                    window.member = json;
+                                    window.hasLogin = true;//添加登陆成功标志
+                                    $('#app').html('<aui-frame></aui-frame>');
+                                },
+                                error: function(rs){
+                                    Alert.show({
+                                        content: '请求错误',
+                                        doOk: function(){
+                                            appnest.navigation.closeWindow();
+                                        }
+                                    });
+                                }
+                            });
+                        },
+                        fail:function(mi){
+                            Alert.show({
+                                content: mi.errMsg,
+                                doOk: function(){
+                                    appnest.navigation.closeWindow();
+                                }
+                            });
+                        }
+                    });
+                },
+                fail:function(r){
+                    Alert.show({
+                        content: r.errMsg,
+                        doOk: function(){
+                            appnest.navigation.closeWindow();
+                        }
+                    });
+                }
+            });
+            
+        });
+    }
+}
+</script>
+
+<style>
+.loadimg{
+    width: 100%;
+    height: 100%;
+}
+</style>

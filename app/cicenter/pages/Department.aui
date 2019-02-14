@@ -1,0 +1,220 @@
+<ui>
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>部门选择</aui-text>
+            </caption-area>
+        </aui-titlebar>
+    </aui-header>
+
+    <aui-scroller id="dscroller" class="content" style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;text-align: center; background-color:white;">
+        <ul id="o1" style="margin:5%;text-align:left;">
+        </ul>
+    </aui-scroller>
+</ui>
+
+
+<script>
+    import '@auicomp/grid/Grid.aui';
+    import '@auicomp/list/List.aui';
+    import '@auicomp/button/Button.aui';
+    import Confirm from '@auicomp/confirm/Confirm.aui';
+    import auiLoading from '@auicomp/loading/Loading.aui';
+    import fetch from '@comm/utils/xfetch';
+    import Toast from '@auicomp/toast/Toast.aui';
+    import { router } from '@auicomp/action/Action.aui';
+    import './Frame.aui';
+import { types } from 'util';
+
+    export default class Department {
+
+        static get tag() {
+            return 'department';
+        }
+
+        created() {
+            var flags=[] //表示将已经查询过的节点数据放入该数组中，以便判断
+            var flag = router.getQueryObj(location.search).flag||router.getQueryObj().flag;//判断将参数传送给哪个页面
+            var n = router.getQueryObj(location.search).n||router.getQueryObj().n;//判断第几次进入该页面
+            auiLoading.show();
+            fetch({
+                appId: 'ci',
+                url : 'http://ciurl/plugin/buildOrgSelectedTree?nodelevelId=',
+                data: {
+                },
+                success: function(json){
+                    $.each(json, function(e,e1) {
+                        $("#o1").append("<li id='"+e1.id+"'><img src='./assets/imgs/jian.png' class='"+e1.id+"'/><span class='s"+e1.id+"'>"+e1.text+"</span></li>")//第一层执委会
+                        $("#"+e1.id).append("<ul id='o2' style='margin-left:10%;'></ul>")
+                        $('.'+e1.id).click(function(){
+                            obj.func.changes(e1.id)
+                        })
+
+                            $.each(e1.children, function(m,m1) {
+                                if(m1.state=='closed'){
+                                    $("#o2").append("<li id='"+m1.id+"'><img src='./assets/imgs/jia.png' class='"+m1.id+"' /> <span class='s"+m1.id+"'>"+m1.text+"</li>")//第二层 例 工程系统运作部
+                                    
+                                    $("#"+m1.id).append("<ul id='o"+m1.id+"' style='margin-left:10%;'></ul>")
+                                    
+                                    $('.'+m1.id).click(function(){
+                                        obj.func.changes(m1.id)
+                                    })
+                                    $('.s'+m1.id).click(function(){
+                                        obj.func.gettext(m1.text,m1.id)
+                                    })
+                                 }else if(m1.state=="open"){
+                                     //没有子数据的第一层
+  						 	        $("#o2").append("<li id='"+m1.id+"'><img src='./assets/imgs/menu.png'/><span class='s"+m1.id+"'>"+m1.text+"</li>")
+                                    $('.s'+m1.id).click(function(){
+                                        obj.func.gettext(m1.text,m1.id)
+                                    })
+                                  }
+                            });
+                        });
+                        
+                        auiLoading.hide();
+                },
+                error: function(rs){
+                    auiLoading.hide();
+                    Toast.show(rs.errmsg);
+                }
+            });
+            
+            
+            var obj = {
+             func:{
+                changes:function(data){
+                    if($("."+data).attr("src")=="./assets/imgs/jian.png"){
+                        $("."+data).attr("src","./assets/imgs/jia.png");
+                        $("#"+data).children("ul:eq(0)").hide('fast');
+                    }
+                    else{
+                    //判断是否存在该节点，若为-1则该节点在数组中不存在即未查询过
+                    var result= $.inArray(data, flags);
+                             if(result==-1 || flags.length==0){
+                                 auiLoading.show();
+                                fetch({
+                                    appId: 'ci',
+                                    url : 'http://ciurl/plugin/buildOrgSelectedTree?nodelevelId='+'&id='+data,
+                                    data: {
+                                    },
+                                    success: function(json){
+                                    $.each(json, function(n,n1) {
+                                        var nid=n1.id.replace(/\s/g,'');//去掉id中的所有空格
+
+                                        if(n1.state=="closed"){
+                                            $("#o"+data).append("<li  id='"+nid+"'><img src='./assets/imgs/jia.png' class='"+nid+"' /> <span class='s"+nid+"'>"+n1.text+"</li>")//第三层 例 实验室
+                                            $("#"+nid).append("<ul id='o"+nid+"' style='margin-left:10%;'></ul>")
+                                            
+                                            $('.'+nid).click(function(){
+                                                obj.func.changes(nid)
+                                            })
+
+                                            $('.s'+nid).click(function(){
+                                                obj.func.gettext(n1.text,n1.id)
+                                            });
+                                        }else if(n1.state=="open"){
+                                            $("#o"+data).append("<li id='"+nid+"'><img src='./assets/imgs/menu.png'/><span  class='s"+nid+"' >"+n1.text+"</li>")//第三层 例 实验室
+                                            
+                                            $('.s'+nid).click(function(){
+                                                obj.func.gettext(n1.text,n1.id)
+                                            });
+                                       }
+                                       
+                                    })
+                                    
+                                    flags.push(data);//将查询过的节点的id存入数组
+                                    $("."+data).attr("src","./assets/imgs/jian.png");
+                                    $("#"+data).children("ul:eq(0)").show('fast');
+
+                                    auiLoading.hide();
+                                    },
+                                    error: function(rs){
+                                        auiLoading.hide();
+                                        Toast.show(rs.errmsg);
+                                    }
+                                });
+                            }
+                            else if(result!=-1&&flags.length>0){
+                                $("."+data).attr("src","./assets/imgs/jian.png");
+                                $("#"+data).children("ul:eq(0)").show('fast');
+                            }                            
+}
+
+                },
+                gettext:function(data1,data2){
+                    Confirm.show({
+                            content: '确定要选择‘'+data1+'’吗？',
+                            doOk: function(){
+                                if(flag==0){
+                                    //返回积分页面
+                                     document.querySelector('aui-jifenpage').component.jifen(data1,data2);
+                                    history.go(-1);
+                                }
+                                if(flag==1){
+                                    //返回合理化查询页面 提取部门
+                                    document.querySelector('aui-hls').component.tcbumen(data1,data2);
+                                    history.go(-1);
+                                }
+                                if(flag==2){
+                                    //返回合理化查询页面 实施部门
+                                    document.querySelector('aui-hls').component.ssbumen(data1,data2);
+                                    history.go(-1);
+                                }
+                                if(flag==3){
+                                    //返回我处理过的页面 提出部门
+                                    document.querySelector('aui-selectpage').component.tcbumen3(data1,data2);
+                                    history.go(-1);
+                                }
+                                if(flag==4){
+                                    //返回我处理过的页面 实施部门
+                                    document.querySelector('aui-selectpage').component.ssbumen4(data1,data2);
+                                    history.go(-1);
+                                }
+                                 if(flag==5){
+                                    //返回评奖维护页面 实施部门
+                                    document.querySelector('aui-eval').component.evaltree(data1,data2);
+                                    history.go(-1);
+                                }
+                                
+                            },
+                            doCancel: function(){
+                                console.log('Confirm Cancel');
+                            }
+                        });
+                }
+            }
+         };
+         $('#dscroller').render(obj);
+
+        }
+    }
+</script>
+
+<style>
+			*{margin: 0;}
+			ul {
+				list-style: none;
+				cursor: pointer;
+                -webkit-tap-highlight-color: rgba(0,0,0,0);-webkit-tap-highlight-color: transparent;
+			}
+			#o1 li span{
+				height: 40px;
+				line-height: 40px;
+				margin-left: 10px;
+				position: relative;
+				top: -12px;
+			}
+            #o1 li img{
+				border-radius: 5px;
+                width: 25px;
+                height: 25px;
+			}
+            /* #o2{
+                margin-left: 10%;
+            } */
+			
+		</style>

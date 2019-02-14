@@ -1,0 +1,1051 @@
+<ui>
+    <div class="XiaoiDetail">
+       <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>移动小i</aui-text>
+                </caption-area>
+                <right-area>
+                   
+                </right-area>
+            </aui-titlebar>
+        </aui-header>
+        <aui-tabbar class="tabbar tabbar-line tabbar-line-width70 animated" style="display:none">
+            <tabbar-cell v-bind:class="{active:tabIndex==0}" v-on:click="func.tabChange(0)">
+                <label class="tab-label">表单信息</label>
+            </tabbar-cell>
+            <tabbar-cell v-bind:class="{active:tabIndex==1}" v-on:click="func.tabChange(1)">
+                <label class="tab-label">详细信息</label>
+            </tabbar-cell>
+        </aui-tabbar>
+        <aui-scroller class="content">
+            <div class="page1 " v-bind:class="{curr:tabIndex==0}">
+                <div v-for="item in data.list">
+                    <aui-action class="list-cell active" v-bind:href="'#toggle'+$index" type="toggle">
+                        <a class="toogle-title">
+                            {{item.title}}<i class="icon auicon icon-arrowright"></i>
+                        </a>
+                    </aui-action>
+                    <div class="toggle1-line"></div>
+                    <div v-bind:id="'toggle'+$index" action-target class="active toggle-box">
+                        <div class="box1" v-for="innerItem in item.newList">
+                            <div class="label-top">{{innerItem.name}}</div>
+                            <div class="label-content" v-if="innerItem.type=='input'">{{innerItem.value}}</div>
+                            <div class="label-content" v-elseif="innerItem.type=='webview'" style="display: flex;justify-content: flex-end;">
+                                <div class="webviewBt" v-on:click="func.openWebview">点击查看</div>
+                            </div>
+                            <div class="label-content" v-elseif="innerItem.type=='files'">
+                                <ul class="attach-list">
+                                    <li v-for="fileItem in innerItem.files" v-filter="func.addAttachIcon" v-on:click="func.openAttach(fileItem.href,fileItem.text)">
+                                        <img v-bind:src="fileItem.icon" class="attach-icon"></img>
+                                        <div class="attach-text">{{fileItem.text}}</div>
+                                    </li>
+                                </ul>
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            <div class="page2"  v-bind:class="{curr:tabIndex==1}">
+                <div class="padding10" v-html="data.webview">
+                   
+                </div>
+            </div>
+        </aui-scroller>
+    </div>
+</ui>
+<script>
+    import '@auicomp/list/List.aui';
+
+    import fetch from "@libs/xfetch";
+    import common from '@libs/common';
+    import { router } from '@auicomp/action/Action.aui';
+    import Selectsheet from '@comm/components/Selectsheet.aui';
+    // import Action from '@auicomp/action/Action.aui';
+    import '@auicomp/tabbar/Tabbar.aui';
+    import { Base64 } from "js-base64";
+    
+
+    export default class XiaoiDetail {
+
+        static get tag() {
+            return 'XiaoiDetail';
+        }
+        created() {
+            var self = this;
+            const obj = this.$obj = {
+                tabIndex:0,
+                data:{},
+                buttonSav:'',
+                buttonFow:'',
+                content:'',
+                func:{
+                    openWebview(){
+                        obj.tabIndex = 1;
+                    },
+                    tabChange(index){
+                        obj.tabIndex = index;
+                    },
+                    openSelect(){
+                        Selectsheet.show({
+                            list: obj.data.selInfo.map(function(item){
+                                return item.selText
+                            }),
+                            func:function(index){
+                                obj.content = obj.data.selInfo[index].selValue;
+                            }
+                        });
+                    },
+                    openShenPi(){
+                         Selectsheet.show({
+                            list: obj.data.butInfo.map(function(item){
+                                return item.butText
+                            }),
+                            func:function(index){
+                                self.doNext(obj.data.butInfo[index].butText,obj.data.butInfo[index].butValue)
+                            }
+                        });
+                    },
+                    addAttachIcon(index,item){
+                        let name = item.text;
+                        let houzui = name.substring(name.lastIndexOf(".") + 1, name.length).toLowerCase();;
+                        let imgType = "jpg,bmp,pcx,tiff,gif,jpeg,tga,exif,fpx,svg,psd,cdr,pcd,dxf,ufo,eps,al,png,hdri,raw,wmf,lic,emf,";
+                        let imgstr;
+                        if (houzui == "pdf") {
+                            imgstr = './assets/imgs/filetype/pdf.png';
+                        } else if (houzui == "doc" || houzui == "docx") {
+                            imgstr = './assets/imgs/filetype/word.png';
+                        } else if (houzui == "txt") {
+                            imgstr = './assets/imgs/filetype/txt.png';
+                        } else if (houzui == "xls" || houzui == "xlsx") {
+                            imgstr = './assets/imgs/filetype/excel.png';
+                        } else if (imgType.indexOf(houzui + ",") > -1) {
+                            imgstr = './assets/imgs/filetype/picture.png';
+                        } else if (houzui == "rar" || houzui == "zip") {
+                            imgstr = './assets/imgs/filetype/zip.png';
+                        } else {
+                            imgstr = './assets/imgs/filetype/unknow.png';
+                        }
+                        item.icon = imgstr;
+                    },
+                    openAttach(url,name){
+                        url = "http://mobile"+url.replace(/&amp;/g,'&');
+                        common.openAttach(url,name);
+                    }
+                }
+            }
+            /*let infos = {
+                "listparam": [
+                    {
+                        "name": "class_name",
+                        "value": "IncidentManagement.Incident"
+                    },
+                    {
+                        "name": "lifecycle_name",
+                        "value": ""
+                    },
+                    {
+                        "name": "object_template_name",
+                        "value": ""
+                    },
+                    {
+                        "name": "key",
+                        "value": "60985953-3b0a-477c-ab4a-fbb351291805"
+                    },
+                    {
+                        "name": "parent_class_name",
+                        "value": ""
+                    },
+                    {
+                        "name": "parent_key",
+                        "value": ""
+                    },
+                    {
+                        "name": "child_class_name",
+                        "value": ""
+                    },
+                    {
+                        "name": "child_key",
+                        "value": ""
+                    },
+                    {
+                        "name": "is_new",
+                        "value": "False"
+                    },
+                    {
+                        "name": "parent_function_name",
+                        "value": ""
+                    },
+                    {
+                        "name": "function_name",
+                        "value": ""
+                    },
+                    {
+                        "name": "sub_class_name",
+                        "value": ""
+                    },
+                    {
+                        "name": "form",
+                        "value": "CopyofIncidentManagementIncident15HD1"
+                    },
+                    {
+                        "name": "lock_version",
+                        "value": "1"
+                    },
+                    {
+                        "name": "populated_controls",
+                        "value": ""
+                    },
+                    {
+                        "name": "original_values",
+                        "value": "{&quot;RaiseUserTitle&quot;:&quot;3511a7f5-1009-4e4d-9072-3502e273b20c&quot;,&quot;Title9&quot;:&quot;测试专用1113&quot;,&quot;Description&quot;:&quot;111&quot;,&quot;_IncidentRequest2&quot;:&quot;5594d79a-dc9c-4399-8df1-a8e473f6c201&quot;,&quot;_JCI补单&quot;:&quot;False&quot;,&quot;_JCI信息安全事件2&quot;:&quot;False&quot;,&quot;CategoryTitle&quot;:&quot;9e7191b7-6ff9-4fdc-88f1-6226ecb48593&quot;,&quot;_MajorIncident&quot;:&quot;False&quot;,&quot;_JCI客户抱怨2&quot;:&quot;False&quot;,&quot;_服务请求类型4&quot;:null,&quot;_IncidentSource&quot;:null,&quot;_Impact&quot;:&quot;b9099643-3146-44ca-ab44-77074ec2df84&quot;,&quot;_JCIHPSDNumber&quot;:&quot;222&quot;,&quot;_SRIMPACT16&quot;:&quot;7e54f209-945f-46db-a009-3468af8aada5&quot;,&quot;_JCIREQUESTID2&quot;:&quot;333&quot;,&quot;_IncidentUrgency&quot;:&quot;492c0009-4db4-423d-9e81-76f4f0213b23&quot;,&quot;_JCIREQUESTTYPE2&quot;:&quot;444&quot;,&quot;_SRURGENCY18&quot;:&quot;64e9fe99-acdb-4214-a6ca-8a6cd3a85b99&quot;,&quot;_calculation110&quot;:&quot;:SetHidden(Category,False);:SetMandatory(Category,True);:SetHidden(_服务请求类型,True);:SetMandatory(_服务请求类型,False);:SetHidden(_IncidentUrgency,False);:SetHidden(_Impact,False);:SetHidden(_SRIMPACT1,True);:SetHidden(_SRURGENCY1,True);&quot;,&quot;ResponseLevelTitle&quot;:&quot;b98745b7-9d1a-4798-8c4a-7e1f37f00dbe&quot;,&quot;_ServiceSow2&quot;:&quot;13f2b5c6-fb47-4214-a925-ffff317da6ad&quot;,&quot;_Attachment15&quot;:&quot;&lt;ArrayOfDataObjectAttachment&gt;&lt;DataObjectAttachment&gt;&lt;IsNew&gt;false&lt;/IsNew&gt;&lt;Guid&gt;3e1e7cde-9b10-4e67-90e3-fd5d0346325f&lt;/Guid&gt;&lt;OriginalGuid&gt;00000000-0000-0000-0000-000000000000&lt;/OriginalGuid&gt;&lt;FileName&gt;20181113105431498_1429imsi.jpg&lt;/FileName&gt;&lt;Size&gt;19257&lt;/Size&gt;&lt;Type&gt;MultipleAttachments&lt;/Type&gt;&lt;MimeType&gt;image/jpeg&lt;/MimeType&gt;&lt;/DataObjectAttachment&gt;&lt;/ArrayOfDataObjectAttachment&gt;&quot;,&quot;_CurrentAssignedAnalyst&quot;:null,&quot;_CurrentAssignedGroup&quot;:&quot;帮助台&quot;,&quot;_MinutesToBreach&quot;:&quot;772&quot;,&quot;_Unresolved&quot;:&quot;False&quot;,&quot;_AssignCount&quot;:&quot;1&quot;,&quot;_Reopened&quot;:&quot;False&quot;,&quot;StatusTitle&quot;:&quot;e86fa025-db1e-463d-ae6f-011fd8e418ba&quot;,&quot;IsClockStopped&quot;:&quot;False&quot;,&quot;CreationDate&quot;:&quot;11/13/2018 2:54:54 AM&quot;,&quot;CreationUserTitle&quot;:&quot;3511a7f5-1009-4e4d-9072-3502e273b20c&quot;,&quot;LastUpdate&quot;:&quot;11/13/2018 2:54:54 AM&quot;,&quot;LastUpdateUserTitle&quot;:&quot;3511a7f5-1009-4e4d-9072-3502e273b20c&quot;}"
+                    },
+                    {
+                        "name": "is_non_base_culture_saving",
+                        "value": "False"
+                    },
+                    {
+                        "name": "RaiseUser",
+                        "value": "3511a7f5-1009-4e4d-9072-3502e273b20c"
+                    },
+                    {
+                        "name": "RaiseUser._JCI部门工厂",
+                        "value": "信息技术部"
+                    },
+                    {
+                        "name": "RaiseUser.Name",
+                        "value": "axu296"
+                    },
+                    {
+                        "name": "RaiseUser._MobilePhone",
+                        "value": "13501994722"
+                    },
+                    {
+                        "name": "RaiseUser.EMailAddress",
+                        "value": "yidi.xu@adient.com"
+                    },
+                    {
+                        "name": "RaiseUser.Phone",
+                        "value": "68078250"
+                    },
+                    {
+                        "name": "RaiseUser._JCI工号",
+                        "value": "82984"
+                    },
+                    {
+                        "name": "RaiseUser._JobTitle",
+                        "value": "应用系统工程师"
+                    },
+                    {
+                        "name": "Title",
+                        "value": "测试专用1113"
+                    },
+                    {
+                        "name": "_IncidentRequest",
+                        "value": "5594d79a-dc9c-4399-8df1-a8e473f6c201"
+                    },
+                    {
+                        "name": "_JCI补单",
+                        "value": "False"
+                    },
+                    {
+                        "name": "_JCI信息安全事件",
+                        "value": "False"
+                    },
+                    {
+                        "name": "Category",
+                        "value": "9e7191b7-6ff9-4fdc-88f1-6226ecb48593"
+                    },
+                    {
+                        "name": "_MajorIncident",
+                        "value": "False"
+                    },
+                    {
+                        "name": "_JCI客户抱怨",
+                        "value": "False"
+                    },
+                    {
+                        "name": "_服务请求类型",
+                        "value": ""
+                    },
+                    {
+                        "name": "_IncidentSource",
+                        "value": ""
+                    },
+                    {
+                        "name": "_Impact",
+                        "value": "b9099643-3146-44ca-ab44-77074ec2df84"
+                    },
+                    {
+                        "name": "_JCIHPSDNumber",
+                        "value": "222"
+                    },
+                    {
+                        "name": "_SRIMPACT1",
+                        "value": "7e54f209-945f-46db-a009-3468af8aada5"
+                    },
+                    {
+                        "name": "_JCIREQUESTID",
+                        "value": "333"
+                    },
+                    {
+                        "name": "_IncidentUrgency",
+                        "value": "492c0009-4db4-423d-9e81-76f4f0213b23"
+                    },
+                    {
+                        "name": "_JCIREQUESTTYPE2",
+                        "value": "444"
+                    },
+                    {
+                        "name": "_SRURGENCY1",
+                        "value": "64e9fe99-acdb-4214-a6ca-8a6cd3a85b99"
+                    },
+                    {
+                        "name": "ResponseLevel",
+                        "value": "b98745b7-9d1a-4798-8c4a-7e1f37f00dbe"
+                    },
+                    {
+                        "name": "_ServiceSow",
+                        "value": "13f2b5c6-fb47-4214-a925-ffff317da6ad"
+                    },
+                    {
+                        "name": "_Attachment1",
+                        "value": ""
+                    },
+                    {
+                        "name": "_Attachment1",
+                        "value": "20181113105431498_1429imsi.jpg"
+                    },
+                    {
+                        "name": "_CurrentAssignedAnalyst",
+                        "value": ""
+                    },
+                    {
+                        "name": "_CurrentAssignedGroup",
+                        "value": "帮助台"
+                    },
+                    {
+                        "name": "_MinutesToBreach",
+                        "value": "772"
+                    },
+                    {
+                        "name": "_Unresolved",
+                        "value": "False"
+                    },
+                    {
+                        "name": "_AssignCount",
+                        "value": "1"
+                    },
+                    {
+                        "name": "_Reopened",
+                        "value": "False"
+                    },
+                    {
+                        "name": "Status",
+                        "value": "e86fa025-db1e-463d-ae6f-011fd8e418ba"
+                    },
+                    {
+                        "name": "IsClockStopped",
+                        "value": "True"
+                    },
+                    {
+                        "name": "mainForm-CreationDate-date",
+                        "value": "2018年11月13日"
+                    },
+                    {
+                        "name": "mainForm-CreationDate-time",
+                        "value": "10:54:54"
+                    },
+                    {
+                        "name": "CreationDate",
+                        "value": "2018年11月13日 10:54:54"
+                    },
+                    {
+                        "name": "CreationUser",
+                        "value": "3511a7f5-1009-4e4d-9072-3502e273b20c"
+                    },
+                    {
+                        "name": "mainForm-LastUpdate-date",
+                        "value": "2018年11月13日"
+                    },
+                    {
+                        "name": "mainForm-LastUpdate-time",
+                        "value": "10:54:54"
+                    },
+                    {
+                        "name": "LastUpdate",
+                        "value": "2018年11月13日 10:54:54"
+                    },
+                    {
+                        "name": "LastUpdateUser",
+                        "value": "3511a7f5-1009-4e4d-9072-3502e273b20c"
+                    }
+                ],
+                "list": [
+                    {
+                        "title": "提交用户详细信息",
+                        "listsmall": [
+                            {
+                                "value": "用户:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "徐依迪",
+                                "type": "input"
+                            },
+                            {
+                                "value": "所属部门/工厂:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "信息技术部",
+                                "type": "input"
+                            },
+                            {
+                                "value": "登录 ID:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "axu296",
+                                "type": "input"
+                            },
+                            {
+                                "value": "移动电话:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "13501994722",
+                                "type": "input"
+                            },
+                            {
+                                "value": "电子邮件地址:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "yidi.xu@adient.com",
+                                "type": "input"
+                            },
+                            {
+                                "value": "电话:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "68078250",
+                                "type": "input"
+                            },
+                            {
+                                "value": "工号:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "82984",
+                                "type": "input"
+                            },
+                            {
+                                "value": "职务:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "应用系统工程师",
+                                "type": "input"
+                            }
+                        ]
+                    },
+                    {
+                        "title": "事件详细信息",
+                        "listsmall": [
+                            {
+                                "value": "标题*:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "测试专用1113",
+                                "type": "input"
+                            },
+                            {
+                                "value": "详细信息:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "MTEx",
+                                "type": "webview"
+                            },
+                            {
+                                "value": "事件OR请求:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "事件(Incident)",
+                                "type": "input"
+                            },
+                            {
+                                "value": "补单:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "否(No)",
+                                "type": "input"
+                            },
+                            {
+                                "value": "信息安全事件:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "否(No)",
+                                "type": "input"
+                            },
+                            {
+                                "value": "类别*:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "Application - AMP - AMP",
+                                "type": "input"
+                            },
+                            {
+                                "value": "重要事件:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "否(No)",
+                                "type": "input"
+                            },
+                            {
+                                "value": "客户抱怨:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "否(No)",
+                                "type": "input"
+                            },
+                            {
+                                "value": "来源:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "",
+                                "type": "input"
+                            },
+                            {
+                                "value": "影响:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "中(C)-总部部分职能部门/单一工厂",
+                                "type": "input"
+                            },
+                            {
+                                "value": "HPSD 单号:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "222",
+                                "type": "input"
+                            },
+                            {
+                                "value": "WFL ID:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "333",
+                                "type": "input"
+                            },
+                            {
+                                "value": "紧急性:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "中(C)-部分操作无法进行",
+                                "type": "input"
+                            },
+                            {
+                                "value": "WFL类型:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "444",
+                                "type": "input"
+                            },
+                            {
+                                "value": "响应级别:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "Application P3(4小时响应2个工作日内解决)",
+                                "type": "input"
+                            },
+                            {
+                                "value": "服务范围:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "信息技术部",
+                                "type": "input"
+                            },
+                            {
+                                "value": "附件:",
+                                "type": "font"
+                            },
+                            {
+                                "filearr": [
+                                    {
+                                        "text": "20181113105431498_1429imsi.jpg",
+                                        "href": "/ServiceDesk.WebAccess/ss/Object/GetAttachment.rails?class_name=IncidentManagement.Incident&amp;key=60985953-3b0a-477c-ab4a-fbb351291805&amp;attribute=_Attachment1&amp;attachment_guid=3e1e7cde-9b10-4e67-90e3-fd5d0346325f"
+                                    }
+                                ],
+                                "type": "files"
+                            }
+                        ]
+                    },
+                    {
+                        "title": "当前分配详细信息",
+                        "listsmall": [
+                            {
+                                "value": "IT工程师:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "",
+                                "type": "input"
+                            },
+                            {
+                                "value": "组:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "帮助台",
+                                "type": "input"
+                            }
+                        ]
+                    },
+                    {
+                        "title": "信息",
+                        "listsmall": [
+                            {
+                                "value": "剩余处理:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "772",
+                                "type": "input"
+                            },
+                            {
+                                "value": "未解决?",
+                                "type": "font"
+                            },
+                            {
+                                "value": "假",
+                                "type": "input"
+                            },
+                            {
+                                "value": "分配计数:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "1",
+                                "type": "input"
+                            },
+                            {
+                                "value": "是否已重新打开?",
+                                "type": "font"
+                            },
+                            {
+                                "value": "假",
+                                "type": "input"
+                            },
+                            {
+                                "value": "状态:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "进行中",
+                                "type": "input"
+                            },
+                            {
+                                "value": "创建时间:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "2018年11月13日 10:54:54",
+                                "type": "input"
+                            },
+                            {
+                                "value": "提交者:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "徐依迪",
+                                "type": "input"
+                            },
+                            {
+                                "value": "更新时间:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "2018年11月13日 10:54:54",
+                                "type": "input"
+                            },
+                            {
+                                "value": "提交者:",
+                                "type": "font"
+                            },
+                            {
+                                "value": "徐依迪",
+                                "type": "input"
+                            }
+                        ]
+                    }
+                ],
+                "listAtt": []
+            };
+            infos.list.forEach(function(item){
+                item.newList = [];
+                item.listsmall.forEach(function(innerItem,index){
+                    if(index%2==0){
+                        item.newList[index/2] = {};
+                        item.newList[index/2].name = innerItem.value
+                    }else{
+                        item.newList[Math.floor(index/2)].value = innerItem.value
+                        item.newList[Math.floor(index/2)].type = innerItem.type
+                        if(innerItem.type == 'files'){
+                            item.newList[Math.floor(index/2)].files = innerItem.filearr
+                        }
+                        if(innerItem.type == 'webview'){
+                            infos.webview = Base64.decode(innerItem.value)
+                        }
+                    }
+                })
+            });
+            console.log(infos)
+            self.$obj.data = infos;
+            self.$vm = $(self.$el).render(self.$obj);
+            $(".tabbar").css("display","block");*/
+            this.onload();
+        }
+        detached(){
+            this.$vm && this.$vm.destroy();
+        }
+        doNext(flag, flag1){
+            switch(flag) {
+				case "同意":
+					this.$obj.buttonSav = "approve";
+					this.$obj.buttonFow = "ACCEPT";
+					break;
+				case "Approve":
+					this.$obj.buttonSav = "approve";
+					this.$obj.buttonFow = "ACCEPT";
+					break;
+				case "拒绝":
+					this.$obj.buttonSav = "approve";
+					this.$obj.buttonFow = "REJECT";
+					break;
+				case "Reject":
+					this.$obj.buttonSav = "approve";
+					this.$obj.buttonFow = "REJECT";
+					break;
+				case "回退上一步":
+					this.$obj.buttonSav = "backTrace";
+					this.$obj.buttonFow = "";
+					break;
+				case "Back to previous step":
+					this.$obj.buttonSav = "backTrace";
+					this.$obj.buttonFow = "";
+					break;
+				case "退回开端":
+					this.$obj.buttonSav = "returnStart";
+					this.$obj.buttonFow = "";
+					break;
+				case "Back to Initiator":
+					this.$obj.buttonSav = "returnStart";
+					this.$obj.buttonFow = "";
+					break;
+				case "回退历史审批人":
+					this.$obj.buttonSav = "showHistoryList";
+					this.$obj.buttonFow = flag1;
+					break;
+				case "征询意见":
+					this.$obj.buttonSav = "inquire";
+					this.$obj.buttonFow = "";
+					break;
+				case "consultation":
+					this.$obj.buttonSav = "inquire";
+					this.$obj.buttonFow = "";
+					break;
+				case "提交":
+					this.$obj.buttonSav = "FinishInquire";
+					this.$obj.buttonFow = "";
+					break;
+				case "Submit":
+					this.$obj.buttonSav = "FinishInquire";
+					this.$obj.buttonFow = "";
+					break;
+				case "转办":
+					this.$obj.buttonSav = "forward";
+					this.$obj.buttonFow = "";
+					break;
+				case "transfer to others":
+					this.$obj.buttonSav = "forward";
+					this.$obj.buttonFow = "";
+					break;
+				default:
+					alert("该操作暂不支持,请联系管理员!This operation hasn't done yet,Please contact the IT department!");
+					break;
+				}
+				this.doSubmit();
+        }
+        doSubmit() {
+            let self = this;
+            if (this.$obj.buttonSav == "approve") {
+                if (this.$obj.buttonFow == "ACCEPT") {
+                    var data = "{\"Opinion\":\"ACCEPT\",\"Remark\":\"" + this.$obj.content + "\",\"TaskId\":\"" + this.$obj.data.taskId + "\",\"FlowId\":\"" + this.$obj.data.flowid + "\",\"DataVersion\":\"" + this.$obj.data.dataVersion + "\",\"StartTime\":\"" + this.$obj.data.startTime + "\",\"FuncName\":\"wf.RuntimeHandler.Approve\"}{:ky->f" + this.$obj.data.jPack;
+                  
+                } else {
+                    var data = "{\"Opinion\":\"REJECT\",\"Remark\":\"" + this.$obj.content + "\",\"TaskId\":\"" + this.$obj.data.taskId + "\",\"FlowId\":\"" + this.$obj.data.flowid + "\",\"DataVersion\":\"" + this.$obj.data.dataVersion + "\",\"StartTime\":\"" + this.$obj.data.startTime + "\",\"FuncName\":\"wf.RuntimeHandler.Approve\"}{:ky->f" + this.$obj.data.jPack;
+                }
+                this.submit(data);
+            }
+            if (this.$obj.buttonSav == "backTrace") {
+                if (this.$obj.content == "") {
+                    common.alert("请填写意见!Please fill in the comments!",function(){
+                        self.$obj.tabIndex = 1;
+                        $('.opinions').focus();
+                    });
+                } else {
+                    var data = "{\"TaskId\":\"" + this.$obj.data.taskId + "\",\"Remark\":\"" + this.$obj.content + "\",\"StartTime\":\"" + this.$obj.data.startTime + "\",\"FlowId\":\"" + this.$obj.data.flowid + "\",\"FuncName\":\"wf.RuntimeHandler.BackTrace\"}";
+                    this.submit(data);
+                }
+            }
+            if (this.$obj.buttonSav == "returnStart") {
+                if (this.$obj.content == "") {
+                    common.alert("请填写意见!Please fill in the comments!",function(){
+                        self.$obj.tabIndex = 1;
+                        $('.opinions').focus();
+                    });
+                } else {
+                    var data = "{\"TaskId\":\"" + this.$obj.data.taskId + "\",\"Remark\":\"" + this.$obj.content  + "\",\"StartTime\":\"" + this.$obj.data.startTime + "\",\"FlowId\":\"" + this.$obj.data.flowid  + "\",\"FuncName\":\"wf.RuntimeHandler.ReturnStart\"}";
+                    this.submit(data);
+                }
+            }
+            if (this.$obj.buttonSav == "showHistoryList") {
+                if (this.$obj.content == "") {
+                    common.alert("请填写意见!Please fill in the comments!",function(){
+                        self.$obj.tabIndex = 1;
+                        $('.opinions').focus();
+                    });
+                } else {
+                    location.href = '#/History?flag='+this.$obj.buttonFow+'&page=aui-XiaoiDetail';
+                }
+            }
+            if (this.$obj.buttonSav == "inquire") {
+                if (this.$obj.content == "") {
+                     common.alert("请填写意见!Please fill in the comments!",function(){
+                        self.$obj.tabIndex = 1;
+                        $('.opinions').focus();
+                    });
+                } else {
+                    location.href = '#/Choose?caoZuo=Inquire&page=aui-XiaoiDetail';
+                }
+            }
+            if (this.$obj.buttonSav == "FinishInquire") {
+                if (this.$obj.content == "") {
+                     common.alert("请填写意见!Please fill in the comments!",function(){
+                        self.$obj.tabIndex = 1;
+                        $('.opinions').focus();
+                    });
+                } else {
+                    var data = "{\"Remark\":\"" + this.$obj.content + "\",\"TaskId\":\"" + this.$obj.data.taskId + "\",\"FlowId\":\"" + this.$obj.data.flowid + "\",\"StartTime\":\"" + this.$obj.data.startTime + "\",\"FuncName\":\"wf.RuntimeHandler.FinishInquire\"}{:ky->f" + this.$obj.data.jPack;
+                    this.submit(data);
+                }
+            }
+            if (this.$obj.buttonSav == "forward") {
+                if (this.$obj.content == "") {
+                     common.alert("请填写意见!Please fill in the comments!",function(){
+                        self.$obj.tabIndex = 1;
+                        $('.opinions').focus();
+                    });
+                }  else {
+                     location.href = '#/Choose?caoZuo=Forward&page=aui-XiaoiDetail';
+                }
+            }
+        }
+        submit(jsonData){
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : common.hrUrl+'/qingjiasubmit.jsp',
+                data: {
+                    jsonData:jsonData,
+                },
+                type: 'post',
+                success: function(dataInfo){
+                   if (dataInfo.flag == "success") {
+                        common.alert("操作成功!Successful Done!", function() {
+                            document.querySelector('.aui-refresher-QingjiaList').component.refresher.triggerDownScroll();
+                            history.go(-1);
+                        });
+                    } else {
+                        common.alert("操作失败!Fail Done!");
+                    }
+                }
+            });
+        }
+        onload(){
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : common.oaUrl+'/detail',
+                data: {
+                    pageid:router.getQueryObj().pageid,
+                },
+                type: 'post',
+                success: function(infos){
+                    console.log(JSON.stringify(infos));
+                    infos.list.forEach(function(item){
+                        item.newList = [];
+                        item.listsmall.forEach(function(innerItem,index){
+                            if(index%2==0){
+                                item.newList[index/2] = {};
+                                item.newList[index/2].name = innerItem.value
+                            }else{
+                                item.newList[Math.floor(index/2)].value = innerItem.value
+                                item.newList[Math.floor(index/2)].type = innerItem.type
+                                if(innerItem.type == 'files'){
+                                    item.newList[Math.floor(index/2)].files = innerItem.filearr
+                                }
+                                if(innerItem.type == 'webview'){
+                                    infos.webview = Base64.decode(innerItem.value)
+                                }
+                            }
+                        })
+                    });
+                    self.$obj.data = infos;
+                    self.$vm = $(self.$el).render(self.$obj);
+                    $(".tabbar").css("display","block");
+                }
+            });
+        }
+    }
+</script>
+<style type='less'>
+@import url('../assets/less/theme/default/common.less');
+.XiaoiDetail{
+    .tabbar{
+         position: absolute;
+        top: 45px;
+    }
+    .content{
+        position: absolute;
+        top: 85px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        background: white;
+        .page1,.page2{
+            display: none;
+            width: 100%;
+            margin-bottom: 15px;
+            .list-cell{
+                border-top: 0;
+                .toogle-title{
+                    color:#428bca !important;
+                }
+            }
+            .toggle1-line{
+                height: 1px;
+                background: #A0C8E8;
+                margin: 0px 15px 0px 15px;
+            }
+            .toggle-box{
+                border: 1px solid #AAAAAA;
+                margin: 0px 15px 0px 15px;
+                margin-top: 5px;
+                // display: flex;
+                // flex-direction: column;
+                .box1{
+                    padding: 8px 10px 8px 10px;
+                    border-bottom: 1px solid @border-color;
+                    .label-content{
+                        margin-top:5px;
+                        text-align: right;
+                        color: #2E9BF2;
+                        .attach-list{
+                            li{
+                                display: flex;
+                                flex-direction: row;
+                                align-items: center;
+                                border-bottom: 1px solid @border-color;
+                                padding: 5px 0;
+                                .attach-icon{
+                                    width: 35px;
+                                    margin-right: 5px;
+                                }
+                                &:last-child{
+                                    border:0;
+                                }
+                                &:active{
+                                    background: #eee;
+                                }
+                            }
+                        }
+                    }
+                    .sp-text{
+                         border-top: 1px solid @border-color;
+                         margin-top: 8px;
+                        padding-top: 8px;
+                    }
+                    .sp-info{
+                        text-align:right;
+                        color:red;
+                    }
+                }
+                .opinions-title{
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    padding:8px 10px 8px 10px;
+                    border-bottom: 1px solid @border-color;
+                    .opinions-text{
+                        flex:1;
+                    }
+                    .auicon{
+                        font-size:24px;
+                    }
+                }
+                .opinions-textarea{
+                     width: 100%;
+                    padding: 8px 10px 8px 10px;
+                    .textarea-box{
+                        width: 100%;
+                        border: 1px solid @border-color;
+                        border-radius: 4px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: stretch;
+                        textarea{
+                            border:0;
+                            padding: 0;
+                            margin: 5px;
+                        }
+                    }
+                }
+               
+            }  
+            .webviewBt{
+                color: white;
+                background: #428bca;
+                padding: 5px;
+            } 
+        }
+        .curr{
+            display: block;
+        }
+    }
+}
+
+
+</style>

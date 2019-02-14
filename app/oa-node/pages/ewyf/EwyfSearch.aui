@@ -1,0 +1,275 @@
+<ui>
+    <div class="EwyfSearch">
+        <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>额外运费</aui-text>
+                </caption-area>
+                <right-area>
+                    <a v-on:click="func.changeSearch">
+                        <i class="icon auicon icon-search"></i>
+                    </a>
+                </right-area>
+            </aui-titlebar>
+        </aui-header>
+        <div class="searchBox"  v-bind:class="{showSearch:isShowSearch}">
+            <div class="row">
+               <input  type="text" placeholder="请输入主题 Subject" v-model="subject">
+            </div>
+            <!-- <div class="row">
+               <input  type="text" placeholder="请输入单号 Bill number" v-model="billno">
+            </div>
+            <div class="row">
+                <div class="text">文档状态 Status</div>
+                <div class="select" v-on:click="func.openSelect">
+                    <div class="select-value" >{{statusName}}</div>
+                    <li class="icon auicon icon-arrowright"></li>
+                </div>
+            </div> -->
+            <div class="row border0">
+                 <div class="bt" v-on:click="func.search">查询</div>
+            </div>
+        </div>
+         <aui-refresher delay class="scroll aui-refresher-EwyfSearch" v-on:pulldown="func.doPullDown" v-on:pullup="func.doPullUp"  v-bind:class="{refresherTop:isShowSearch}">
+            <aui-list class="list" v-if="isAjaxed&&hasData">
+                <list-cell  v-for="item in list" >
+                    <a v-on:click="func.doDetail(item.fdId)">
+                        <div class="caption">{{item.title}}</div>
+                        <div class="snd-title">{{item.createtime}}  {{item.declPerson}}</div>
+                    </a>
+                </list-cell>
+            </aui-list>
+            <div v-if="isAjaxed&&!hasData" class="nodata">
+                    <img src="./assets/imgs/nodata.png">
+                </div>
+        </aui-refresher>
+    </div>
+</ui>
+<script>
+    import Refresher from '@auicomp/refresher/Refresher.aui';
+    import '@auicomp/list/List.aui';
+    import Actionsheet from '../../components/Actionsheet.aui';
+    import Alert from '@auicomp/alert/Alert.aui';
+    import fetch from "@libs/fetch";
+    import common from '@libs/common';
+    import { router } from '@auicomp/action/Action.aui';
+    import Selectsheet from '@comm/components/Selectsheet.aui';
+
+    export default class EwyfSearch {
+
+        static get tag() {
+            return 'EwyfSearch';
+        }
+        created() {
+            $(this.$el).on('enter',common.removeCachePage);
+            const self = this;
+            const obj = this.$obj = {
+                hasData: false,
+                list: [],
+                start:1,
+                isAjaxed:false,
+                subject:"",
+                billno:"",
+                statusArr:[{
+                    name:'不限 Ulimited',
+                    value:''
+                    },{ 
+                    name:'草稿 Draft',
+                    value:'10'
+                    },{ 
+                    name:'待审 UnlimitedDraftTo be examined',
+                    value:'20'
+                    },{ 
+                    name:'驳回 Refuse',
+                    value:'11'
+                    },{ 
+                    name:'废弃 Discard',
+                    value:'00'
+                    },{ 
+                    name:'结束 Finish',
+                    value:'30'
+                     },{ 
+                    name:'已反馈 Publish',
+                    value:'31'
+                }],
+                status:'',
+                statusName:'不限 Ulimited',
+                isShowSearch:true,
+                func: {
+                    doPullDown: function(e, $refresh){
+                        self.$obj.start = 1;
+                        self.getList(function(data){
+                            obj.isAjaxed=true;
+                            if(data.list.length>0){
+                                obj.hasData=true;
+                            }else{
+                                obj.hasData=false;
+                            }
+                            obj.list.$reset(data.list);
+                           if(Number(data.totalPage)<=Number(data.currentPage)){
+                                $refresh.end();
+                            }else{
+                                $refresh.refresh();
+                            }
+                        })
+                    },
+                    doPullUp: function(e, $refresh){
+                        if(!self.$obj.isAjaxed){
+                            return;
+                        }
+                        self.$obj.start++;
+                        self.getList(function(data){
+                            obj.list.push(...data.list);
+                            if(Number(data.totalPage)<=Number(data.currentPage)){
+                                $refresh.end();
+                            }else{
+                                $refresh.refresh();
+                            }
+                        })
+                    },
+                    changeSearch:function(){
+                         obj.isShowSearch = !obj.isShowSearch;
+                    },
+                    doDetail:function(unid) {
+                        router.go({path: '/EwyfDetail?fdId='+unid, isForce: true}); 
+                    },
+                    search:function(){
+                        if($('.aui-refresher-EwyfSearch').hasAttr('delay')){
+                            Refresher.init('.aui-refresher-EwyfSearch');
+                        }else{
+                            document.querySelector('.aui-refresher-EwyfSearch').component.refresher.triggerDownScroll();
+                        }
+                       
+                    },
+                    openSelect(){
+                        Selectsheet.show({
+                            list: obj.statusArr.map(function(item){
+                                return item.name
+                            }),
+                            func:function(index){
+                                obj.status = obj.statusArr[index].value;
+                                obj.statusName = obj.statusArr[index].name;
+                            }
+                        });
+                    },
+                }
+            }
+            this.$vm = $(this.$el).render(obj);
+        }
+        
+        getList(cb){
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : common.oaUrl+'/ewyfquery.jsp',
+                data: {
+                    page:this.$obj.start,
+                    subject:this.$obj.subject,
+                    billno:this.$obj.billno,
+                    status:this.$obj.status,
+                },
+                hideLoading:this.$obj.isAjaxed,
+                type: 'post',
+                success: function(infos){
+                    self.$obj.isShowSearch = false;
+                    cb(infos)
+                }
+            });
+            
+        
+        }
+        detached(){
+            this.$vm && this.$vm.destroy();
+        }
+    }
+</script>
+<style type='less'>
+@import url('../../assets/less/theme/default/common.less');
+.EwyfSearch{
+    width: 100%;
+    height: 100%;
+    position: relative;
+    .scroll { 
+        position: absolute;
+        top: 44px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        .list{
+            list-cell{
+                padding:0;
+                a{
+                    margin:0;
+                    padding:5px 10px;
+                }
+                .caption{
+                    font-size: 16px;
+                }
+                .rcaption{
+                    font-size: 14px;
+                    color: #8E8E93;
+                    margin-top: 3px;
+                }
+                .snd-title{
+                    font-size: 14px;
+                    color: #8E8E93;
+                    margin-top: 5px;
+                }
+            }
+           
+        }
+        
+    } 
+    .refresherTop{
+        top: 160px;
+    }
+    .searchBox{
+        display: none;
+        position: absolute;
+        top: 45px;
+        right: 0px;
+        left: 0px;
+        margin: 5px 10px;
+        .row{
+            display:flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #C7C7CC;
+            .text{
+                flex:4
+            }
+            .select{
+                display:flex;
+                flex-direction: row;
+                align-items: center;
+                flex:6;
+                .select-value{
+                    flex:1;
+                    text-align: right;
+                    margin-right: 5px;
+                }
+            }
+            .bt{
+                color: white;
+                background: #2371AF;
+                width: 100%;
+                text-align: center;
+                padding: 5px 0;
+            }
+            input{
+                border:1px solid #C7C7CC;
+                width: 100%;
+                border-radius: 4px;
+            }
+        }
+    }
+    .showSearch{
+         display: block;
+    }
+}
+
+</style>

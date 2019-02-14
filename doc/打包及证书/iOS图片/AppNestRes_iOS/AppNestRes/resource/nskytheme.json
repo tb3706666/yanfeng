@@ -1,0 +1,79 @@
+{
+    "common": {
+        "navigation": {
+            /* ios导航栏的背景颜色 */
+            "backgroudColor": "#4E93F7",
+            /* ios顶部状态栏背景颜色 */
+            "statusBarBackGroundColor" : "#4E93F7",
+            /* ios顶部状态栏背景颜色开关,默认是0(关)，1(开)开启时statusBarBackGroundColor才生效 */
+            "statusBarBackGroundColorEnable" : 0,
+            /* ios导航栏的Title的文字颜色 */
+            "titleColor": "#FFFFFF"
+        },
+        /* 进度条的背景色 (toast的背景色也会改) */
+        "progressBarBackGroundColor": "#000000",
+        /* 下载进度的边框颜色 如云盘工作台下载界面 */
+        "downloadProgressCircleColor": "#0076FF",
+        /* 所有界面蓝色高亮文字的颜色(如搜索界面高亮的字,圈子订阅号点赞的文字) */
+        "highlightTextColor": "#4E93F7",
+        /* pop弹出页的背景色 (如同事圈右上角点击发布圈子,消息应用界面筛选界面) */
+        "popBackGroundColor" : "#7F000000",
+        /* ios系统栏的文字颜色只有 light(白色) default(黑色) 两种颜色*/
+        "statusBarStyle" : "light",
+        /* ios左上角用户头像显示风格 只有white(白色底部) normal(和通讯录中一样) 两种设置*/
+        "userHeaderStyle" : "white",
+        "actionsheet": {
+            /* 底部弹出框的普通按钮颜色 */
+            "buttonTextColor": "#333333",
+            /* 底部弹出框的取消按钮颜色 */
+            "cancelButtonTextColor": "#333333",
+            /* 底部弹出框的删除按钮颜色 */
+            "deleteButtonTextColor": "#FF0000"
+        },
+        "switch": {
+            /* iOS 开关控件 打开状态时的背景色 */
+            "onBackGroundColor": "#4CD964",            
+        },
+        "bluebutton": {
+            "backgroundColor": "#4E92FE",
+            "titleColor": "#FFFFFF"
+        },
+        "redbutton": {
+            "backgroundColor": "#FE666C",
+            "titleColor": "#FFFFFF"
+        },
+        "operatebutton": {
+            /* 操作按钮的文字颜色(如应用超市界面的下载 打开 等等) */
+            "color": "#4E93F7"
+        },
+        "switchtab": {
+            /* 切换Tab页底部短线条的颜色(如云盘传输列表界面，应用超市界面) */
+            "lineColor": "#4E93F7"
+        }
+    },
+    "moment": {
+        /*同事圈主界面顶部已经关注的圈子的边框颜色*/
+        "followedCircleBorderColor": "#50BDFA",
+        /*同事圈匿名的文字颜色*/
+        "nikenameColor" : "#4EC5B8"
+    },
+    "tabbar" :
+    {
+        /*主界面底部tabbar 未选中 的文字颜色*/
+        "textColor" : "#9B9B9B",
+        /*主界面底部tabbar 选中 的文字颜色*/
+        "selectedTextColor" : "#4E93F7"
+    },
+    "im": {
+        /* 聊天页面右侧气泡颜色 */
+        "outgoingBubbleColor": "#D1E3FC",
+        /* 聊天页面右侧气泡边框颜色 */
+        "outgoingBubbleBorderColor": "#B4D0F0"
+    },
+    "contacts": {
+        /* 联系人底部菜单的背景色 */
+        "bottomMenuBackGroundColor": "#FFFFFF",
+        /* 联系人底部菜单的文字色 */
+        "bottomMenuTextColor": "#666666"
+    }
+}

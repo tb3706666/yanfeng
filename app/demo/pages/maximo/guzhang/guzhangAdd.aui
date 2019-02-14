@@ -1,0 +1,311 @@
+<ui>
+<aui-header>
+    <aui-titlebar>
+        <left-area>
+            <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+        </left-area>
+        <caption-area>
+            <aui-text>新建工单</aui-text>
+        </caption-area>
+    </aui-titlebar>
+</aui-header>
+<aui-scroller class="content" style="position: absolute; top: 45px; right: 0px; bottom: 45px;left: 0px;">
+    <div class="yf-baseInfo">
+        <div class="baseLine">
+            <font class="label-left">工单</font>
+            <div style="flex:2;display: flex;">
+                <input type="text" readonly class="dj-text" value="SP1811373"/>
+            </div>
+            <font class="lbtext" style="width:70px;color: #428bca;text-decoration: underline;">工单类型</font>
+            <div style="flex:1;display: flex;">
+                <!-- <input type="text" readonly class="dj-text" value="PM"/> -->
+                <select style="width:100%;height: 30px;margin-right:5px">
+                    <option>EM</option>
+                    <option>CM</option>
+                </select>
+            </div>
+            <font class="label-left">状态</font>
+            <div style="flex:1;display: flex;">
+                <input type="text" readonly class="dj-text" value="APPR"/>
+            </div>
+        </div>
+        <div class="baseLine">
+            <font class="label-left">描述</font>
+            <div style="flex:1;display: flex;">
+                <input type="text" class="edit" style="width:100%;padding-right:0;padding-left:5px;" value="1#前座椅装配线 巡检"/>
+            </div>
+        </div>
+        <div class="baseLine">
+            <font class="label-left" style="color: #428bca;text-decoration: underline;">资产</font>
+            <div style="flex:1;display: flex;">
+                <input type="text" readonly class="dj-text" v-model="editData.zichan1"/>
+            </div>
+            <div style="flex:2;display: flex;">
+                <input type="text" readonly class="dj-text" value="1#前座椅装配线"/>
+            </div>
+        </div>
+        <div class="baseLine">
+            <font class="label-left" style="color: #428bca;text-decoration: underline;">位置</font>
+            <div style="flex:1;display: flex;">
+                <input type="text" readonly class="dj-text" v-model="editData.weizhi1"/>
+            </div>
+            <div style="flex:2;display: flex;">
+                <input type="text" readonly class="dj-text" value="LAVIDA前排生产线"/>
+            </div>
+        </div>
+        <div class="baseLine">
+            <font class="label-left">停工开始</font>
+            <div class="datetime-area" style="flex:1">
+                <input type="text" readonly />
+                <i class="icon auicon icon-arrowleft icon-time"></i>
+            </div>
+        </div>
+        <div class="baseLine">
+            <font class="label-left">停工结束</font>
+            <div class="datetime-area" style="flex:1">
+                <input type="text" readonly />
+                <i class="icon auicon icon-arrowleft icon-timeend"></i>
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="addline" v-for="item in editData.line1Arr">
+            <div class="flex-vcenter">
+                <font class="lbtext" style="width:40px;">员工</font>
+                <div style="flex:1;display: flex;">
+                    <input type="text" class="edit" style="width:100%;padding-left:5px;" v-model="item.badge"/>
+                </div>
+                <div class="datetime-area" style="flex:2">
+                    <input type="text" readonly  placeholder="实际开始日期" v-model="item.actStartDate"/>
+                    <i class="icon auicon icon-arrowleft icon-calendar"></i>
+                </div>
+            </div>
+            <div class="flex-vcenter">
+                <div class="datetime-area" style="flex:1;border-bottom:0">
+                    <input type="text" readonly  placeholder="实际开始时间" v-model="item.actStartTime"/>
+                    <i class="icon auicon icon-arrowleft icon-time"></i>
+                </div>
+                <div class="datetime-area" style="flex:1;border-bottom:0">
+                    <input type="text" readonly  placeholder="实际结束时间" v-model="item.actEndTime"/>
+                    <i class="icon auicon icon-arrowleft icon-timeend"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="btndiv">
+        <aui-button class="btn btn-outlined btn-primary" v-on:click="func.delLine1">删除行</aui-button>
+        <aui-button class="btn btn-outlined btn-primary" v-on:click="func.addLine1">新建行</aui-button>
+    </div>
+    <div style="border:1px solid #ddd;border-right:0;border-left:0">
+        <div style="padding:5px">任务项</div>
+        <div class="flex-vcenter" v-for="item in editData.line2Arr">
+            <div style="width:40px;display: flex;">
+                <input type="text" class="dj-text" readonly style="width:100%;padding-left:5px;" v-model="item.xiangid"/>
+            </div>
+            <div style="flex:1;display: flex;">
+                <input type="text" class="edit" style="width:100%;padding-right:0;padding-left:5px;" placeholder="任务描述" v-model="item.xiangmiaoshu"/>
+            </div>
+        </div>
+    </div>
+    <div class="btndiv">
+        <aui-button class="btn btn-outlined btn-primary"  v-on:click="func.tgtest1">删除行</aui-button>
+        <aui-button class="btn btn-outlined btn-primary" >新建行</aui-button>
+    </div>
+
+    <p style="font-size:14px;color:#428bca;padding:5px;">故障汇报</p>
+        <div class="yf-bottomInfo">
+            <div class="linkLine">
+                <a class="link-left" v-on:click="func.selectGuzhang">故障</a>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" value="ATJITF0004"/>
+                </div>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" value="前座椅装配线故障"/>
+                </div>
+            </div>
+            <div class="linkLine">
+                <a class="link-left" v-on:click="func.selectGuzhang">问题</a>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" value=""/>
+                </div>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" value=""/>
+                </div>
+            </div>
+            <div class="linkLine">
+                <a class="link-left">原因</a>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" value=""/>
+                </div>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" value=""/>
+                </div>
+            </div>
+            <div class="linkLine">
+                <a class="link-left">措施</a>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" value=""/>
+                </div>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" value=""/>
+                </div>
+            </div>
+        </div>
+</aui-scroller>
+<aui-footer>
+    <div class="yf-footer">
+        <aui-button class="btn btn-outlined btn-primary" v-on:click="func.dosave">完成</aui-button>
+    </div>
+</aui-footer>
+</ui>
+<script>
+import '@auicomp/footer/Footer.aui';
+import '@auicomp/button/Button.aui';
+
+import Selectsheet from '@comm/components/Selectsheet.aui';
+import Action,{ router } from '@auicomp/action/Action.aui';
+
+export default class guzhangAdd {
+
+    static get tag() {
+        return 'guzhangadd';
+    }
+
+    created() {
+        const $el = $(this.$el);
+        $el.on("backfill1",function(e,zichan){
+            console.log(zichan);
+            obj.editData.zichan1 = zichan;
+        });
+        const obj = this.$obj = {
+            editData:{
+                line1Arr:[{badge:'',actStartDate:'',actStartTime:'',actEndTime:''}],
+                line2Arr:[{xiangid:10,xiangmiaoshu:''}],
+                gdTypeOptions:['EM','CM'],
+                zichan1:'',
+                weizhi1:''
+            },
+            func:{
+                tgtest1:function(e){
+                    // e.stopPropagation();
+                    $el.trigger("backfill1",['8823849']);
+                },
+                addLine1:function(){
+                    obj.editData.line1Arr.push({badge:'',actStartDate:'',actStartTime:'',actEndTime:''});
+                },
+                delLine1:function(){
+                    if(obj.editData.line1Arr.length > 1){
+                        obj.editData.line1Arr.pop();
+                    }
+                },
+                addLine2:function(){
+                    obj.editData.line2Arr.push({xiangid: (obj.editData.line2Arr.length+1)*10,xiangmiaoshu:''});
+                },
+                delLine2:function(){
+                    if(obj.editData.line2Arr.length > 1){
+                        obj.editData.line2Arr.pop();
+                    }
+                },
+                selectGuzhang:function(){
+                    router.go("/guzhangquery");
+                }
+            }
+        }
+        $el.render(obj);
+    }
+}
+</script>
+<style type="less">
+[readonly]{  pointer-events:none; }
+aui-guzhangadd{
+@defaultborder:1px solid #ddd;
+@blueborder:1px solid #428bca;
+.yf-footer{
+    height: 45px;
+    padding: 0 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    aui-button{
+        flex: 1;
+        margin: 0 5px;
+    }
+}
+.edit{
+    border:0;
+    border-bottom:@defaultborder;
+    height: 30px;
+    margin-right: 5px;
+}
+.btndiv{
+    display: flex;
+    padding: 5px 10px;
+    justify-content: flex-end;
+    aui-button {
+        &:first-child{
+            margin-right: 5px;
+        }
+    }
+}
+.addline{
+    border-top: @defaultborder;
+    &:last-child{
+        border-bottom:@defaultborder;
+    }
+}
+input[type='text']{
+    margin-right: 5px;
+    &:not(:read-only){
+        border-radius: 0;
+    }
+}
+.flex-vcenter{
+    display: flex;
+    align-items: center;
+    padding: 5px;
+}
+.datetime-area{
+    box-sizing: border-box;
+    .edit;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    input[type='text']{
+        width: 90%;
+        border: 0;
+        padding-left:5px; 
+        font-size: 14px;
+    }
+}
+
+.lbtext{
+    text-align: left;
+    color: #8E8E93;
+}
+
+.yf-baseInfo{
+    padding: 5px 0;
+    .baseLine{
+        .flex-vcenter;
+        .label-left{
+            width: 40px;
+            .lbtext;
+        }       
+    }
+}
+.yf-bottomInfo{
+    padding: 5px 0;
+    border-top: @blueborder;
+    .linkLine{
+        .flex-vcenter;
+        .link-left{
+            width: 40px;
+            text-align: left;
+            color: #428bca;
+            text-decoration: underline;
+        }
+    }
+}
+
+}
+</style>

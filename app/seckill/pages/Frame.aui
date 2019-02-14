@@ -1,0 +1,96 @@
+<ui>
+    <aui-page transition="slide"></aui-page>
+</ui>
+
+
+<script>
+import router from '../routers';
+import '@auifont/iconfont.css';
+/**
+ * 组件定义要求：
+   1. 组件定义必须包含是一个具有结构化的函数/类
+   2. 可以使用es6（使用export default导出class）或者es5（使用module.exports = Function.prototype）来定义
+   3. 类中必须定义静态的属性tag为标签名，实际调用的标签即为aui-tag
+   4. 组件类的四个生命周期事件：
+      created（组件创建时触发）：比如：const $frame = $('<aui-frame></aui-frame>').appendTo($('body));
+                这时候aui-frame组件被创建并添加到body元素中，触发created事件
+      detached（组件移除文档时触发）：比如：const fragment = document.createDocumentFragment(); fragment.append($frame[0]); 
+                这时候刚才的frame组件被从body中抽出，并添加到fragment，由于fragment元素也不在文档中，这时候就会触发detached事件
+      adopted（组件从旧文档移到新文档时触发）：比如：const $div = $('div').appendTo($('body')); $div.append($frame); 
+                这时候将一个div添加到body中，则div处于文档中，然后将frame添加到div中相当于从body中移动到div中，所以会触发adopted事件
+      attributeChanged（组件属性改变时触发）：属性改变需要组件类定义静态属性observedAttributes = [需要监控的属性名]
+                比如：假设设置了
+                static get observedAttributes(){
+                    return ['init'];
+                }
+                当设置$frame.attr('init', 'true');则会触发attributeChanged事件，该事件接收三个参数（attrName, oldVal, newVal）
+                当设置多个属性监听的时候都会进到此函数，可以根据attrName进行区分
+    5. 类的实例化对象中this.$el代表的就是当前组件对应的标准dom对象（不是一个jquery的$对象），注意this本身不是一个dom对象
+    6. ui标签可以不写，可以在created或者其他事件中往this.$el来innerHTML进行实例化
+    7. 当存在ui的时候，调用组件的时候组件存在子元素的时候，这时候子元素是无效的，比如frame组件的ui改为：
+        <ui><div>test</div></ui>
+       当调用<aui-frame><div>子组件</div></aui-frame>时，实际看到的是<aui-frame><div>test</div></aui-frame>
+       如果需要显示子组件，可以使用<child></child>来占位替代，该标签在哪出现则显示在哪，比如frame的ui改为：
+       <ui><div>test<child></child></div></ui>
+       这时候调用<aui-frame><div>子组件</div></aui-frame>时，实际看到的就是<aui-frame><div>test<div>子组件</div></div></aui-frame>
+    8. style标签默认是标准css语法，当设置type="less"时可以编写less语法；当设置type="sass"时可以编写sass语法，建议使用less，比如：
+        <style type="less">
+        @width: 100px;
+
+        aui-frame{
+            div{
+                width: @width;
+            }
+        }
+
+        </style>
+        解析结果为
+        <style>
+        aui-frame div{
+            width: 100px;
+        }
+
+        </style>
+ */
+
+export default class Frame{
+    
+    static get tag(){
+        return 'frame'; // 必须定义静态属性tag，调用组件的写法即为aui-tag
+    }
+
+    created(){
+        // 通过hash值来判断首次加载的路由
+        const hash = (location.hash||'/').replace('#', '');
+        router.go(hash);
+    }
+}
+
+</script>
+
+<style type="less">
+
+/* 引用皮肤 */
+@import url('~@theme/common.less');
+
+#app, aui-frame{
+    display: block;
+    height: 100%;
+}
+
+.demo-note {
+    background: #fff75d;
+    margin: 10px 0px;
+    padding: 10px;
+    color: #7b7b7b;
+    text-align: center;
+    text-shadow: none;
+    font-size: 14px;
+}
+
+aui-titlebar .icon{
+    color: @color;/* 使用皮肤中的变量 */
+}
+</style>
+
+

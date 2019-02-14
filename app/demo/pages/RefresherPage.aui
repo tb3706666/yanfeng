@@ -1,0 +1,142 @@
+<ui>
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft-fill"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>Refresher</aui-text>
+            </caption-area>
+        </aui-titlebar>
+        <div class="demo-note">此处列表刷新使用的是内置的MVVM框架</div>
+    </aui-header>
+
+    <aui-refresher style="position:absolute; top:110px; right: 0px; bottom: 0px; left: 0px;" v-on:pulldown="func.doPullDown" v-on:pullup="func.doPullUp">
+        <div>
+            <aui-list>
+                <list-cell v-for="item in list">
+                    <a>
+                        {{item.title}} <i class="icon auicon icon-arrowright"></i>
+                    </a>
+                </list-cell>
+            </aui-list>
+            <div v-if="!hasData" style="text-align:center;padding:10px;color:#ddd;">没有更多数据</div>
+        </div>
+    </aui-refresher>
+</ui>
+
+
+<script>
+
+import '@auicomp/refresher/Refresher.aui';
+import '@auicomp/list/List.aui';
+
+let listIndex = 0;
+
+export default class RefresherPage{
+    
+    static get tag(){
+        return 'refresherpage';
+    }
+
+    init(){
+        const arr = [];
+        // for(let i=0;i<20;i++){
+        //     arr.push({
+        //         title: '标题'+listIndex++
+        //     });
+        // }
+
+        const obj = this.$obj = {
+            hasData: true,
+            list: arr,
+            func: {
+                doPullDown: function(e, $refresh){
+                    console.log('pulldown');
+                    setTimeout(function(){
+                        const arr = [];
+                        for(let i=0;i<10;i++){
+                            arr.push({
+                                title: '标题'+listIndex++
+                            });
+                        }
+                        obj.list.$reset(arr);
+                        obj.hasData = true;
+                        $refresh.refresh();
+                    }, 2000);
+                },
+                doPullUp: function(e, $refresh){
+                    console.log('pullup');
+                    setTimeout(function(){
+                        const arr = [];
+                        for(let i=0;i<5;i++){
+                            arr.push({
+                                title: '标题'+listIndex++
+                            });
+                        }
+                        obj.list.push(...arr);
+
+                        if(listIndex>30) {
+                            obj.hasData = false;
+                            return $refresh.end();
+                        }
+                        $refresh.refresh();
+                    }, 2000);
+                }
+            }
+        }
+        this.$vm = $(this.$el).find('aui-refresher').render(obj);
+
+    }
+
+    created(){
+
+        this.init();
+
+        // const obj = this.$obj;
+        
+        // $(this.$el).find('aui-refresher')
+        // .on('pulldown', function(e, $refresh){
+        //     setTimeout(function(){
+        //         const arr = [];
+        //         for(let i=0;i<20;i++){
+        //             arr.push({
+        //                 title: '标题'+listIndex++
+        //             });
+        //         }
+        //         obj.list.$reset(arr);
+        //         obj.hasData = true;
+        //         $refresh.refresh();
+        //     }, 2000);
+        // }).on('pullup', function(e, $refresh){
+        //     setTimeout(function(){
+
+        //         const arr = [];
+        //         for(let i=0;i<5;i++){
+        //             arr.push({
+        //                 title: '标题'+listIndex++
+        //             });
+        //         }
+        //         obj.list.push(...arr);
+
+        //         if(listIndex>30) {
+        //             obj.hasData = false;
+        //             return $refresh.end();
+        //         }
+        //         $refresh.refresh();
+        //     }, 2000);
+        // });
+    }
+
+    detached(){
+        this.$vm && this.$vm.destroy();
+    }
+}
+
+</script>
+
+<style>
+
+</style>
+
+

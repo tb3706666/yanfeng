@@ -1,0 +1,726 @@
+<ui>
+    <div class="LizhiDetail">
+       <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>详情Detail</aui-text>
+                </caption-area>
+                <right-area>
+                    <a v-on:click="func.openShenPi">
+                        <i class="icon auicon icon-rdook"></i>
+                    </a>
+                </right-area>
+            </aui-titlebar>
+        </aui-header>
+        <aui-tabbar class="tabbar tabbar-line tabbar-line-width70 animated" style="display:none">
+            <tabbar-cell v-bind:class="{active:tabIndex==0}" v-on:click="func.tabChange(0)">
+                <label class="tab-label">流程表单Form</label>
+            </tabbar-cell>
+            <tabbar-cell v-bind:class="{active:tabIndex==1}" v-on:click="func.tabChange(1)">
+                <label class="tab-label">审批Comments</label>
+            </tabbar-cell>
+        </aui-tabbar>
+        <aui-scroller class="content">
+            <div class="page1 " v-bind:class="{curr:tabIndex==0}">
+                <aui-action class="list-cell active" href="#toggle1" type="toggle">
+                    <a class="toogle-title">
+                        离职信息<i class="icon auicon icon-arrowright"></i>
+                    </a>
+                </aui-action>
+                <div class="toggle1-line"></div>
+                <div id="toggle1" action-target class="active toggle-box">
+                    <div class="box1">
+                        <div class="label-top">主题</div>
+                        <div class="label-content">{{data.zt}}</div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">填单人姓名</div>
+                        <div class="label-content">{{data.xm}}</div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">填单人说明</div>
+                        <div class="label-content">{{data.tdrsm}}</div>
+                    </div>
+                   <div class="box1">
+                        <div class="label-top">离职人工号</div>
+                        <div class="label-content">{{data.bm}}</div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">部门</div>
+                        <div class="label-content">{{data.qjlx}}</div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">岗位</div>
+                        <div class="label-content">{{data.kssj}}</div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">入职日期</div>
+                        <div class="label-content">{{data.jssj}}</div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">最后工作日</div>
+                        <div class="label-content">{{data.dkcd}}</div>
+                    </div>
+                     <div class="box1">
+                        <div class="label-top">备注</div>
+                        <div class="label-content">{{data.jqsm}}</div>
+                    </div>
+                    <div class="box1 border0">
+                        <div class="label-top">附件 Attachment</div>
+                        <div class="label-content">
+                            <div v-if="data.fileInfo.length==0">
+                            无附件
+                            </div>
+                            <ul v-else class="attach-list">
+                                <li v-for="item in data.fileInfo" v-filter="func.addAttachIcon" v-on:click="func.openAttach(item.fileUrl,item.fileName)">
+                                    <img v-bind:src="item.icon" class="attach-icon"></img>
+                                    <div class="attach-text">{{item.fileName}}</div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <aui-action class="list-cell active" href="#toggle2" type="toggle">
+                    <a class="toogle-title">
+                        签收单<i class="icon auicon icon-arrowright"></i>
+                    </a>
+                </aui-action>
+                <div class="toggle1-line"></div>
+                <div id="toggle2" action-target class="active toggle-box border0">
+                   <div v-for="item1 in data.qianshoudanArr" v-filter="func.addIndex">
+                        <div v-for="item2 in item1.qianshoulist"  class="border1 margin-b5">
+                            <div class="fd-row border-bt1 align-c padding10">
+                                <div class="flex3">事项</div>
+                                <div class="flex7 margin-r5 text-r">{{item2.spantext}}</div>
+                            </div>
+                           <div class="fd-row border-bt1 align-c padding10">
+                                <div class="flex3">审核状态</div>
+                                <div class="flex7 fd-row align-c" v-on:click="func.selectType(item1.index,$index)">
+                                    <div class="flex1  text-r margin-r5">{{item2.selectName}}</div>
+                                    <i class="icon auicon icon-arrowright"></i>
+                                </div>
+                            </div>
+                            <div class="fd-row align-c padding10">
+                                <div class="flex3">审核说明</div>
+                                <div class="flex7 text-r margin-r5">
+                                   <input type="text" class="text-r" v-model="item2.inputvalue" v-on:change="func.changeinput(item1.index,$index)" placeholder="请输入审核说明" style="padding:0"/>
+                                </div>
+                            </div>
+                        </div>
+                   </div>
+                </div>
+            </div>
+            <div class="page2"  v-bind:class="{curr:tabIndex==1}">
+                <div class="box1">
+                    <aui-action class="list-cell " href="#toggle3" type="toggle">
+                        <a class="toogle-title">
+                            流程信息 Process Status<i class="icon auicon icon-arrowright"></i>
+                        </a>
+                    </aui-action>
+                    <div class="toggle1-line"></div>
+                    <div id="toggle3" action-target class="toggle-box">
+                        <div class="box1" v-if="data.hisInfo.length==0">{{data.hisInfo.length}}暂无记录!</div>
+                        <div  v-else v-for="item in data.hisInfo">
+                            <div class="box1" v-if="item.cur == 'false'&&item.td6 == 'fiberhome'">{{item.td5}} {{item.td1}} {{item.td3}} {{item.td2}}</div>
+                            <div class="box1" v-if="item.cur == 'false'&&item.td6 != 'fiberhome'">
+                                <div>{{item.td5}} {{item.td1}} {{item.td3}} {{item.td2}}</div>
+                                <div class="sp-text">审批意见 Comments</div>
+                                <div  class="sp-info">{{item.td6}}</div>
+                            </div>
+                            <div class="box1 ftc-red" v-if="item.cur != 'false'">{{item.td1}} {{item.td5}} 待处理 To been done</div>
+                        </div>
+                    </div>
+                    <aui-action class="list-cell active" href="#toggle4" type="toggle">
+                        <a class="toogle-title">
+                            审批意见 Comments<i class="icon auicon icon-arrowright"></i>
+                        </a>
+                    </aui-action>
+                    <div class="toggle1-line"></div>
+                    <div id="toggle4" action-target class="active toggle-box">
+                        <div class="opinions-title">
+                            <div class="opinions-text">常用意见 Common opinions</div>
+                            <i class="icon auicon icon-rdomenu"  v-on:click="func.openSelect()"></i>
+                        </div>
+                        <div class="opinions-textarea">
+                            <div class="textarea-box">
+                                <textarea rows="5" v-model="content"></textarea>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </aui-scroller>
+    </div>
+</ui>
+<script>
+    import '@auicomp/list/List.aui';
+
+    import fetch from "@libs/fetch";
+    import common from '@libs/common';
+    import { router } from '@auicomp/action/Action.aui';
+    import Selectsheet from '@comm/components/Selectsheet.aui';
+    import Action from '@auicomp/action/Action.aui';
+    import '@auicomp/tabbar/Tabbar.aui';
+
+    
+
+    export default class LizhiDetail {
+
+        static get tag() {
+            return 'LizhiDetail';
+        }
+        created() {
+            var self = this;
+            const obj = this.$obj = {
+                tabIndex:0,
+                data:{},
+                buttonSav:'',
+                buttonFow:'',
+                content:'',
+                func:{
+                    tabChange(index){
+                        obj.tabIndex = index;
+                    },
+                    openSelect(){
+                        Selectsheet.show({
+                            list: obj.data.selInfo.map(function(item){
+                                return item.selText
+                            }),
+                            func:function(index){
+                                obj.content = obj.data.selInfo[index].selValue;
+                            }
+                        });
+                    },
+                    openShenPi(){
+                         Selectsheet.show({
+                            list: obj.data.butInfo.map(function(item){
+                                return item.butText
+                            }),
+                            func:function(index){
+                                self.doNext(obj.data.butInfo[index].butText,obj.data.butInfo[index].butValue)
+                            }
+                        });
+                    },
+                    addAttachIcon(index,item){
+                        let name = item.fileName;
+                        let houzui = name.substring(name.lastIndexOf(".") + 1, name.length).toLowerCase();;
+                        let imgType = "jpg,bmp,pcx,tiff,gif,jpeg,tga,exif,fpx,svg,psd,cdr,pcd,dxf,ufo,eps,al,png,hdri,raw,wmf,lic,emf,";
+                        let imgstr;
+                        if (houzui == "pdf") {
+                            imgstr = './assets/imgs/filetype/pdf.png';
+                        } else if (houzui == "doc" || houzui == "docx") {
+                            imgstr = './assets/imgs/filetype/word.png';
+                        } else if (houzui == "txt") {
+                            imgstr = './assets/imgs/filetype/txt.png';
+                        } else if (houzui == "xls" || houzui == "xlsx") {
+                            imgstr = './assets/imgs/filetype/excel.png';
+                        } else if (imgType.indexOf(houzui + ",") > -1) {
+                            imgstr = './assets/imgs/filetype/picture.png';
+                        } else if (houzui == "rar" || houzui == "zip") {
+                            imgstr = './assets/imgs/filetype/zip.png';
+                        } else {
+                            imgstr = './assets/imgs/filetype/unknow.png';
+                        }
+                        item.icon = imgstr;
+                    },
+                    openAttach(url,name){
+                        url = common.oaUrl + url;
+                        common.openAttach(url,name);
+                    },
+                    addIndex(index,item){
+                        item.index = index;
+                    },
+                    selectType(index1,index2){
+                        Selectsheet.show({
+                            list: obj.data.qianshoudanArr[index1].qianshoulist[index2].selectlist.map(function(item){
+                                return item.optiontext
+                            }),
+                            func:function(index){
+                                obj.data.qianshoudanArr[index1].qianshoulist[index2].selectName = obj.data.qianshoudanArr[index1].qianshoulist[index2].selectlist[index].optiontext;
+                                obj.data.qianshoudanArr[index1].qianshoulist[index2].selectValue = obj.data.qianshoudanArr[index1].qianshoulist[index2].selectlist[index].optionvalue;
+                                let optionvalue = obj.data.qianshoudanArr[index1].qianshoulist[index2].selectlist[index].optionvalue;
+                                if(optionvalue == ""){
+                                    return;
+                                }
+                                //select 切换更改jPack的值
+                                let id1 =  obj.data.qianshoudanArr[index1].qianshoulist[index2].selectid.split("_")[1];
+                                let mdvar =  obj.data.jPack.replace(new RegExp(".*?(\{\"Index\":"+id1+",.*?\}).*","g"),"$1");
+                                // console.log(obj.data.jPack);
+                                mdvar = mdvar.replace(new RegExp("\"DataAction\":0","g"),"\"DataAction\":2");
+                                mdvar = mdvar.replace(new RegExp("\"C7\":[0-9]","g"),"\"C7\":"+optionvalue+"");
+                                obj.data.jPack = obj.data.jPack.replace(new RegExp("\{\"Index\":"+id1+",.*?\}","g"),mdvar);
+                                // console.log(obj.data.jPack);
+                            }
+                        });
+                    },
+                    changeinput(index1,index2){
+                        //审核说明input 更改  更改jPack的值
+                        let id1 =  obj.data.qianshoudanArr[index1].qianshoulist[index2].selectid.split("_")[1];
+                        let id2 =  obj.data.qianshoudanArr[index1].qianshoulist[index2].selectid.split("_")[2];
+                        let inputvalue = obj.data.qianshoudanArr[index1].qianshoulist[index2].inputvalue;
+                        let mdvar =  obj.data.jPack.replace(new RegExp(".*?(\{\"Index\":"+id1+",.*?\}).*","g"),"$1");
+                        // console.log(obj.data.jPack);
+                        if(mdvar.indexOf(id2)==-1){
+                            mdvar = mdvar.replace(new RegExp("\"Datas\":\{","g"),"\"Datas\":\{\""+id2+"\":\""+inputvalue+"\",");
+                        }else{
+                            mdvar = mdvar.replace(/\"C7\":.*?,/g,"\""+id2+"\":\""+inputvalue+"\",");
+                        }
+                        obj.data.jPack = obj.data.jPack.replace(new RegExp("\{\"Index\":"+id1+",.*?\}","g"),mdvar);
+                        console.log(obj.data.jPack);
+                    }
+                }
+            }
+            /*var infos = {
+                "dw": "",
+                "flowid": "2310",
+                "jssj": "2012-12-17",
+                "xm": "徐燕燕_Xu Yanyan",
+                "ly": "",
+                "nodeid": "4",
+                "startTime": "2018-11-8 09:50:57",
+                "dataVersion": "1",
+                "flowVersion": "2",
+                "procTime": "2",
+                "zt": "aniqi_83186_倪茜_Ni Qian_离职审批_Leave approval",
+                "bm": "83186-倪茜-Ni Qian",
+                "action": "ApproveIns.aspx?flowid=2310&taskid=17816208",
+                "hrid": "1",
+                "tdrsm": "手动添加Created by user",
+                "gjlx": "信息技术部",
+                "jqsm": "手动添加Created by user",
+                "taskId": "17816208",
+                "butInfo": [
+                    {
+                        "butText": "同意",
+                        "butValue": ""
+                    },
+                    {
+                        "butText": "征询意见",
+                        "butValue": ""
+                    },
+                    {
+                        "butText": "转办",
+                        "butValue": ""
+                    }
+                ],
+                "dkcd": "2018-11-30",
+                "instanceId": "17252592",
+                "qianshoudanArr": [
+                    {
+                        "qianshoulist": [
+                            {
+                                "selectid": "F9_70_C7",
+                                "spantext": "应用系统相关-总部使用(总部指定审批人,不允许修改)",
+                                "inputid": "F9_70_C8",
+                                "selectlist": [
+                                    {
+                                        "optionselect": "false",
+                                        "optionvalue": "",
+                                        "optiontext": ""
+                                    },
+                                    {
+                                        "optionselect": "true",
+                                        "optionvalue": "0",
+                                        "optiontext": "待审核"
+                                    },
+                                    {
+                                        "optionselect": "false",
+                                        "optionvalue": "1",
+                                        "optiontext": "已审核"
+                                    },
+                                    {
+                                        "optionselect": "false",
+                                        "optionvalue": "2",
+                                        "optiontext": "无需审核"
+                                    }
+                                ]
+                            }
+                        ],
+                        "displayflag": ""
+                    }
+                ],
+                "selInfo": [
+                    {
+                        "selText": "- 请选择 -",
+                        "selValue": ""
+                    },
+                    {
+                        "selText": "测试测试",
+                        "selValue": "测试测试"
+                    },
+                    {
+                        "selText": "好好好",
+                        "selValue": "好好好"
+                    }
+                ],
+                "kssj": "高级应用系统工程师",
+                "qjcd": "",
+                "slotId": "0",
+                "jPack": "{\"IsAltered\":false,\"BizIndex\":71,\"Blocks\":{\"BIZ_TERMINATIONCHECKEMP\":{\"TableName\":\"BIZ_TERMINATIONCHECKEMP\",\"Records\":{\"1\":{\"Index\":1,\"DataAction\":0,\"Datas\":{\"C16\":\"aniqi_83186_倪茜_Ni Qian_离职审批_Leave approval\",\"C12\":\"83084\",\"C13\":\"徐燕燕_Xu Yanyan\",\"C15\":244,\"C17\":\"手动添加Created by user\",\"C19\":null,\"C18\":28656,\"C3\":\"倪茜_Ni Qian\",\"C5\":244,\"C20\":13653,\"C21\":29746,\"C22\":\"2012-12-17T00:00:00\",\"C23\":\"2018-11-30T00:00:00\",\"C24\":\"qian.ni@adient.com\",\"C25\":\"13916681410\",\"C28\":62,\"C29\":\"aniqi\",\"C27\":null,\"C26\":\"手动添加Created by user\",\"C1\":1890,\"C4\":\"Ni Qian\",\"C2\":\"83186\",\"C6\":null,\"C7\":null,\"C8\":1461,\"C9\":null,\"C10\":null,\"C11\":null,\"C14\":\"Xu Yanyan\"}}}},\"BIZ_TERMINATIONCHECKLIST\":{\"TableName\":\"BIZ_TERMINATIONCHECKLIST\",\"Records\":{\"2\":{\"Index\":2,\"DataAction\":0,\"Datas\":{\"C2\":2,\"C5\":16590,\"C7\":0,\"C8\":null,\"C10\":1,\"C1\":24078,\"C3\":1,\"C4\":true,\"C9\":3,\"C6\":null}},\"3\":{\"Index\":3,\"DataAction\":0,\"Datas\":{\"C2\":3,\"C5\":56269,\"C7\":0,\"C8\":null,\"C10\":1,\"C1\":24079,\"C3\":0,\"C4\":false,\"C9\":12,\"C6\":null}},\"4\":{\"Index\":4,\"DataAction\":0,\"Datas\":{\"C2\":4,\"C5\":30730,\"C7\":0,\"C8\":null,\"C10\":1,\"C1\":24080,\"C3\":1,\"C4\":true,\"C9\":6,\"C6\":null}},\"5\":{\"Index\":5,\"DataAction\":0,\"Datas\":{\"C2\":5,\"C5\":19781,\"C7\":0,\"C8\":null,\"C10\":1,\"C1\":24081,\"C3\":1,\"C4\":true,\"C9\":4,\"C6\":null}},\"6\":{\"Index\":6,\"DataAction\":0,\"Datas\":{\"C2\":6,\"C5\":54742,\"C7\":0,\"C8\":null,\"C10\":1,\"C1\":24082,\"C3\":1,\"C4\":true,\"C9\":10,\"C6\":null}},\"7\":{\"Index\":7,\"DataAction\":0,\"Datas\":{\"C2\":7,\"C5\":55349,\"C7\":0,\"C8\":null,\"C10\":1,\"C1\":24083,\"C3\":1,\"C4\":true,\"C9\":11,\"C6\":null}},\"8\":{\"Index\":8,\"DataAction\":0,\"Datas\":{\"C2\":8,\"C5\":55349,\"C7\":0,\"C8\":null,\"C10\":1,\"C1\":24084,\"C3\":1,\"C4\":true,\"C9\":11,\"C6\":null}},\"9\":{\"Index\":9,\"DataAction\":0,\"Datas\":{\"C2\":9,\"C5\":32447,\"C7\":0,\"C8\":null,\"C10\":1,\"C1\":24085,\"C3\":1,\"C4\":true,\"C9\":7,\"C6\":null}},\"10\":{\"Index\":10,\"DataAction\":0,\"Datas\":{\"C2\":11,\"C5\":52108,\"C7\":0,\"C8\":null,\"C10\":1,\"C1\":24086,\"C3\":1,\"C4\":true,\"C9\":9,\"C6\":null}},\"11\":{\"Index\":11,\"DataAction\":0,\"Datas\":{\"C2\":12,\"C5\":30730,\"C7\":0,\"C8\":null,\"C10\":1,\"C1\":24087,\"C3\":1,\"C4\":true,\"C9\":6,\"C6\":null}},\"12\":{\"Index\":12,\"DataAction\":0,\"Datas\":{\"C2\":13,\"C5\":4087,\"C7\":0,\"C8\":null,\"C10\":1,\"C1\":24088,\"C3\":1,\"C4\":true,\"C9\":2,\"C6\":null}},\"13\":{\"Index\":13,\"DataAction\":0,\"Datas\":{\"C2\":14,\"C5\":1579,\"C7\":0,\"C8\":null,\"C10\":1,\"C1\":24089,\"C3\":1,\"C4\":true,\"C9\":1,\"C6\":null}},\"14\":{\"Index\":14,\"DataAction\":0,\"Datas\":{\"C2\":19,\"C5\":24561,\"C7\":0,\"C8\":null,\"C10\":1,\"C1\":24090,\"C3\":0,\"C4\":false,\"C9\":5,\"C6\":null}},\"15\":{\"Index\":15,\"DataAction\":0,\"Datas\":{\"C2\":24,\"C5\":34764,\"C7\":0,\"C8\":null,\"C10\":1,\"C1\":24091,\"C3\":1,\"C4\":true,\"C9\":8,\"C6\":null}}}},\"BIZ_TERMINATIONCHECKLIST01\":{\"TableName\":\"BIZ_TERMINATIONCHECKLIST01\",\"Records\":{\"69\":{\"Index\":69,\"DataAction\":0,\"Datas\":{\"C2\":14,\"C7\":0,\"C8\":null,\"C1\":2006,\"C3\":1,\"C4\":true,\"C5\":1579,\"C6\":null}}}},\"BIZ_TERMINATIONCHECKLIST02\":{\"TableName\":\"BIZ_TERMINATIONCHECKLIST02\",\"Records\":{\"68\":{\"Index\":68,\"DataAction\":0,\"Datas\":{\"C2\":13,\"C7\":0,\"C8\":null,\"C1\":2159,\"C3\":1,\"C4\":true,\"C5\":4087,\"C6\":null}}}},\"BIZ_TERMINATIONCHECKLIST03\":{\"TableName\":\"BIZ_TERMINATIONCHECKLIST03\",\"Records\":{\"58\":{\"Index\":58,\"DataAction\":0,\"Datas\":{\"C2\":2,\"C7\":0,\"C8\":null,\"C1\":2160,\"C3\":1,\"C4\":true,\"C5\":16590,\"C6\":null}}}},\"BIZ_TERMINATIONCHECKLIST04\":{\"TableName\":\"BIZ_TERMINATIONCHECKLIST04\",\"Records\":{\"61\":{\"Index\":61,\"DataAction\":0,\"Datas\":{\"C2\":5,\"C7\":0,\"C8\":null,\"C4\":true,\"C1\":2227,\"C5\":19781,\"C3\":1,\"C6\":null}}}},\"BIZ_TERMINATIONCHECKLIST05\":{\"TableName\":\"BIZ_TERMINATIONCHECKLIST05\",\"Records\":{\"70\":{\"Index\":70,\"DataAction\":0,\"Datas\":{\"C2\":19,\"C7\":0,\"C8\":null,\"C1\":2668,\"C3\":0,\"C4\":false,\"C5\":24561,\"C6\":null}}}},\"BIZ_TERMINATIONCHECKLIST06\":{\"TableName\":\"BIZ_TERMINATIONCHECKLIST06\",\"Records\":{\"60\":{\"Index\":60,\"DataAction\":0,\"Datas\":{\"C2\":4,\"C7\":0,\"C8\":null,\"C1\":2231,\"C3\":1,\"C4\":true,\"C5\":30730,\"C6\":null}},\"67\":{\"Index\":67,\"DataAction\":0,\"Datas\":{\"C2\":12,\"C7\":0,\"C8\":null,\"C1\":2232,\"C3\":1,\"C4\":true,\"C5\":30730,\"C6\":null}}}},\"BIZ_TERMINATIONCHECKLIST07\":{\"TableName\":\"BIZ_TERMINATIONCHECKLIST07\",\"Records\":{\"65\":{\"Index\":65,\"DataAction\":0,\"Datas\":{\"C2\":9,\"C7\":0,\"C8\":null,\"C1\":2269,\"C3\":1,\"C4\":true,\"C5\":32447,\"C6\":null}}}},\"BIZ_TERMINATIONCHECKLIST08\":{\"TableName\":\"BIZ_TERMINATIONCHECKLIST08\",\"Records\":{\"71\":{\"Index\":71,\"DataAction\":0,\"Datas\":{\"C2\":24,\"C7\":0,\"C8\":null,\"C1\":1897,\"C3\":1,\"C4\":true,\"C5\":34764,\"C6\":null}}}},\"BIZ_TERMINATIONCHECKLIST09\":{\"TableName\":\"BIZ_TERMINATIONCHECKLIST09\",\"Records\":{\"66\":{\"Index\":66,\"DataAction\":0,\"Datas\":{\"C2\":11,\"C7\":0,\"C8\":null,\"C1\":1630,\"C3\":1,\"C4\":true,\"C5\":52108,\"C6\":null}}}},\"BIZ_TERMINATIONCHECKLIST10\":{\"TableName\":\"BIZ_TERMINATIONCHECKLIST10\",\"Records\":{\"62\":{\"Index\":62,\"DataAction\":0,\"Datas\":{\"C2\":6,\"C7\":0,\"C8\":null,\"C1\":1334,\"C3\":1,\"C4\":true,\"C5\":54742,\"C6\":null}}}},\"BIZ_TERMINATIONCHECKLIST11\":{\"TableName\":\"BIZ_TERMINATIONCHECKLIST11\",\"Records\":{\"63\":{\"Index\":63,\"DataAction\":0,\"Datas\":{\"C2\":7,\"C7\":0,\"C8\":null,\"C1\":1358,\"C3\":1,\"C4\":true,\"C5\":55349,\"C6\":null}},\"64\":{\"Index\":64,\"DataAction\":0,\"Datas\":{\"C2\":8,\"C7\":0,\"C8\":null,\"C1\":1359,\"C3\":1,\"C4\":true,\"C5\":55349,\"C6\":null}}}},\"BIZ_TERMINATIONCHECKLIST12\":{\"TableName\":\"BIZ_TERMINATIONCHECKLIST12\",\"Records\":{\"59\":{\"Index\":59,\"DataAction\":0,\"Datas\":{\"C2\":3,\"C7\":0,\"C8\":null,\"C1\":1083,\"C3\":0,\"C4\":false,\"C5\":56269,\"C6\":null}}}},\"BIZ_TERMINATIONCHECKLIST13\":{\"TableName\":\"BIZ_TERMINATIONCHECKLIST13\",\"Records\":{}},\"BIZ_TERMINATIONCHECKLIST14\":{\"TableName\":\"BIZ_TERMINATIONCHECKLIST14\",\"Records\":{}},\"BIZ_TERMINATIONCHECKLIST15\":{\"TableName\":\"BIZ_TERMINATIONCHECKLIST15\",\"Records\":{}},\"BIZ_TERMINATIONCHECKLIST16\":{\"TableName\":\"BIZ_TERMINATIONCHECKLIST16\",\"Records\":{}},\"BIZ_TERMINATIONCHECKLIST17\":{\"TableName\":\"BIZ_TERMINATIONCHECKLIST17\",\"Records\":{}},\"BIZ_TERMINATIONCHECKLIST18\":{\"TableName\":\"BIZ_TERMINATIONCHECKLIST18\",\"Records\":{}},\"BIZ_TERMINATIONCHECKLIST19\":{\"TableName\":\"BIZ_TERMINATIONCHECKLIST19\",\"Records\":{}},\"BIZ_TERMINATIONCHECKLIST20\":{\"TableName\":\"BIZ_TERMINATIONCHECKLIST20\",\"Records\":{}}}}",
+                "fileInfo": [],
+                "qjlx": "信息技术部",
+                "hisInfo": [
+                    {
+                        "td1": "83084-徐燕燕-Xu Yanyan",
+                        "cur": "false",
+                        "td3": "开始节点",
+                        "td2": "发起申请",
+                        "td5": "2018-11-07 10:53",
+                        "td4": "",
+                        "td6": "fiberhome"
+                    },
+                    {
+                        "td1": "80001-骆君-Luo Jun,82176-沈琴-Shen Qin,82272-何燕燕-He Yanyan,82450-林斌-Lin Bin（10017849-邱勇倩-Qiu Yongqian）,83022-王海伟-Wang Haiwei,810362-秦鹏-qin peng（10021796-吴卫斌-Wu Weibin）,10007659-朱美凤-Zhu Meifeng,10009924-王宾-Wang Bin,10028525-陆青-Lu Qing,10031169-周泽鑫-Zhou Zexin,10031763-蔡莉萍-Cai Liping,10032673-陈媛秋子-Chenyuan Qiuzi",
+                        "cur": "true",
+                        "td3": "并行节点",
+                        "td2": "",
+                        "td5": "",
+                        "td4": "2018-11-07 10:53",
+                        "td6": "fiberhome"
+                    },
+                    {
+                        "td1": "",
+                        "cur": "false",
+                        "td3": "告知节点",
+                        "td2": "",
+                        "td5": "",
+                        "td4": "",
+                        "td6": "fiberhome"
+                    }
+                ]
+            };
+            infos.qianshoudanArr.forEach(function(item1){
+                item1.qianshoulist.forEach(function(item2){
+                    item2.inputvalue = "";//添加审核说明字段
+                    let selected = item2.selectlist.filter(item3=>item3.optionselect=='true')[0];
+                    item2.selectName = selected.optiontext;
+                    item2.selectValue = selected.optionvalue;
+                })
+            });
+            console.log(infos.jPack)
+            self.$obj.data = infos;
+            self.$vm = $(self.$el).render(self.$obj);
+            $(".tabbar").css("display","block");*/
+            this.onload();
+        }
+        detached(){
+            this.$vm && this.$vm.destroy();
+        }
+        doNext(flag, flag1){
+            switch(flag) {
+				case "同意":
+					this.$obj.buttonSav = "approve";
+					this.$obj.buttonFow = "ACCEPT";
+					break;
+				case "Approve":
+					this.$obj.buttonSav = "approve";
+					this.$obj.buttonFow = "ACCEPT";
+					break;
+				case "拒绝":
+					this.$obj.buttonSav = "approve";
+					this.$obj.buttonFow = "REJECT";
+					break;
+				case "Reject":
+					this.$obj.buttonSav = "approve";
+					this.$obj.buttonFow = "REJECT";
+					break;
+				case "回退上一步":
+					this.$obj.buttonSav = "backTrace";
+					this.$obj.buttonFow = "";
+					break;
+				case "Back to previous step":
+					this.$obj.buttonSav = "backTrace";
+					this.$obj.buttonFow = "";
+					break;
+				case "退回开端":
+					this.$obj.buttonSav = "returnStart";
+					this.$obj.buttonFow = "";
+					break;
+				case "Back to Initiator":
+					this.$obj.buttonSav = "returnStart";
+					this.$obj.buttonFow = "";
+					break;
+				case "回退历史审批人":
+					this.$obj.buttonSav = "showHistoryList";
+					this.$obj.buttonFow = flag1;
+					break;
+				case "征询意见":
+					this.$obj.buttonSav = "inquire";
+					this.$obj.buttonFow = "";
+					break;
+				case "consultation":
+					this.$obj.buttonSav = "inquire";
+					this.$obj.buttonFow = "";
+					break;
+				case "提交":
+					this.$obj.buttonSav = "FinishInquire";
+					this.$obj.buttonFow = "";
+					break;
+				case "Submit":
+					this.$obj.buttonSav = "FinishInquire";
+					this.$obj.buttonFow = "";
+					break;
+				case "转办":
+					this.$obj.buttonSav = "forward";
+					this.$obj.buttonFow = "";
+					break;
+				case "transfer to others":
+					this.$obj.buttonSav = "forward";
+					this.$obj.buttonFow = "";
+					break;
+				default:
+					alert("该操作暂不支持,请联系管理员!This operation hasn't done yet,Please contact the IT department!");
+					break;
+				}
+				this.doSubmit();
+        }
+        doSubmit() {
+            let self = this;
+            if (this.$obj.buttonSav == "approve") {
+                if (this.$obj.buttonFow == "ACCEPT") {
+
+                    for(let i=0;i<this.$obj.data.qianshoudanArr.length;i++){
+                        let qianshoulist = this.$obj.data.qianshoudanArr[i].qianshoulist;
+                        for(let j = 0;j<qianshoulist.length;j++){
+                            if(qianshoulist[j].selectValue == ''||qianshoulist[j].selectValue == '0'){
+                                common.alert("请选择审核状态");
+								return;
+                            }
+                        }
+                    }
+                    var data = "{\"Opinion\":\"ACCEPT\",\"Remark\":\"" + this.$obj.content + "\",\"TaskId\":\"" + this.$obj.data.taskId + "\",\"FlowId\":\"" + this.$obj.data.flowid + "\",\"DataVersion\":\"" + this.$obj.data.dataVersion + "\",\"StartTime\":\"" + this.$obj.data.startTime + "\",\"FuncName\":\"wf.RuntimeHandler.Approve\"}{:ky->f" + this.$obj.data.jPack;
+                  
+                } else {
+                    var data = "{\"Opinion\":\"REJECT\",\"Remark\":\"" + this.$obj.content + "\",\"TaskId\":\"" + this.$obj.data.taskId + "\",\"FlowId\":\"" + this.$obj.data.flowid + "\",\"DataVersion\":\"" + this.$obj.data.dataVersion + "\",\"StartTime\":\"" + this.$obj.data.startTime + "\",\"FuncName\":\"wf.RuntimeHandler.Approve\"}{:ky->f" + this.$obj.data.jPack;
+                }
+                this.submit(data);
+            }
+            if (this.$obj.buttonSav == "backTrace") {
+                if (this.$obj.content == "") {
+                    common.alert("请填写意见!Please fill in the comments!",function(){
+                        self.$obj.tabIndex = 1;
+                        $('.opinions').focus();
+                    });
+                } else {
+                    var data = "{\"TaskId\":\"" + this.$obj.data.taskId + "\",\"Remark\":\"" + this.$obj.content + "\",\"StartTime\":\"" + this.$obj.data.startTime + "\",\"FlowId\":\"" + this.$obj.data.flowid + "\",\"FuncName\":\"wf.RuntimeHandler.BackTrace\"}";
+                    this.submit(data);
+                }
+            }
+            if (this.$obj.buttonSav == "returnStart") {
+                if (this.$obj.content == "") {
+                    common.alert("请填写意见!Please fill in the comments!",function(){
+                        self.$obj.tabIndex = 1;
+                        $('.opinions').focus();
+                    });
+                } else {
+                    var data = "{\"TaskId\":\"" + this.$obj.data.taskId + "\",\"Remark\":\"" + this.$obj.content  + "\",\"StartTime\":\"" + this.$obj.data.startTime + "\",\"FlowId\":\"" + this.$obj.data.flowid  + "\",\"FuncName\":\"wf.RuntimeHandler.ReturnStart\"}";
+                    this.submit(data);
+                }
+            }
+            if (this.$obj.buttonSav == "showHistoryList") {
+                if (this.$obj.content == "") {
+                    common.alert("请填写意见!Please fill in the comments!",function(){
+                        self.$obj.tabIndex = 1;
+                        $('.opinions').focus();
+                    });
+                } else {
+                   location.href = '#/History?flag='+this.$obj.buttonFow+'&page=aui-LizhiDetail';
+                }
+            }
+            if (this.$obj.buttonSav == "inquire") {
+                if (this.$obj.content == "") {
+                     common.alert("请填写意见!Please fill in the comments!",function(){
+                        self.$obj.tabIndex = 1;
+                        $('.opinions').focus();
+                    });
+                } else {
+                    location.href = '#/Choose?caoZuo=Inquire&page=aui-LizhiDetail';
+                }
+            }
+            if (this.$obj.buttonSav == "FinishInquire") {
+                if (this.$obj.content == "") {
+                     common.alert("请填写意见!Please fill in the comments!",function(){
+                        self.$obj.tabIndex = 1;
+                        $('.opinions').focus();
+                    });
+                } else {
+                    var data = "{\"Remark\":\"" + this.$obj.content + "\",\"TaskId\":\"" + this.$obj.data.taskId + "\",\"FlowId\":\"" + this.$obj.data.flowid + "\",\"StartTime\":\"" + this.$obj.data.startTime + "\",\"FuncName\":\"wf.RuntimeHandler.FinishInquire\"}{:ky->f" + this.$obj.data.jPack;
+                    this.submit(data);
+                }
+            }
+            if (this.$obj.buttonSav == "forward") {
+                if (this.$obj.content == "") {
+                     common.alert("请填写意见!Please fill in the comments!",function(){
+                        self.$obj.tabIndex = 1;
+                        $('.opinions').focus();
+                    });
+                }  else {
+                     location.href = '#/Choose?caoZuo=Forward&page=aui-LizhiDetail';
+                }
+            }
+        }
+        submit(jsonData){
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : common.hrUrl+'/qingjiasubmit',
+                data: {
+                    jsonData:jsonData,
+                },
+                type: 'post',
+                success: function(dataInfo){
+                   if (dataInfo.flag == "success") {
+                        common.alert("操作成功!Successful Done!", function() {
+                            document.querySelector('.aui-refresher-LizhiList').component.refresher.triggerDownScroll();
+                            history.go(-1);
+                        });
+                    } else {
+                        common.alert("操作失败!Fail Done!");
+                    }
+                }
+            });
+        }
+        onload(){
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : common.hrUrl+'/lizhidetail.jsp',
+                data: {
+                    unid:router.getQueryObj().unid,
+                },
+                type: 'post',
+                success: function(infos){
+                    self.$obj.data = infos;
+                    infos.qianshoudanArr.forEach(function(item1){
+                        item1.qianshoulist.forEach(function(item2){
+                            item2.inputvalue = "";//添加审核说明字段
+                            let selected = item2.selectlist.filter(item3=>item3.optionselect=='true')[0];
+                            item2.selectName = selected.optiontext;
+                            item2.selectValue = selected.optionvalue;
+                        })
+                    });
+                    console.log(JSON.stringify(infos));
+                    self.$vm = $(self.$el).render(self.$obj);
+                    $(".tabbar").css("display","block");
+                }
+            });
+        }
+    }
+</script>
+<style type='less'>
+@import url('../../assets/less/theme/default/common.less');
+.LizhiDetail{
+    .tabbar{
+         position: absolute;
+        top: 45px;
+    }
+    .content{
+        position: absolute;
+        top: 85px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        background: white;
+        .page1,.page2{
+            display: none;
+            width: 100%;
+            margin-bottom: 15px;
+            .list-cell{
+                border-top: 0;
+                .toogle-title{
+                    color:#428bca !important;
+                }
+            }
+            .toggle1-line{
+                height: 1px;
+                background: #A0C8E8;
+                margin: 0px 15px 0px 15px;
+            }
+            .toggle-box{
+                border: 1px solid #AAAAAA;
+                margin: 0px 15px 0px 15px;
+                margin-top: 5px;
+                // display: flex;
+                // flex-direction: column;
+                .box1{
+                    padding: 8px 10px 8px 10px;
+                    border-bottom: 1px solid @border-color;
+                    .label-content{
+                        margin-top:5px;
+                        text-align: right;
+                        color: #2E9BF2;
+                        .attach-list{
+                            li{
+                                display: flex;
+                                flex-direction: row;
+                                align-items: center;
+                                border-bottom: 1px solid @border-color;
+                                padding: 5px 0;
+                                .attach-icon{
+                                    width: 35px;
+                                    margin-right: 5px;
+                                }
+                                &:last-child{
+                                    border:0;
+                                }
+                                &:active{
+                                    background: #eee;
+                                }
+                            }
+                        }
+                    }
+                    .sp-text{
+                         border-top: 1px solid @border-color;
+                         margin-top: 8px;
+                        padding-top: 8px;
+                    }
+                    .sp-info{
+                        text-align:right;
+                        color:red;
+                    }
+                }
+                .opinions-title{
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    padding:8px 10px 8px 10px;
+                    border-bottom: 1px solid @border-color;
+                    .opinions-text{
+                        flex:1;
+                    }
+                    .auicon{
+                        font-size:24px;
+                    }
+                }
+                .opinions-textarea{
+                    width: 100%;
+                    padding: 8px 10px 8px 10px;
+                    .textarea-box{
+                        width: 100%;
+                        border: 1px solid @border-color;
+                        border-radius: 4px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: stretch;
+                        textarea{
+                            border:0;
+                            padding: 0;
+                            margin: 5px;
+                        }
+                    }
+                }
+               
+            }   
+        }
+        .curr{
+            display: block;
+        }
+    }
+}
+
+
+</style>

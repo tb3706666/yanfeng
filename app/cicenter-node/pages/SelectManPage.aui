@@ -1,0 +1,132 @@
+<ui>
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>人员选择</aui-text>
+            </caption-area>
+        </aui-titlebar>
+    </aui-header>
+
+
+    <aui-scroller id="namescroller" class="content" style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;text-align: center;">
+        
+        <div style="width:100%;margin:5px 0px;">
+            <div style="display: inline-block; width:60%;">
+                    <input name="searchman" style="width:100%;height:44px;" id="inputname" type="text"  placeholder="请输入关键字" minlength="2" required data-icon="empty">
+                
+            </div>
+            <div style="display: inline-block; width:20%;">
+                <aui-button class="btn btn-link" v-on:click="func.searchname" style="width:20%;">搜索</aui-button>
+            </div>
+        </div>
+         <aui-list id="manlist">
+            <list-cell  v-for="item in items" v-on:click="func.nlistclick(item.empname,item.userid)">
+                <a style="text-align:left;">
+                    {{item.empname}} 
+                </a>
+            </list-cell>
+        </aui-list>
+    </aui-scroller>
+   
+</ui>
+
+
+<script>
+import '@auicomp/header/Header.aui';
+import '@auicomp/button/Button.aui';
+import '@auicomp/scroller/Scroller.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auicomp/datetime/DateTime.aui';
+import '@auiutil/mobiscroll3/css/mobiscroll.javascript.min.css';
+import mobiscroll from '@auiutil/mobiscroll3/js/mobiscroll.javascript.min';
+import '@auicomp/list/List.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+import Confirm from '@auicomp/confirm/Confirm.aui';
+import fetch from '@comm/utils/xfetch';
+import { router } from '@auicomp/action/Action.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import './Frame.aui';
+export default class SelectManPage{
+    static get tag(){
+        return 'selectman';
+    }
+    created () {
+
+      mobiscroll.settings = {
+            theme: 'ios',
+            lang: 'zh',
+        };
+        mobiscroll.form('#demo');
+
+
+        // var lname = router.getQueryObj(location.search).lname||router.getQueryObj().lname;//获取username
+        // var lpassword = router.getQueryObj(location.search).lpassword||router.getQueryObj().lpassword;//password
+         var mancout=[];
+         var f=0; //表示无匹配数据 否则为1
+         var obj = {
+             items : mancout,
+             func:{
+                searchname:function(){
+                    mancout.splice(0,mancout.length);
+                    var nametag=$("#inputname").val();
+                    var re = new RegExp(nametag);//正则表达判断
+                    f=0;
+                    auiLoading.show();
+                    fetch({
+                        appId: 'ci',
+                        url : 'http://ciurl/search.jsp',
+                        data: {
+                            // username: lname,
+                            // password: lpassword
+                        },
+                        success: function(json){
+                            $.each(json.list, function(e,e1) {
+                                var showname=e1.empname;
+                                if(re.test(showname)){
+                                    var manjson={empname:showname,userid:e1.id}
+                                    mancout.push(manjson);
+                                    f=1;
+                                }
+                            });
+                            if(f==0){
+                                Toast.show("无匹配数据！");
+                            }
+
+                            auiLoading.hide();
+                        },
+                        error: function(rs){
+                            auiLoading.hide();
+                            Toast.show(rs.errmsg);
+                        }
+                    });
+                },
+                nlistclick:function(names,id){
+                    Confirm.show({
+                            content: '确定选择'+names+'吗？',
+                            doOk: function(){
+                     //组件传值
+                    document.querySelector('aui-hllr').component.fname(names,id);
+                    history.go(-1);
+
+                            },
+                            doCancel: function(){
+                                console.log('Confirm Cancel');
+                            }
+                        });
+                }
+            }
+         };
+         $('#namescroller').render(obj);
+
+    }
+}
+
+</script>
+
+<style>
+
+    
+</style>

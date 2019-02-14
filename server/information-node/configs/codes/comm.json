@@ -1,0 +1,16 @@
+[
+    {
+        "errcode": 10000,
+        "errmsg": {
+            "cn": "请求错误",
+            "en": "request error"
+        }
+    },
+    {
+        "errcode": 10001,
+        "errmsg": {
+            "cn": "会话超时",
+            "en": "session timeout"
+        }
+    }
+]

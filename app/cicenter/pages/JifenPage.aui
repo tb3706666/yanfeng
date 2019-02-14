@@ -1,0 +1,167 @@
+<ui >
+<div id="jscroller">
+   <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>积分查询</aui-text>
+            </caption-area>
+            <right-area v-on:click="func.nlistclick()">
+                <a>
+                    <i class="icon auicon icon-search"></i>
+                </a>
+            </right-area>
+        </aui-titlebar>
+    </aui-header>
+
+
+    <aui-scroller class="content" style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;text-align: center; background-color:white;">
+        <form id="demo" style="display:none" mbsc-form>
+            <div class="mbsc-form-group">
+               
+                 <label >
+                    <span  class="stylespan">提出部门/科室 </span>
+                    <input id="tcbmname" type="text" placeholder="请选择" readonly  v-on:click="func.deptclick()" required >
+                    <input id="tcbmid" name="tcbmid" v-model="tcbmid" type="hidden">
+                </label>
+              
+            </div>
+            <div class="mbsc-form-group">
+               
+                 <label>
+                    <span class="stylespan" >开始日期</span>
+                    <input v-model="starttime" name="starttime" id="md-starttime" type="text" placeholder="开始" required >
+                </label>
+                <label>
+                <span class="stylespan" >结束日期</span>
+                     <input v-model="endtime" name="endtime" id="md-endtime" type="text" placeholder="结束" required  >  
+                </label>
+            </div>
+             <div class="mbsc-form-group">
+               
+                 <label >
+                    <span class="stylespan" >提出人 </span>
+                    <input name="postman" type="text" placeholder="" required >
+                </label>
+              
+            </div>
+        </form>
+
+       
+    </aui-scroller>
+</div>
+</ui>
+
+
+<script>
+import '@auicomp/datetime/DateTime.aui';
+import '@auiutil/mobiscroll3/css/mobiscroll.javascript.min.css';
+import mobiscroll from '@auiutil/mobiscroll3/js/mobiscroll.javascript.min';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import fetch from '@comm/utils/xfetch';
+import Toast from '@auicomp/toast/Toast.aui';
+import { router } from '@auicomp/action/Action.aui';
+import './Frame.aui';
+
+export default class JifenPage{
+    static get tag(){
+        return 'jifenpage';
+    }
+
+    jifen(data1,data2){
+        $('#tcbmname').val(data1);
+        $('#tcbmid').val(data2);
+    }
+
+    created () {
+        //  某个逻辑发起ajax post请求
+        var propDateS;//初始化页面时，默认的开始时间
+        var propDateE;//初始化页面时，默认的结束时间
+        auiLoading.show();
+            fetch({
+                appId: 'ci',
+                url : 'http://ciurl/hlh_credit_init.jsp',
+                data: {
+                },
+                success: function(json){
+                    obj.starttime=json.propDateS;
+                    obj.endtime=json.propDateE;
+                auiLoading.hide();
+                },
+                error: function(rs){
+                    auiLoading.hide();
+                    Toast.show(rs.errmsg);
+                }
+            });
+    
+       
+         var obj = {
+             tcbmid:'',
+             starttime:'',
+             endtime:'',
+             func:{
+                 deptclick:function(){
+                    router.go('/department?flag=0');//flag=0表示是积分查询页面传送过去的
+                },
+                nlistclick:function(){
+                    var fjson=JSON.stringify($("form").serializeArray());
+                    var json=JSON.parse(fjson);
+                    var formjson=[];
+                    $.each(json, function(e,e1) {
+                        formjson.push(e1.value)
+                    });
+                    router.go('/jifenlist?dateS='+formjson[1]+'&dateE='+formjson[2]+'&postman='+formjson[3]+'&pdept='+formjson[0]+'&rows=20');
+                }
+            }
+         };
+          $('#jscroller').render(obj);
+
+        mobiscroll.settings = {
+            theme: 'ios',
+            lang: 'zh',
+        };
+
+        var date, select, widget,
+            now = new Date(),
+            form = document.getElementById("demo");
+
+        mobiscroll.form('#demo');
+
+         date = mobiscroll.date('#md-starttime', {
+            defaultValue: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
+            min: new Date(now.getFullYear() - 100, 0, 1),
+            max: new Date(now.getFullYear()+100 , 0, 1)
+        });
+
+        date = mobiscroll.date('#md-endtime', {
+            defaultValue: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
+            min: new Date(now.getFullYear() - 100, 0, 1),
+            max: new Date(now.getFullYear()+100 , 0, 1)
+        });
+    }
+}
+
+</script>
+
+<style>
+
+    .md-phone-num .mbsc-np-dsp {
+        min-height: 25px;
+        -webkit-box-sizing: content-box;
+        -moz-box-sizing: content-box;
+        box-sizing: content-box;
+    }
+    .mbsc-ios .mbsc-control-w:after, .mbsc-ios .mbsc-control-w:before{
+        border:none;
+    }
+    .mbsc-form-group{
+        margin:0.5em 0;
+    }
+    .stylespan{
+        height:44px;
+        line-height:44px;
+        width:110px;
+    }
+</style>

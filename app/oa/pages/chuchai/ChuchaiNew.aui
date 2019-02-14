@@ -1,0 +1,1197 @@
+<ui>
+    <div class="ChuchaiNew">
+        <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>出差</aui-text>
+                </caption-area>
+                <right-area>
+                    <a v-on:click="func.submit">
+                        <i class="icon auicon icon-rdook"></i>
+                    </a>
+                </right-area>
+            </aui-titlebar>
+        </aui-header>
+        <aui-tabbar class="tabbar tabbar-line tabbar-line-width70 animated" style="display:none">
+            <tabbar-cell v-bind:class="{active:tabIndex==0}" v-on:click="func.tabChange(0)">
+                <label class="tab-label">流程表单Form</label>
+            </tabbar-cell>
+            <tabbar-cell v-bind:class="{active:tabIndex==1}" v-on:click="func.tabChange(1)">
+                <label class="tab-label">审批Comments</label>
+            </tabbar-cell>
+        </aui-tabbar>
+        <aui-scroller class="content">
+            <div class="page1 " v-bind:class="{curr:tabIndex==0}">
+                <div class="border1 padding-lr5 width100">
+                    <div class="fd-row border-bt1 align-c">
+                        <div class="flex3">主题 Subject</div>
+                        <div class="flex7">
+                            <input type="text" v-model="docSubject"  class="text-r" placeholder="请输入主题"/>
+                        </div>
+                    </div>
+                    <div class="fd-row border-bt1 align-c padding-tb10">
+                        <div class="flex3">申请人</div>
+                        <div class="flex7 text-r ftc-red">{{data.application}}</div>
+                    </div>
+                    <div class="fd-row border-bt1 align-c padding-tb10">
+                        <div class="flex3">部门</div>
+                        <div class="flex7 text-r ftc-red">{{data.fdClaimantDeptName}}</div>
+                    </div>
+                    <div class="fd-row border-bt1 align-c padding-tb10">
+                        <div class="flex3">出差类别</div>
+                        <div class="flex7 fd-row align-c" v-on:click="func.selectType">
+                            <div class="flex1  text-r margin-r5">{{fdTypeName}}</div>
+                            <i class="icon auicon icon-arrowright"></i>
+                        </div>
+                    </div>
+                    <div class="fd-row border-bt1 align-c ">
+                        <div class="flex3">出差开始时间</div>
+                        <div class="flex7 fd-row align-c" >
+                            <aui-datetime formate="yy-mm-dd HH:ii"  type="datetime" v-bind:value="Date0" class="flex1">
+                                <input v-model="Date0"  class="text-r"/>
+                            </aui-datetime>
+                            <i class="icon auicon icon-arrowright"></i>
+                        </div>
+                    </div>
+                    <div class="fd-row border-bt1 align-c ">
+                        <div class="flex3">出差结束时间</div>
+                        <div class="flex7 fd-row align-c" >
+                            <aui-datetime formate="yy-mm-dd HH:ii" type="datetime" v-bind:value="Date1" class="flex1">
+                                <input v-model="Date1" class="text-r"/>
+                            </aui-datetime>
+                            <i class="icon auicon icon-arrowright"></i>
+                        </div>
+                    </div>
+                    <div class="fd-column border-bt1 ">
+                        <div class="padding-tb10">出差目的 </div>
+                        <div class="border1 margin5 dsp-f border-r4">
+                            <textarea rows="5" v-model="fd_purpose" class="border0 width100"></textarea>
+                        </div>
+                    </div>
+                    <div class="fd-row border-bt1 align-c padding-tb10">
+                        <div class="flex1">详细行程（中英文）及邀请信</div>
+                        <li class="icon auicon icon-rdoadd fts20" v-on:click="func.xingcheng_upload"></li>
+                    </div>
+                    <div v-for="item in xingcheng_files">
+                        <div  class="padding-tb10 fd-row border-bt1" v-on:click="func.del_xingcheng_file($index)">
+                            <div class="flex1">{{item.attname}}</div>
+                            <div class="ftc-red">删除</div>
+                        </div>
+                    </div>
+                    <aui-action class="list-cell active border0" href="#toggle1" type="toggle">
+                        <a class="toogle-title">
+                           出差人员名单 Reimbursement list<i class="icon auicon icon-arrowright"></i>
+                        </a>
+                    </aui-action>
+                    <div class="toggle-line"></div>
+                    <div id="toggle1" action-target class="active border1 margin5 padding-lr5">
+                        <div class="fd-row border-bt1 align-c">
+                            <div class="flex3">姓名</div>
+                            <div class="flex7 fd-row align-c" v-on:click="func.selpeople">
+                                <input type="text" class="flex1 text-r margin-r5" readonly v-model="xm0" >
+                                <i class="icon auicon icon-arrowright"></i>
+                            </div>
+                        </div>
+                        <div class="fd-row border-bt1 align-c ">
+                            <div class="flex3">出生年月</div>
+                            <input type="text" class="flex7 text-r margin-r5" readonly v-model="csny0">
+                        </div>
+                        <div class="fd-row border-bt1 align-c ">
+                            <div class="flex3">性别</div>
+                            <input type="text" class="flex7 text-r margin-r5" readonly v-model="sex0" >
+                        </div>
+                        <div class="fd-row border-bt1 align-c ">
+                            <div class="flex3">岗位</div>
+                            <input type="text" class="flex7 text-r margin-r5" readonly v-model="gw0" >
+                        </div>
+                        <div class="fd-row border-bt1 align-c ">
+                            <div class="flex3">主管领导 </div>
+                            <input type="text" class="flex7 text-r margin-r5" readonly v-model="zgld0" >
+                        </div>
+                        <div class="fd-row  align-c">
+                            <div class="flex3">备注</div>
+                            <div class="flex7">
+                                <input type="text" v-model="ccrybz0"  class="text-r" placeholder="请输入备注"/>
+                            </div>
+                        </div>
+                    </div>
+                    <aui-action class="list-cell active border0" href="#toggle2" type="toggle">
+                        <a class="toogle-title">
+                           出差行程<i class="icon auicon icon-arrowright"></i>
+                        </a>
+                    </aui-action>
+                    <div class="toggle-line"></div>
+                    <div id="toggle2" action-target class="active border1 padding3">
+                        <div class=" border1 padding-lr5">
+                            <div class="fd-row border-bt1 align-c">
+                                <div class="flex3">出差人</div>
+                                <div class="flex7 fd-row align-c" v-on:click="func.selpeople1">
+                                    <input type="text" class="flex1 text-r margin-r5" readonly v-model="rname0" >
+                                    <i class="icon auicon icon-arrowright"></i>
+                                </div>
+                            </div>
+                            <div class="fd-row border-bt1 align-c " v-if="fdTypeValue=='市内'">
+                                <div class="flex3">市内出发时间</div>
+                                <div class="flex7 fd-row align-c" >
+                                    <aui-datetime formate="yy-mm-dd HH:ii"  type="datetime" v-bind:value="slcfdate0" class="flex1">
+                                        <input v-model="slcfdate0" class="text-r"/>
+                                    </aui-datetime>
+                                    <i class="icon auicon icon-arrowright"></i>
+                                </div>
+                            </div>
+                            <div class="fd-row border-bt1 align-c " v-if="fdTypeValue=='市内'">
+                                <div class="flex3">市内到达时间</div>
+                                <div class="flex7 fd-row align-c" >
+                                    <aui-datetime formate="yy-mm-dd HH:ii" type="datetime" v-bind:value="sldddate0" class="flex1">
+                                        <input v-model="sldddate0" class="text-r"/>
+                                    </aui-datetime>
+                                    <i class="icon auicon icon-arrowright"></i>
+                                </div>
+                            </div>
+                            <div class="fd-row border-bt1 align-c " v-if="fdTypeValue=='国内'">
+                                <div class="flex3">出发时间</div>
+                                <div class="flex7 fd-row align-c" >
+                                    <aui-datetime formate="yy-mm-dd"  type="date" v-bind:value="cfdate0" class="flex1">
+                                        <input v-model="cfdate0" class="text-r"/>
+                                    </aui-datetime>
+                                    <i class="icon auicon icon-arrowright"></i>
+                                </div>
+                            </div>
+                            <div class="fd-row border-bt1 align-c " v-if="fdTypeValue=='国内'">
+                                <div class="flex3">到达时间 </div>
+                                <div class="flex7 fd-row align-c" >
+                                    <aui-datetime formate="yy-mm-dd" type="date" v-bind:value="dddate0" class="flex1">
+                                        <input v-model="dddate0" class="text-r"/>
+                                    </aui-datetime>
+                                    <i class="icon auicon icon-arrowright"></i>
+                                </div>
+                            </div>
+                            <div class="fd-row  border-bt1 align-c">
+                                <div class="flex3">出发地</div>
+                                <div class="flex7">
+                                    <input type="text" v-model="cfd0" class="text-r" placeholder="请输入出发地"/>
+                                </div>
+                            </div>
+                            <div class="fd-row  border-bt1 align-c">
+                                <div class="flex3">途径 </div>
+                                <div class="flex7">
+                                    <input type="text" v-model="tj0" class="text-r" placeholder="请输入途径"/>
+                                </div>
+                            </div>
+                            <div class="fd-row  border-bt1 align-c">
+                                <div class="flex3">目的地 </div>
+                                <div class="flex7">
+                                    <input type="text" v-model="mdd0" class="text-r" placeholder="请输入目的地"/>
+                                </div>
+                            </div>
+                            <div class="fd-row  align-c">
+                                <div class="flex3">总天数 </div>
+                                <div class="flex7">
+                                    <input type="text" v-model="zts0" class="text-r" placeholder="请输入总天数"/>
+                                </div>
+                            </div>
+                            <div class="calculate-bt" v-on:click="func.calculate">计算  Calculate</div>
+                            <div class="fd-row border-t1 align-c">
+                                <div class="flex3">备注 </div>
+                                <div class="flex7">
+                                    <input type="text" v-model="bz0" class="text-r" placeholder="请输入备注"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class=" border1 padding-lr5 margin-t5" v-if="fdTypeValue=='国内'&&sfjp">
+                            <div class="padding10">
+                                <input class="magic-checkbox" type="checkbox"  id="fd_is_booking_tickets" v-model="fd_is_booking_tickets" v-on:change="func.jipiaocheck">
+                                <label for="fd_is_booking_tickets">需要预定机票</label>
+                            </div>
+                            <div v-if="fd_is_booking_tickets">
+                                <div class="addtickets-bt margin-lr5" v-on:click="func.addxingcheng">增加行程</div>
+                                <div class="border1 margin-tb5 padding-lr5" v-for="item in tickets">
+                                    <div class="fd-row border-bt1 align-c padding-tb10">
+                                        <div class="flex3">姓名</div>
+                                        <div class="flex7 fd-row align-c" v-on:click="func.selpeoplejipiao($index)">
+                                            <div class="flex1  text-r margin-r5">{{item.xingming1}}</div>
+                                            <i class="icon auicon icon-arrowright"></i>
+                                        </div>
+                                    </div>
+                                    <div class="fd-row  border-bt1 align-c">
+                                        <div class="flex3">姓</div>
+                                        <div class="flex7">
+                                            <input type="text" v-model="item.LAST_NAME" class="text-r" placeholder="请输入姓"/>
+                                        </div>
+                                    </div>
+                                    <div class="fd-row  border-bt1 align-c">
+                                        <div class="flex3">名</div>
+                                        <div class="flex7">
+                                            <input type="text"  v-model="item.FIRST_NAME"  class="text-r" placeholder="请输入名"/>
+                                        </div>
+                                    </div>
+                                    <div class="fd-row border-bt1 align-c padding-tb10">
+                                        <div class="flex3">乘机人工号</div>
+                                        <div class="flex7 fd-row align-c" v-on:click="">
+                                            <div class="flex1  text-r margin-r5">{{item.xingming4}}</div>
+                                        </div>
+                                    </div>
+                                    <div class="fd-row border-bt1 align-c padding-tb10">
+                                        <div class="flex3">费用成本中心</div>
+                                        <div class="flex7 fd-row align-c" v-on:click="func.chengbenzhongxin($index)">
+                                            <div class="flex1  text-r margin-r5">{{item.FD_WF_CC_NAME}}</div>
+                                            <i class="icon auicon icon-arrowright"></i>
+                                        </div>
+                                    </div>
+                                    <div class="fd-row border-bt1 align-c ">
+                                        <div class="flex3">日期</div>
+                                        <div class="flex7 fd-row align-c" >
+                                            <aui-datetime formate="yy-mm-dd"  type="date" v-bind:value="item.date" class="flex1">
+                                                <input v-model="item.date" class="text-r"/>
+                                            </aui-datetime>
+                                            <i class="icon auicon icon-arrowright"></i>
+                                        </div>
+                                    </div>
+                                    <div class="fd-row border-bt1 align-c padding-tb10">
+                                        <div class="flex3">出发城市-机场</div>
+                                        <div class="flex7 fd-row align-c" v-on:click="func.selectAirport($index,'chufa')">
+                                            <div class="flex1  text-r margin-r5">{{item.chufa1}}</div>
+                                            <i class="icon auicon icon-arrowright"></i>
+                                        </div>
+                                    </div>
+                                    <div class="fd-row border-bt1 align-c padding-tb10">
+                                        <div class="flex3">到达城市-机场</div>
+                                        <div class="flex7 fd-row align-c"  v-on:click="func.selectAirport($index,'daoda')">
+                                            <div class="flex1  text-r margin-r5">{{item.daoda1}}</div>
+                                            <i class="icon auicon icon-arrowright"></i>
+                                        </div>
+                                    </div>
+                                    <div class="addtickets-bt" v-on:click="func.delTicket($index)">删除本行程</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fd-column border-bt1 ">
+                        <div class="padding-tb10">交通说明</div>
+                        <div class="border1 margin5 dsp-f border-r4">
+                            <textarea rows="5" v-model="fd_traffic_description" class="border0 width100"></textarea>
+                        </div>
+                    </div>
+                    <div class="fd-row border-bt1 align-c padding-tb10">
+                        <div class="flex1">附件</div>
+                        <li class="icon auicon icon-rdoadd fts20" v-on:click="func.jiaotong_upload"></li>
+                    </div>
+                    <div v-for="item in jiaotong_files">
+                        <div  class="padding-tb10 fd-row border-bt1" v-on:click="func.del_jiaotong_file($index)">
+                            <div class="flex1">{{item.attname}}</div>
+                            <div class="ftc-red">删除</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="page2" v-bind:class="{curr:tabIndex==1}">
+                <div class="border1 padding-lr5 width100">
+                    <div class="padding-tb5 border-bt1">
+                        <div class="padding-tb5">紧急程度 level of urgency</div>
+                        <div class="padding-tb5"><input type="radio" value="1" v-model="fdNotifyLevel" id="urgency1" class="magic-radio" name="oprGroup"/><label for="urgency1">紧急 Urgent</label></div>
+                        <div class="padding-tb5"><input type="radio" value="2" v-model="fdNotifyLevel" id="urgency2" class="magic-radio" name="oprGroup"/><label for="urgency2">急 Important</label></div>
+                        <div class="padding-tb5"><input type="radio" value="3" v-model="fdNotifyLevel" id="urgency3" class="magic-radio" name="oprGroup"/><label for="urgency3">一般 Normal</label></div>
+                    </div>
+                    <div class="fd-column border-bt1 ">
+                        <div class="padding-tb10">处理意见 Process opinion </div>
+                        <div class="border1 margin5 dsp-f border-r4">
+                            <textarea rows="5" v-model="fdUsageContent" class="border0 width100"></textarea>
+                        </div>
+                    </div>
+                    <div class="fd-row border-bt1 align-c padding-tb10">
+                        <div class="flex1">附件 Attachment </div>
+                        <li class="icon auicon icon-rdoadd fts20" v-on:click="func.yijian_upload"></li>
+                    </div>
+                    <div v-for="item in yijian_files">
+                        <div  class="padding-tb10 fd-row border-bt1" v-on:click="func.del_yijian_file($index)">
+                            <div class="flex1">{{item.attname}}</div>
+                            <div class="ftc-red">删除</div>
+                        </div>
+                    </div>
+                    <div class="fd-row  align-c padding-tb10">
+                        <div class="flex3">提交身份 Submit the ID</div>
+                        <div class="flex7 fd-row align-c" v-on:click="func.selectRole">
+                            <div class="flex1  text-r margin-r5">{{rolesSelectObjName}}</div>
+                            <i class="icon auicon icon-arrowright"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aui-scroller>
+    </div>
+</ui>
+<script>
+    import fetch from "@libs/xfetch";
+    import common from '@libs/common';
+    import '@auicomp/datetime/DateTime.aui';
+    import Selectsheet from '@comm/components/Selectsheet.aui';
+    import Actionsheet from '../../components/Actionsheet.aui';
+    import '@auicomp/tabbar/Tabbar.aui';
+    export default class ChuchaiNew {
+
+        static get tag() {
+            return 'ChuchaiNew';
+        }
+        created() {
+            let self = this;
+            const obj = this.$obj = {
+                tabIndex: 0,
+                docSubject: "",//主题
+                fdTypeName: "==请选择==",
+                fdTypeValue: "",//出差类别 
+                fdTypes: [{
+                        name: "==请选择==",
+                        value: ""
+                    },
+                    {
+                        name: "市内 Local",
+                        value: "市内"
+                    },
+                    {
+                        name: "国内 Domestic",
+                        value: "国内"
+                    }
+                ],
+                Date0:common.getCurrData()+' 07:30',//出差开始时间
+                Date1:common.getCurrData()+' 17:00',//出差结束时间
+                fd_purpose:"",//出差目的地
+                //出差人员名单开始
+                id0:"",
+                xm0:"",//姓名 
+                csny0:"",//出生年月
+                sex0:"",//性别
+                gw0:"",//岗位
+                zgld0:"",//主管领导
+                ccrybz0: "",//备注
+                //出差人员名单结束
+                //出差行程开始
+                iid0:"",//出差人id
+                rname0:"",//出差人
+                slcfdate0:"",//市内出发时间
+                sldddate0:"",//市内到达时间 
+                cfdate0:"",//出发时间
+                dddate0:"",//到达时间
+                cfd0:"",//出发地
+                tj0:"",//途径
+                mdd0:"",//目的地 
+                zts0:"",//总天数
+                bz0:"",//备注
+                //出差行程结束
+                fd_traffic_description:"",//交通说明
+                fd_is_booking_tickets:false,//是否预定机票
+                fdNotifyLevel:'3',//紧急程度
+                fdUsageContent:"",//处理意见 
+                sfjp:false,//是否显示机票添加区域
+                xingcheng_files:[],//行程附件
+                jiaotong_files:[],
+                yijian_files:[],
+                tickets:[],//机票信息数组
+                rolesSelectObjName:"",
+                rolesSelectObjValue:"",
+                rolesSelectObjs:[],
+                data: {},
+                func: {
+                    tabChange(index){
+                        obj.tabIndex = index;
+                    },
+                    submit() {
+                        self.doSubmit();
+                    },
+                    selectType() {
+                        Selectsheet.show({
+                            list: obj.fdTypes.map(function(item){
+                                return item.name
+                            }),
+                            func:function(index){
+                                obj.fdTypeValue = obj.fdTypes[index].value;
+                                obj.fdTypeName = obj.fdTypes[index].name;
+                                if(obj.fdTypeValue == '市内'){
+                                    obj.slcfdate0=common.getCurrData()+' 07:30';//市内出发时间
+                                    obj.sldddate0=common.getCurrData()+' 17:00';//市内到达时间
+                                }else if (obj.fdTypeValue == "国内") {
+                                    obj.cfdate0=common.getCurrData();//出发时间
+                                    obj.dddate0=common.getCurrData();//到达时间
+                                }
+                            }
+                        });
+                    },
+                    //添加行程附件
+                    xingcheng_upload(){
+                        Actionsheet.show({
+                            list: [
+                                {
+                                    text: '附件上传',
+                                    handler: function () {
+                                         common.selectFile(function(path){
+                                            self.xingcheng_upload(path);
+                                         })
+                                    }
+                                },
+                                {
+                                    text: '拍照上传',
+                                    handler: function () {
+                                       common.openCamera(function(res){
+                                           self.xingcheng_upload(res.imagePath)
+                                       })
+                                    }
+                                }
+                            ],
+                            doCancel: function () {
+                            }
+                        });
+                    },
+                    //添加交通附件
+                    jiaotong_upload(){
+                        Actionsheet.show({
+                            list: [
+                                {
+                                    text: '附件上传',
+                                    handler: function () {
+                                         common.selectFile(function(path){
+                                            self.jiaotong_upload(path);
+                                         })
+                                    }
+                                },
+                                {
+                                    text: '拍照上传',
+                                    handler: function () {
+                                       common.openCamera(function(res){
+                                           self.jiaotong_upload(res.imagePath)
+                                       })
+                                    }
+                                }
+                            ],
+                            doCancel: function () {
+                            }
+                        });
+                    },
+                    //添加意见附件
+                    yijian_upload(){
+                        Actionsheet.show({
+                            list: [
+                                {
+                                    text: '附件上传',
+                                    handler: function () {
+                                         common.selectFile(function(path){
+                                            self.yijian_upload(path);
+                                         })
+                                    }
+                                },
+                                {
+                                    text: '拍照上传',
+                                    handler: function () {
+                                       common.openCamera(function(res){
+                                           self.yijian_upload(res.imagePath)
+                                       })
+                                    }
+                                }
+                            ],
+                            doCancel: function () {
+                            }
+                        });
+                    },
+                    //删除行程附件
+                    del_xingcheng_file(index){
+                        let id =  obj.xingcheng_files[index].attid;
+                        let name =   obj.xingcheng_files[index].attname;
+                        let cacheValue = self.getHiddenValue("attachmentForms.fd_3323b03ebb346a.attachmentIds").split(";");
+                        common.confirm('是否删除'+name,null,null,function(){
+                            cacheValue.splice(cacheValue.findIndex(item => item.attid === id), 1);
+                            self.setHiddenValue("attachmentForms.fd_3323b03ebb346a.attachmentIds",cacheValue.join(';'));
+                            obj.xingcheng_files.splice(index, 1)
+                        });
+                        
+                    },
+                    //删除交通附件
+                    del_jiaotong_file(index){
+                        let id =  obj.jiaotong_files[index].attid;
+                        let name =   obj.jiaotong_files[index].attname;
+                        let cacheValue = self.getHiddenValue("attachmentForms.fd_attachment.attachmentIds").split(";");
+                        common.confirm('是否删除'+name,null,null,function(){
+                            cacheValue.splice(cacheValue.findIndex(item => item.attid === id), 1);
+                            self.setHiddenValue("attachmentForms.fd_attachment.attachmentIds",cacheValue.join(';'));
+                            obj.jiaotong_files.splice(index, 1)
+                        });
+                        
+                    },
+                    //删除意见附件
+                    del_yijian_file(index){
+                         let id =  obj.yijian_files[index].attid;
+                        let name =   obj.yijian_files[index].attname;
+                        let cacheValue = self.getHiddenValue("sysWfBusinessForm.fdAuditNoteFdId").split(";");
+                        common.confirm('是否删除'+name,null,null,function(){
+                            cacheValue.splice(cacheValue.findIndex(item => item.attid === id), 1);
+                            self.setHiddenValue("sysWfBusinessForm.fdAuditNoteFdId",cacheValue.join(';'));
+                            obj.yijian_files.splice(index, 1)
+                        });
+                    },
+                    //出差人员名单选择
+                    selpeople(){
+                         location="#/Selpeople";
+                    },
+                    //出差行程人员选择
+                    selpeople1(){
+                        location="#/Selpeople1";
+                    },
+                    //计算总天数
+                    calculate(){
+                        if(obj.fdTypeValue == '市内'){
+                            if(obj.slcfdate0==''||obj.sldddate0==''){
+                                common.alert('市内出发时间/市内到达时间不能为空!Departure/Return date cannot be null!');
+                            }else{
+                                var data1=new Date(obj.slcfdate0.split(" ")[0]); 
+                                var data2=new Date(obj.sldddate0.split(" ")[0]);
+                                obj.zts0 = (data2.getTime()-data1.getTime())/86400000+1;
+                                 
+                            }
+                        }else if(obj.fdTypeValue == '国内'){
+                            if(obj.cfdate0==''||obj.dddate0==''){
+                                common.alert('出发时间/到达时间不能为空!Departure/Return date cannot be null!');
+                            }else{
+                                var data1=new Date(obj.cfdate0); 
+                                var data2=new Date(obj.dddate0);
+                                obj.zts0 = (data2.getTime()-data1.getTime())/86400000+1;
+                                 
+                            }
+                        }
+                    },
+                    //是否需要预定机票
+                    jipiaocheck(){
+                        console.log(obj.fd_is_booking_tickets)
+                        if(obj.fd_is_booking_tickets){
+                            self.setHiddenValue('extendDataFormInfo.value(fd_is_booking_tickets)','Y');
+                            self.setHiddenValue('extendDataFormInfo.value(fd_ibt_val)','Y');
+                        }else{
+                            self.setHiddenValue('extendDataFormInfo.value(fd_is_booking_tickets)','');
+                            self.setHiddenValue('extendDataFormInfo.value(fd_ibt_val)','N');
+                        }
+                    },
+                    //添加行程
+                    addxingcheng(){
+                        obj.tickets.push({
+                            xingming1:"",
+                            xingming2:"",
+                            xingming3:"",
+                            LAST_NAME:"",
+                            FIRST_NAME:"",
+                            xingming4:"",
+                            FD_WF_CC_NAME:"",
+                            FD_WF_CC_CODE:"",
+                            OM1_GID:"",
+                            itineraryNo:"",
+                            date:"",
+                            chufa1:"",
+                            chufa2:"",
+                            chufa3:"",
+                            chufa4:"",
+                            daoda1:"",
+                            daoda2:"",
+                            daoda3:"",
+                            daoda4:"",
+                            fd_fight_time:"上午",
+                        });
+                    },
+                    //删除机票
+                    delTicket(index){
+                        obj.tickets.splice(index, 1);
+                    },
+                    //机票人员选择
+                    selpeoplejipiao(index){
+                        localStorage.setItem('seljipiaopersonurl',obj.data.seljipiaopersonurl);
+                        location="#/Selpeoplejipiao?index="+index;
+                    },
+                    //成本中心
+                    chengbenzhongxin(index){
+                        localStorage.setItem('chengbenzhongxinurl',obj.data.chengbenzhongxinurl);
+                        location="#/Chengbenzhongxin?index="+index;
+                    },
+                    //机场选择
+                    selectAirport(index,type){
+                        location="#/SelectAirport?index="+index+"&type="+type;
+                    },
+                    //提交身份选择
+                    selectRole(){
+                        Selectsheet.show({
+                            list: obj.rolesSelectObjs.map(item=>item.name),
+                            func:function(index){
+                                obj.rolesSelectObjName = obj.rolesSelectObjs[index].name;
+                                obj.rolesSelectObjValue = obj.rolesSelectObjs[index].value;
+                            }
+                        });
+                    }
+                }
+            }
+            
+            
+            
+            this.onload();
+        }
+        detached() {
+            this.$vm && this.$vm.destroy();
+        }
+        //机票add
+        addTickets(){
+            this.setHiddenValue('extendDataFormInfo.value(fd_sql_hris_cc)',this.getHiddenValue('extendDataFormInfo.value(fd_hris_cc)'));
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url: common.oaUrl + '/sfjpcheckshow.jsp',
+                dataType:'text',
+                data:"s_bean=sqlSelectDataBean&sqlValue=SELECT HRIS_CC,FD_IS_BOOKING_TICKET FROM EKP_ENTITY_CC_LIST WHERE HRIS_CC = '"+this.getHiddenValue('extendDataFormInfo.value(fd_hris_cc)')+"'&isLoadData=true&dataSource=null",
+                type: 'post',
+                success: function(dataInfo) {
+                    self.setHiddenValue('extendDataFormInfo.value(fd_is_bt)',dataInfo);
+                    if(self.getHiddenValue('extendDataFormInfo.value(fd_is_bt)')!="N"&&self.getHiddenValue('extendDataFormInfo.value(fd_sql_hris_cc)')!=""){
+                        self.$obj.sfjp = true;
+                    }else{
+                        self.$obj.sfjp = false;
+                    }
+                }
+            });
+        }
+        onload() {
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url: common.oaUrl + '/chuchaiAddInfo.jsp',
+                data: {},
+                type: 'post',
+                success: function(dataInfo) {
+                    console.log(JSON.stringify(dataInfo));
+                    let subName = dataInfo.subName.split(";");
+                    let subId = dataInfo.subId.split(";");
+                    for(let i = 0;i<subName.length;i++){
+                        self.$obj.rolesSelectObjs.push({
+                            name:subName[i],
+                            value:subId[i]
+                        });
+                    }
+                    console.log(self.$obj.rolesSelectObjs)
+                    self.$obj.rolesSelectObjName = self.$obj.rolesSelectObjs[0].name;
+                    self.$obj.rolesSelectObjValue = self.$obj.rolesSelectObjs[0].value;
+                    self.$obj.data = dataInfo;
+                    self.$obj.iid0 = dataInfo.data_id;
+                    self.$obj.id0 = dataInfo.data_id;
+                    self.$obj.xm0 = dataInfo.data_name;
+                    self.$obj.csny0 = dataInfo.data_birth;
+                    self.$obj.sex0 = dataInfo.data_gender;
+                    self.$obj.gw0 = dataInfo.data_position;
+                    self.$obj.zgld0 = dataInfo.data_leader;
+                    self.$obj.rname0 = dataInfo.data_name;
+                    self.$vm = $(self.$el).render(self.$obj);
+                    $(".tabbar").css("display", "block");
+                    self.addTickets();
+                }
+            });
+        }
+        submitAttach() {
+            let self = this;
+            let data = [];
+            this.$obj.file.map(function(item) {
+                data.push({
+                    type: 1,
+                    name: 'FILE_NAME',
+                    value: item.imagePath
+                })
+            })
+            fetch({
+                appId: common.appId,
+                url: common.hrNewUrl + '/file/addfile.jsp',
+                data: data,
+                dataType: 'text',
+                success: function(datas) {
+                    if (datas.split("|")[0] && datas.split("|")[0] == '1') {
+                        self.$obj.FUJIANs = datas.split("|")[1];
+                        self.submitform();
+                    } else {
+                        common.toast(datas.split("|")[1]);
+                    }
+                }
+            });
+        }
+         //判断hidde数组中是否含有对应的name
+        hasHiddenName(name){
+            let hiddens = this.$obj.data.hideInfo;
+            let value = false;
+            for(let i =0;i<hiddens.length;i++){
+                if(hiddens[i].name==name){
+                    value = true;
+                    break;
+                }
+            }
+            return value;
+        }
+        //获取hidden数组中对应name的值
+        getHiddenValue(name){
+            let hiddens = this.$obj.data.hideInfo;
+            let value = '';
+            for(let i =0;i<hiddens.length;i++){
+                if(hiddens[i].name==name){
+                    value = hiddens[i].value;
+                    break;
+                }
+            }
+            return value;
+        }
+        //设置hidden数组中对应name的值
+        setHiddenValue(name,value){
+             let hiddens = this.$obj.data.hideInfo;
+             for(let i =0;i<hiddens.length;i++){
+                if(hiddens[i].name==name){
+                    hiddens[i].value = value;
+                    break;
+                }
+            }
+        }
+        //添加hidden数组中对应name的值
+        addHiddenValue(name,value){
+            let hiddens = this.$obj.data.hideInfo;
+            hiddens.push({
+                name:name,
+                value:value
+            });
+        }
+        //行程附件上传
+        xingcheng_upload(file_path){
+            let file_name = file_path.substring(file_path.lastIndexOf("/")+1);
+            if(file_name.indexOf(".js")>-1 || file_name.indexOf(".bat")>-1 || file_name.indexOf(".exe")>-1 ||file_name.indexOf(".sh")>-1){
+                common.alert("基于安全考虑,系统不允许上传'.js .bat .exe .sh'类型的文件");
+                return;
+            }
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : common.oaUrl+'/xingchengFile.jsp',
+                data: [
+                    {
+                        type:1,
+                        name:'Filedata',
+                        value:file_path
+                    },
+                    {
+                        type:0,
+                        name:'Upload',
+                        value:'Submit Query'
+                    },
+                     {
+                        type:0,
+                        name:'Filename',
+                        value:file_name
+                    },
+                    {
+                        type:0,
+                        name:'domodid',
+                        value:this.getHiddenValue('sysWfBusinessForm.fdModelId')
+                    }
+                ],
+                success: function(dataInfo){
+                    console.log(dataInfo)
+                   common.alert(dataInfo.msg,function(){
+                       if(dataInfo.attid != ""){
+                            self.$obj.xingcheng_files.push(dataInfo);
+                            let hiddenname = "attachmentForms.fd_3323b03ebb346a.attachmentIds";
+
+                            let hiddenvalue = self.getHiddenValue(hiddenname);
+                            if(hiddenvalue!=''){
+                                self.setHiddenValue(hiddenname,hiddenvalue+';'+dataInfo.attid)
+                            }else{
+                                self.setHiddenValue(hiddenname,dataInfo.attid)
+                            }
+                       }
+                   });
+                }
+            });
+        }
+        //交通附件上传
+        jiaotong_upload(file_path){
+            let file_name = file_path.substring(file_path.lastIndexOf("/")+1);
+            if(file_name.indexOf(".js")>-1 || file_name.indexOf(".bat")>-1 || file_name.indexOf(".exe")>-1 ||file_name.indexOf(".sh")>-1){
+                common.alert("基于安全考虑,系统不允许上传'.js .bat .exe .sh'类型的文件");
+                return;
+            }
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : common.oaUrl+'/jiaotongFile.jsp',
+                data: [
+                    {
+                        type:1,
+                        name:'Filedata',
+                        value:file_path
+                    },
+                    {
+                        type:0,
+                        name:'Upload',
+                        value:'Submit Query'
+                    },
+                     {
+                        type:0,
+                        name:'Filename',
+                        value:file_name
+                    },
+                    {
+                        type:0,
+                        name:'domodid1',
+                        value:this.getHiddenValue('sysWfBusinessForm.fdModelId')
+                    }
+                ],
+                success: function(dataInfo){
+                    console.log(dataInfo)
+                   common.alert(dataInfo.msg,function(){
+                       if(dataInfo.attid != ""){
+                            self.$obj.jiaotong_files.push(dataInfo);
+                            let hiddenname = "attachmentForms.fd_attachment.attachmentIds";
+
+                            let hiddenvalue = self.getHiddenValue(hiddenname);
+                            if(hiddenvalue!=''){
+                                self.setHiddenValue(hiddenname,hiddenvalue+';'+dataInfo.attid)
+                            }else{
+                                self.setHiddenValue(hiddenname,dataInfo.attid)
+                            }
+                       }
+                   });
+                }
+            });
+        }
+        //意见附件上传
+        yijian_upload(file_path){
+            let file_name = file_path.substring(file_path.lastIndexOf("/")+1);
+            if(file_name.indexOf(".js")>-1 || file_name.indexOf(".bat")>-1 || file_name.indexOf(".exe")>-1 ||file_name.indexOf(".sh")>-1){
+                common.alert("基于安全考虑,系统不允许上传'.js .bat .exe .sh'类型的文件");
+                return;
+            }
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : common.oaUrl+'/yijianFile.jsp',
+                data: [
+                    {
+                        type:1,
+                        name:'Filedata',
+                        value:file_path
+                    },
+                    {
+                        type:0,
+                        name:'Upload',
+                        value:'Submit Query'
+                    },
+                     {
+                        type:0,
+                        name:'Filename',
+                        value:file_name
+                    },
+                    {
+                        type:0,
+                        name:'domodid2',
+                        value:this.getHiddenValue('sysWfBusinessForm.fdAuditNoteFdId')
+                    },
+                    {
+                        type:0,
+                        name:'modid3',
+                        value:this.getHiddenValue('sysWfBusinessForm.fdAuditNoteFdId')
+                    }
+                ],
+                success: function(dataInfo){
+                    console.log(dataInfo)
+                   common.alert(dataInfo.msg,function(){
+                       if(dataInfo.attid != ""){
+                            self.$obj.yijian_files.push(dataInfo);
+                            let hiddenname = "attachmentForms."+self.getHiddenValue('sysWfBusinessForm.fdAuditNoteFdId')+".attachmentIds";
+
+                            let hiddenvalue = self.getHiddenValue(hiddenname);
+                            if(hiddenvalue!=''){
+                                self.setHiddenValue(hiddenname,hiddenvalue+';'+dataInfo.attid)
+                            }else{
+                                self.setHiddenValue(hiddenname,dataInfo.attid)
+                            }
+                       }
+                   });
+                }
+            });
+        }
+        doSubmit(){
+            if(this.$obj.docSubject==''){
+                common.alert('主题不能为空!Subject cannot be null!')
+                return;
+            }
+            if(this.$obj.fdTypeValue==''){
+                common.alert('请选择出差类别')
+                return;
+            }
+            if(this.$obj.Date0==''||this.$obj.Date1==''){
+                common.alert('出差开始时间/出差结束时间不能为空!Departure/Return date cannot be null!')
+                return;
+            }
+            if(common.compareDate(this.$obj.Date0,this.$obj.Date1)){
+                common.alert('出差结束时间必须在出差开始时间之后!Return date must be after Departure date!')
+                return;
+            }
+            if(this.$obj.fdTypeValue=='市内'){
+                if(this.$obj.slcfdate0 == "" || this.$obj.sldddate0 == ""){
+                    common.alert("市内出发时间/市内到达时间不能为空!Departure/Return date cannot be null!");
+                    return;
+                }
+                if(common.compareDate(this.$obj.slcfdate0,this.$obj.sldddate0)){
+                    common.alert("市内出发时间必须在市内到达时间之前!Return date must be after Departure date!");
+                    return;
+                }
+                if(this.$obj.cfd0 == ""){
+                    common.alert("请填写出发地");
+                    return;
+                }
+                if(this.$obj.mdd0 == ""){
+                    common.alert("请填写目的地");
+                    return;
+                }
+                
+                if(this.$obj.zts0 == ""){
+                    common.alert("请填写出差天数");
+                    return;
+                }
+            }else if(this.$obj.fdTypeValue=='国内'){
+                if(this.$obj.cfdate0 == "" || this.$obj.dddate0 == ""){
+                    common.alert("国内出发时间/国内到达时间不能为空!Departure/Return date cannot be null!");
+                    return;
+                }
+                if(common.compareDate(this.$obj.cfdate0,this.$obj.dddate0)){
+                    common.alert("出发时间必须在到达时间之前!Return date must be after Departure date!");
+                    return;
+                }
+                if(this.$obj.cfd0 == ""){
+                    common.alert("请填写出发地");
+                    return;
+                }
+                if(this.$obj.mdd0 == ""){
+                    common.alert("请填写目的地");
+                    return;
+                }
+                
+                if(this.$obj.zts0 == ""){
+                    common.alert("请填写出差天数");
+                    return;
+                }
+                if(this.$obj.fd_is_booking_tickets){
+                    let ticketsArr = this.$obj.tickets;
+                    let fd_travel_start_date = this.$obj.Date0.split(" ")[0].replace(/-/g,"");
+                    let fd_travel_end_date = this.$obj.Date1.split(" ")[0].replace(/-/g,"");
+                    for(let i =0;i<ticketsArr.length;i++){
+                        if(ticketsArr[i].xingming1==''){
+                            common.alert("请填写乘机人姓名");
+                            return;
+                        }
+                        if(ticketsArr[i].date==''){
+                            common.alert("请填写乘机日期");
+                            return;
+                        }
+                        let fd_fight_date = ticketsArr[i].date.replace(/-/g,"");
+                        if(!(Number(fd_fight_date) >= Number(fd_travel_start_date) && Number(fd_fight_date) <= Number(fd_travel_end_date))){
+                             common.alert("订票日期不在出差时间范围内");
+                            return;
+                        }
+                        if(ticketsArr[i].chufa1 == ""){
+                            common.alert("请填写出发城市-机场");
+                            return;
+                        }
+                        if(ticketsArr[i].daoda1 == ""){
+                            common.alert("请填写到达城市-机场");
+                            return;
+                        }
+                        
+                        if(ticketsArr[i].chufa1 == ticketsArr[i].daoda1){
+                            common.alert("到达城市不能与出发城市一致");
+                            return;
+                        }
+                    }
+                }
+            }
+            
+            this.addHiddenValue('docSubject',this.$obj.docSubject);
+            this.setHiddenValue('extendDataFormInfo.value(fd_type)',this.$obj.fdTypeValue);
+            this.addHiddenValue('extendDataFormInfo.value(fd_travel_start_date)',this.$obj.Date0);
+            this.addHiddenValue('extendDataFormInfo.value(fd_travel_end_date)',this.$obj.Date1);
+            this.addHiddenValue('extendDataFormInfo.value(fd_purpose)',this.$obj.fd_purpose);
+
+           
+
+            var shenfenz=this.$obj.data.data_id_no;
+            var qiansiwei=shenfenz.substring(0,4); 
+            var housiwei=shenfenz.substring(14,18);
+            var idvalue= qiansiwei+"****"+housiwei;
+
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_person.0.fd_traveller_name)','');
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_person.0.fd_traveller_select)',this.$obj.id0);
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_person.0.fd_traveller_select_name)',this.$obj.xm0);
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_person.0.fdId)','');
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_person.0.fd_date_of_birth)',this.$obj.csny0);
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_person.0.fd_gender)',this.$obj.sex0);
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_person.0.fd_position)',this.$obj.gw0);
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_person.0.fd_id_no_hide)',shenfenz);
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_person.0.fd_ID_no)',idvalue);
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_person.0.fd_Passport)','');
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_person.0.fd_passport_type)','');
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_person.0.fd_pas)','');
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_person.0.fd_leader)',this.$obj.zgld0);
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_person.0.fd_remark)',this.$obj.ccrybz0);
+           
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_business.0.fd_business_people.id)',this.$obj.iid0);
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_business.0.fd_business_people.name)',this.$obj.rname0);
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_business.0.fdId)','');
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_business.0.fd_departure_time)',this.$obj.cfdate0);
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_business.0.fd_arrival_time)',this.$obj.dddate0);
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_business.0.fd_departure_city_time)',this.$obj.slcfdate0);
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_business.0.fd_arrival_city_time)',this.$obj.sldddate0);
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_business.0.fd_from)',this.$obj.cfd0);
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_business.0.fd_way)',this.$obj.tj0);
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_business.0.fd_toaddress)',this.$obj.mdd0);
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_business.0.fd_abroad_region)','');
+            this.addHiddenValue('extendDataFormInfo.value(fd_list_business.0.fd_remark2)',this.$obj.bz0);
+            
+            if(this.$obj.fdTypeValue=='市内'){
+                 this.addHiddenValue('extendDataFormInfo.value(fd_list_business.0.fd_inland_region)','');
+                 this.addHiddenValue('extendDataFormInfo.value(fd_list_business.0.fd_total_number_of_days)','');
+                 this.addHiddenValue('extendDataFormInfo.value(fd_list_business.0.fd_total_number_of_city_days)',this.$obj.zts0);
+            } else if(this.$obj.fdTypeValue=='国内'){
+                if(this.$obj.fd_is_booking_tickets){
+                    let ticketsArr = this.$obj.tickets;
+                    for(let i =0;i<ticketsArr.length;i++){
+                        this.addHiddenValue('extendDataFormInfo.value(fd_ticket_itinerary.'+i+'.fd_flight_person_name)',ticketsArr[i].xingming1);
+                        this.addHiddenValue('extendDataFormInfo.value(fd_ticket_itinerary.'+i+'.fd_flight_person)',ticketsArr[i].xingming2);
+                        this.addHiddenValue('extendDataFormInfo.value(fd_ticket_itinerary.'+i+'.fdId)',ticketsArr[i].xingming3);
+                        this.addHiddenValue('extendDataFormInfo.value(fd_ticket_itinerary.'+i+'.fd_last_name)',ticketsArr[i].LAST_NAME);
+                        this.addHiddenValue('extendDataFormInfo.value(fd_ticket_itinerary.'+i+'.fd_first_name)',ticketsArr[i].FIRST_NAME);
+                        this.addHiddenValue('extendDataFormInfo.value(fd_ticket_itinerary.'+i+'.fd_flight_person_no)',ticketsArr[i].xingming4);
+
+                        this.addHiddenValue('extendDataFormInfo.value(fd_ticket_itinerary.'+i+'.fd_costcenter)',ticketsArr[i].FD_WF_CC_CODE);
+                        this.addHiddenValue('extendDataFormInfo.value(fd_ticket_itinerary.'+i+'.fd_costcenter_name)',ticketsArr[i].FD_WF_CC_NAME);
+                        this.addHiddenValue('extendDataFormInfo.value(fd_ticket_itinerary.'+i+'.fd_director)',ticketsArr[i].OM1_GID);
+
+                        this.addHiddenValue('extendDataFormInfo.value(fd_ticket_itinerary.'+i+'.fd_fight_date)',ticketsArr[i].date);
+                        this.addHiddenValue('extendDataFormInfo.value(fd_ticket_itinerary.'+i+'.fd_itinerary_no)',ticketsArr[i].itineraryNo);
+                        this.addHiddenValue('extendDataFormInfo.value(fd_ticket_itinerary.'+i+'.fd_fight_time)',ticketsArr[i].fd_fight_time);
+                        this.addHiddenValue('extendDataFormInfo.value(fd_ticket_itinerary.'+i+'.fd_departure_airport_name)',ticketsArr[i].chufa1);
+                        this.addHiddenValue('extendDataFormInfo.value(fd_ticket_itinerary.'+i+'.fd_departure_airport)',ticketsArr[i].chufa2);
+                        this.addHiddenValue('extendDataFormInfo.value(fd_ticket_itinerary.'+i+'.fd_from_cityname)',ticketsArr[i].chufa3);
+                        this.addHiddenValue('extendDataFormInfo.value(fd_ticket_itinerary.'+i+'.fd_from_airportcitycode)',ticketsArr[i].chufa4);
+                        this.addHiddenValue('extendDataFormInfo.value(fd_ticket_itinerary.'+i+'.fd_arrived_airport_name)',ticketsArr[i].daoda1);
+                        this.addHiddenValue('extendDataFormInfo.value(fd_ticket_itinerary.'+i+'.fd_arrived_airport)',ticketsArr[i].daoda2);
+                        this.addHiddenValue('extendDataFormInfo.value(fd_ticket_itinerary.'+i+'.fd_to_cityname)',ticketsArr[i].daoda3);
+                        this.addHiddenValue('extendDataFormInfo.value(fd_ticket_itinerary.'+i+'.fd_to_airportcitycode)',ticketsArr[i].daoda4);
+
+
+                    }
+                }
+                this.addHiddenValue('extendDataFormInfo.value(fd_list_business.0.fd_traffic)','否');
+                this.addHiddenValue('extendDataFormInfo.value(fd_list_business.0.fd_stay)','否');
+                this.addHiddenValue('extendDataFormInfo.value(fd_list_business.0.fd_company_standards)','是');
+                this.addHiddenValue('extendDataFormInfo.value(fd_list_business.0.fd_support)','否');
+                this.addHiddenValue('extendDataFormInfo.value(fd_list_business.0.fd_total_number_of_days)',this.$obj.zts0);
+                this.addHiddenValue('extendDataFormInfo.value(fd_list_business.0.fd_total_number_of_city_days)','');
+                this.addHiddenValue('extendDataFormInfo.value(fd_list_business.0.fd_inland_region)','');
+
+                this.setHiddenValue('extendDataFormInfo.value(fd_traffic_description)',this.$obj.fd_traffic_description);
+                
+
+
+                
+
+            }
+            var subJson = {};
+            var subJson1 = {};
+            subJson.taskId = this.$obj.data.taskIdAA;
+            subJson.processId = this.getHiddenValue("sysWfBusinessForm.fdModelId");
+            subJson.activityType = "draftWorkitem";
+            subJson.operationType = "drafter_submit";
+            subJson1.operationName = "提交文档";
+            subJson1.notifyType = "";
+            subJson1.notifyLevel = this.$obj.fdNotifyLevel;
+            
+            subJson1.auditNote = this.$obj.fdUsageContent;
+            subJson1.auditNoteFdId = this.getHiddenValue("sysWfBusinessForm.fdAuditNoteFdId");
+            subJson1.identityId = this.$obj.rolesSelectObjValue;
+            subJson1.notifyOnFinish = true;
+            subJson1.dayOfNotifyDrafter = "0";
+            subJson1.hourOfNotifyDrafter = "0";
+            subJson1.minuteOfNotifyDrafter = "0";
+            subJson.param = subJson1;
+            this.setHiddenValue('sysWfBusinessForm.fdParameterJson',JSON.stringify(subJson))
+
+            let postData = [];
+            for(let i = 0;i<this.$obj.data.hideInfo.length;i++){
+                console.log(this.$obj.data.hideInfo[i].name+"	"+this.$obj.data.hideInfo[i].value)
+                postData.push({
+                    type:0,
+                    name:this.$obj.data.hideInfo[i].name,
+                    value:this.$obj.data.hideInfo[i].value
+                })
+            }
+            // console.log(postData);
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url :  common.oaUrl + '/chuchaiSubmit.jsp',
+                data:postData,
+                type: 'post',
+                reqCharset:'UTF-8',
+                success: function(dataInfo){
+                    console.log(dataInfo.aaa)
+                    if(dataInfo.flag == "success"){
+                        common.alert("操作成功!Your operation was successful!",function(){
+                            history.go(-1);
+                        });
+                    }else{
+                        var errinfo = dataInfo.info;
+                        if(errinfo==""){
+                            errinfo="操作失败，请稍后重试";
+                        }
+                        common.alert(errinfo)
+                    }
+                }
+            });
+        }
+    }
+</script>
+<style type="less">
+    @import url('../../assets/less/theme/default/common.less');
+    .ChuchaiNew {
+        .tabbar {
+            position: absolute;
+            top: 45px;
+        }
+        .content {
+            position: absolute;
+            top: 85px;
+            right: 0px;
+            bottom: 0px;
+            left: 0px;
+            .page1,
+            .page2 {
+                display: none;
+                width: 100%;
+                padding: 5px;
+            }
+            .curr {
+                display: block;
+            }
+            .calculate-bt{
+                background: #428bca;
+                color: white;
+                text-align: center;
+                padding: 5px 0;
+                margin: 0 10% 10px 10%;
+            }
+            .addtickets-bt{
+                background: #428bca;
+                color: white;
+                text-align: center;
+                padding: 5px 0;
+                margin: 10px 0;
+            }
+        }
+        input{
+            padding: 10px;
+        }
+    }
+</style>

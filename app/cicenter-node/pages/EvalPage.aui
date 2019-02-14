@@ -1,0 +1,226 @@
+<ui>
+<div id="jscroller">
+   <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+            <!-- 评奖信息维护查询主页 -->
+                <aui-text>评奖信息维护</aui-text>
+            </caption-area>
+            <right-area v-on:click="func.nlistclick()">
+                <a>
+                    <i class="icon auicon icon-search"></i>
+                </a>
+            </right-area>
+        </aui-titlebar>
+    </aui-header>
+
+
+    <aui-scroller class="content" style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;text-align: center; background-color:white;">
+        <form id="demo" style="display:none" mbsc-form>
+            <div class="mbsc-form-group">
+               
+                 <label >
+                    <span  class="stylespan">合理化名称 </span>
+                    <input name="firstname" type="text" placeholder="" required v-model="evalData.propName">
+                </label>
+            </div>
+            <div class="mbsc-form-group">
+                 <label>
+                    <span class="stylespan" >实施报告</span>
+                    <input name="starttime" id="md-starttime" type="text" required v-model="evalData.propDateS">
+                </label>
+                <label>
+                    <span class="stylespan" >审核日期</span>
+                     <input name="endtime" id="md-endtime" type="text" required  v-model="evalData.propDateE">
+                </label>
+            </div>
+             <div class="mbsc-form-group">
+               
+                 <label >
+                    <span class="stylespan" >提出人 </span>
+                    <input name="postman" type="text" placeholder="" required v-model="evalData.pemp">
+                </label>
+                 <label >
+                    <span class="stylespan" >实施人员 </span>
+                    <input name="actionman" type="text" placeholder="" required v-model="evalData.aemp">
+                </label>
+            </div>
+             <div class="mbsc-form-group">
+                 <label >
+                    <span class="stylespan" >合理化分类 </span>
+                   <select id="ptId" name="ptId"  class="input-right-text" v-model="evalData.ptId">
+                        <option value="" selected="true"></option>
+                        <option value="PT01">材料成本/价值分析</option>
+                        <option value="PT02">材料利用率</option>
+                        <option value="PT03">生产力/效率</option>
+                        <option value="PT04">质量</option>
+                        <option value="PT05">安全</option>
+                        <option value="PT06">供应链/交付</option>
+                        <option value="PT07">能源节约/环保</option>
+                        <option value="PT08">管理费用</option>
+				</select>
+                </label>
+
+                <label >
+                    <span class="stylespan" >实施部门/科室 </span>
+                    <input type="text" id="evalssbm" v-on:click="func.manclick(5)" placeholder="请选择" readonly="readonly" required>
+                    <input id="ssbmid" name="ssbmid" type="hidden" v-model="evalData.adept">
+                </label>
+
+
+                 <label >
+                    <span class="stylespan" >是否已评奖 </span>
+                    <select id="bonusFlag" name="bonusFlag"  class="input-right-text" v-model="evalData.bonusFlag">
+                        <option value="" selected="true"></option>
+                        <option value="1">已评奖</option>
+                        <option value="2">未评奖</option>
+				    </select>
+                 </label>
+            </div>
+            <div class="mbsc-form-group">
+                 <label>
+                    <span class="stylespan" >提出日期(开始)</span>
+                    <input name="pstime" id="md-pstime" type="text" placeholder="开始" required v-model="evalData.propDateS1">
+                </label>
+                <label>
+                <span class="stylespan" >提出日期(结束)</span>
+                     <input name="petime" id="md-petime" type="text" placeholder="结束" required  v-model="evalData.propDateE1">  
+                </label>
+            </div>
+        </form>
+    </aui-scroller>
+</div>
+</ui>
+
+
+<script>
+import '@auicomp/datetime/DateTime.aui';
+import '@auiutil/mobiscroll3/css/mobiscroll.javascript.min.css';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import mobiscroll from '@auiutil/mobiscroll3/js/mobiscroll.javascript.min';
+import Toast from '@auicomp/toast/Toast.aui';
+import fetch from '@comm/utils/nfetch';
+import { router } from '@auicomp/action/Action.aui';
+import './Frame.aui';
+
+export default class EvalPage{
+    static get tag(){
+        return 'eval';
+    }
+
+    evaltree(data1,data2){
+        $('#evalssbm').val(data1);
+        this.$obj.evalData.adept=data2;
+    }
+
+    created () {
+
+//mobiscroll
+mobiscroll.settings = {
+            theme: 'ios',
+            lang: 'zh',
+        };
+
+        var date, select, widget,
+            now = new Date(),
+            form = document.getElementById("demo");
+
+        mobiscroll.form('#demo');
+
+//日期开始
+         date = mobiscroll.date('#md-starttime', {
+           defaultValue: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
+            min: new Date(now.getFullYear() - 100, 0, 1),
+            max: new Date(now.getFullYear()+100 , 0, 1)
+        });
+
+        date = mobiscroll.date('#md-endtime', {
+            defaultValue: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
+            min: new Date(now.getFullYear() - 100, 0, 1),
+            max: new Date(now.getFullYear()+100 , 0, 1)
+        });
+        date = mobiscroll.date('#md-pstime', {
+           defaultValue: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
+            min: new Date(now.getFullYear() - 100, 0, 1),
+            max: new Date(now.getFullYear()+100 , 0, 1)
+        });
+        date = mobiscroll.date('#md-petime', {
+            defaultValue: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
+            min: new Date(now.getFullYear() - 100, 0, 1),
+            max: new Date(now.getFullYear()+100 , 0, 1)
+        });
+//日期框结束
+
+        var self=this;
+        auiLoading.show();
+        fetch({
+            appId: 'ci',
+            url : '/hlh_eval_init.jsp',
+            data: {
+            },
+            success: function(json){
+                self.$obj.evalData.propDateS=json.propDateS;
+                self.$obj.evalData.propDateE=json.propDateE;
+                auiLoading.hide();
+            },
+            error: function(rs){
+                auiLoading.hide();
+                Toast.show(rs.errmsg);
+            }
+        });
+    
+       
+        const obj = this.$obj = {
+            evalData:{
+                propName:"",
+                propDateS:"",
+                propDateE:"",
+                pemp:"",
+                aemp:"",
+                ptId:"",
+                adept:"",
+                bonusFlag:"",
+                propDateS1:"",
+                propDateE1:"",
+                rows:20,
+                page:1,
+                noData:0,
+            },
+             func:{
+                  manclick:function(num){
+                    router.go({path: '/department?flag='+num, isForce: true});
+                },
+                nlistclick:function(){
+                    //处理日期
+                    obj.evalData.propDateS=obj.evalData.propDateS.replace('/', "-").replace('/', "-");
+                    obj.evalData.propDateE=obj.evalData.propDateE.replace('/', "-").replace('/', "-");
+                    obj.evalData.propDateS1=obj.evalData.propDateS1.replace('/', "-").replace('/', "-");
+                    obj.evalData.propDateE1=obj.evalData.propDateE1.replace('/', "-").replace('/', "-");
+                    
+                    window.evalData=obj.evalData;
+                    router.go('/evallist');
+                }
+            }
+         };
+          $('#jscroller').render(obj);
+    }
+}
+
+</script>
+
+<style>
+    .mbsc-ios .mbsc-control-w:after, .mbsc-ios .mbsc-control-w:before{
+        border:none;
+    }
+    .mbsc-form-group{
+        margin:0.5em 0;
+    }
+    .stylespan{
+        height:44px;
+        line-height:44px;
+        width:110px;
+    }
+</style>

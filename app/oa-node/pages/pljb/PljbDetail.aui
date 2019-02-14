@@ -1,0 +1,517 @@
+<ui>
+    <div class="PljbDetail">
+       <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>详情Detail</aui-text>
+                </caption-area>
+                <right-area>
+                    <a v-on:click="func.openShenPi">
+                        <i class="icon auicon icon-rdook"></i>
+                    </a>
+                </right-area>
+            </aui-titlebar>
+        </aui-header>
+        <aui-tabbar class="tabbar tabbar-line tabbar-line-width70 animated" style="display:none">
+            <tabbar-cell v-bind:class="{active:tabIndex==0}" v-on:click="func.tabChange(0)">
+                <label class="tab-label">流程表单Form</label>
+            </tabbar-cell>
+            <tabbar-cell v-bind:class="{active:tabIndex==1}" v-on:click="func.tabChange(1)">
+                <label class="tab-label">审批Comments</label>
+            </tabbar-cell>
+        </aui-tabbar>
+        <aui-scroller class="content">
+            <div class="page1 " v-bind:class="{curr:tabIndex==0}">
+                <aui-action class="list-cell active" href="#toggle1" type="toggle">
+                    <a class="toogle-title">
+                        基本信息<i class="icon auicon icon-arrowright"></i>
+                    </a>
+                </aui-action>
+                <div class="toggle1-line"></div>
+                <div id="toggle1" action-target class="active toggle-box">
+                    <div class="box1">
+                        <div class="label-top">主题</div>
+                        <div class="label-content">{{data.zt}}</div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">申请人部门</div>
+                        <div class="label-content">{{data.bm}}</div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">申请原因</div>
+                        <div class="label-content">{{data.sqyy}}</div>
+                    </div>
+                   <div class="box1">
+                        <div class="label-top">处理方式</div>
+                        <div class="label-content">{{data.clfs}}</div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">是否人均超80</div>
+                        <div class="label-content">{{data.kssj}}</div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">部门当月累计加班合计小时数</div>
+                        <div class="label-content">{{data.jssj}}</div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">预计超110h人数</div>
+                        <div class="label-content">{{data.dkcd}}{{data.dw}}</div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">实际超110h人数</div>
+                        <div class="label-content">{{data.sjdkcd}}</div>
+                    </div>
+                    <!-- <div class="box1 border0">
+                        <div class="label-top">附件 Attachment</div>
+                        <div class="label-content">
+                            <div v-if="data.fileInfo.length==0">
+                            无附件
+                            </div>
+                            <ul v-else class="attach-list">
+                                <li v-for="item in data.fileInfo" v-filter="func.addAttachIcon" v-on:click="func.openAttach(item.fileUrl,item.fileName)">
+                                    <img v-bind:src="item.icon" class="attach-icon"></img>
+                                    <div class="attach-text">{{item.fileName}}</div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div> -->
+                </div>
+                <aui-action class="list-cell " href="#toggle2" type="toggle">
+                    <a class="toogle-title">
+                        实际超110加欠班明细<i class="icon auicon icon-arrowright"></i>
+                    </a>
+                </aui-action>
+                <div class="toggle1-line"></div>
+                <div id="toggle2" action-target class=" toggle-box">
+                    <div v-for="item in data.jqlistArr">
+                        <div v-if="item.td10==''"  class="border-bt1 padding10" >
+                            <div>{{item.td1}}({{item.td2}} | {{item.td3}})</div>
+                            <div class="sed-title">加班时长:{{item.td7}}  欠班:{{item.td8}}  当月实际加班合计:{{item.td11}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="page2"  v-bind:class="{curr:tabIndex==1}">
+                <div class="box1">
+                    <aui-action class="list-cell " href="#toggle3" type="toggle">
+                        <a class="toogle-title">
+                            流程信息 Process Status<i class="icon auicon icon-arrowright"></i>
+                        </a>
+                    </aui-action>
+                    <div class="toggle1-line"></div>
+                    <div id="toggle3" action-target class="toggle-box">
+                        <div class="box1" v-if="data.hisInfo.length==0">{{data.hisInfo.length}}暂无记录!</div>
+                        <div  v-else v-for="item in data.hisInfo">
+                            <div class="box1" v-if="item.cur == 'false'&&item.td6 == 'fiberhome'">{{item.td5}} {{item.td1}} {{item.td3}} {{item.td2}}</div>
+                            <div class="box1" v-if="item.cur == 'false'&&item.td6 != 'fiberhome'">
+                                <div>{{item.td5}} {{item.td1}} {{item.td3}} {{item.td2}}</div>
+                                <div class="sp-text">审批意见 Comments</div>
+                                <div  class="sp-info">{{item.td6}}</div>
+                            </div>
+                            <div class="box1 ftc-red" v-if="item.cur != 'false'">{{item.td1}} {{item.td5}} 待处理 To been done</div>
+                        </div>
+                    </div>
+                    <aui-action class="list-cell active" href="#toggle4" type="toggle">
+                        <a class="toogle-title">
+                            审批意见 Comments<i class="icon auicon icon-arrowright"></i>
+                        </a>
+                    </aui-action>
+                    <div class="toggle1-line"></div>
+                    <div id="toggle4" action-target class="active toggle-box">
+                        <div class="opinions-title">
+                            <div class="opinions-text">常用意见 Common opinions</div>
+                            <i class="icon auicon icon-rdomenu"  v-on:click="func.openSelect()"></i>
+                        </div>
+                        <div class="opinions-textarea">
+                            <div class="textarea-box">
+                                <textarea rows="5" v-model="content"></textarea>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </aui-scroller>
+    </div>
+</ui>
+<script>
+    import '@auicomp/list/List.aui';
+
+    import fetch from "@libs/fetch";
+    import common from '@libs/common';
+    import { router } from '@auicomp/action/Action.aui';
+    import Selectsheet from '@comm/components/Selectsheet.aui';
+    import Action from '@auicomp/action/Action.aui';
+    import '@auicomp/tabbar/Tabbar.aui';
+
+    
+
+    export default class PljbDetail {
+
+        static get tag() {
+            return 'PljbDetail';
+        }
+        created() {
+            var self = this;
+            const obj = this.$obj = {
+                tabIndex:0,
+                data:{},
+                buttonSav:'',
+                buttonFow:'',
+                content:'',
+                func:{
+                    tabChange(index){
+                        obj.tabIndex = index;
+                    },
+                    openSelect(){
+                        Selectsheet.show({
+                            list: obj.data.selInfo.map(function(item){
+                                return item.selText
+                            }),
+                            func:function(index){
+                                obj.content = obj.data.selInfo[index].selValue;
+                            }
+                        });
+                    },
+                    openShenPi(){
+                         Selectsheet.show({
+                            list: obj.data.butInfo.map(function(item){
+                                return item.butText
+                            }),
+                            func:function(index){
+                                self.doNext(obj.data.butInfo[index].butText,obj.data.butInfo[index].butValue)
+                            }
+                        });
+                    },
+                    addAttachIcon(index,item){
+                        let name = item.fileName;
+                        let houzui = name.substring(name.lastIndexOf(".") + 1, name.length).toLowerCase();;
+                        let imgType = "jpg,bmp,pcx,tiff,gif,jpeg,tga,exif,fpx,svg,psd,cdr,pcd,dxf,ufo,eps,al,png,hdri,raw,wmf,lic,emf,";
+                        let imgstr;
+                        if (houzui == "pdf") {
+                            imgstr = './assets/imgs/filetype/pdf.png';
+                        } else if (houzui == "doc" || houzui == "docx") {
+                            imgstr = './assets/imgs/filetype/word.png';
+                        } else if (houzui == "txt") {
+                            imgstr = './assets/imgs/filetype/txt.png';
+                        } else if (houzui == "xls" || houzui == "xlsx") {
+                            imgstr = './assets/imgs/filetype/excel.png';
+                        } else if (imgType.indexOf(houzui + ",") > -1) {
+                            imgstr = './assets/imgs/filetype/picture.png';
+                        } else if (houzui == "rar" || houzui == "zip") {
+                            imgstr = './assets/imgs/filetype/zip.png';
+                        } else {
+                            imgstr = './assets/imgs/filetype/unknow.png';
+                        }
+                        item.icon = imgstr;
+                    },
+                    openAttach(url,name){
+                        common.openAttach(url,name);
+                    }
+                }
+            }
+            
+            this.onload();
+        }
+        detached(){
+            this.$vm && this.$vm.destroy();
+        }
+        doNext(flag, flag1){
+            switch(flag) {
+				case "同意":
+					this.$obj.buttonSav = "approve";
+					this.$obj.buttonFow = "ACCEPT";
+					break;
+				case "Approve":
+					this.$obj.buttonSav = "approve";
+					this.$obj.buttonFow = "ACCEPT";
+					break;
+				case "拒绝":
+					this.$obj.buttonSav = "approve";
+					this.$obj.buttonFow = "REJECT";
+					break;
+				case "Reject":
+					this.$obj.buttonSav = "approve";
+					this.$obj.buttonFow = "REJECT";
+					break;
+				case "回退上一步":
+					this.$obj.buttonSav = "backTrace";
+					this.$obj.buttonFow = "";
+					break;
+				case "Back to previous step":
+					this.$obj.buttonSav = "backTrace";
+					this.$obj.buttonFow = "";
+					break;
+				case "退回开端":
+					this.$obj.buttonSav = "returnStart";
+					this.$obj.buttonFow = "";
+					break;
+				case "Back to Initiator":
+					this.$obj.buttonSav = "returnStart";
+					this.$obj.buttonFow = "";
+					break;
+				case "回退历史审批人":
+					this.$obj.buttonSav = "showHistoryList";
+					this.$obj.buttonFow = flag1;
+					break;
+				case "征询意见":
+					this.$obj.buttonSav = "inquire";
+					this.$obj.buttonFow = "";
+					break;
+				case "consultation":
+					this.$obj.buttonSav = "inquire";
+					this.$obj.buttonFow = "";
+					break;
+				case "提交":
+					this.$obj.buttonSav = "FinishInquire";
+					this.$obj.buttonFow = "";
+					break;
+				case "Submit":
+					this.$obj.buttonSav = "FinishInquire";
+					this.$obj.buttonFow = "";
+					break;
+				case "转办":
+					this.$obj.buttonSav = "forward";
+					this.$obj.buttonFow = "";
+					break;
+				case "transfer to others":
+					this.$obj.buttonSav = "forward";
+					this.$obj.buttonFow = "";
+					break;
+				default:
+					alert("该操作暂不支持,请联系管理员!This operation hasn't done yet,Please contact the IT department!");
+					break;
+				}
+				this.doSubmit();
+        }
+        doSubmit() {
+            let self = this;
+            if (this.$obj.buttonSav == "approve") {
+                if (this.$obj.buttonFow == "ACCEPT") {
+                    var data = "{\"Opinion\":\"ACCEPT\",\"Remark\":\"" + this.$obj.content + "\",\"TaskId\":\"" + this.$obj.data.taskId + "\",\"FlowId\":\"" + this.$obj.data.flowid + "\",\"DataVersion\":\"" + this.$obj.data.dataVersion + "\",\"StartTime\":\"" + this.$obj.data.startTime + "\",\"FuncName\":\"wf.RuntimeHandler.Approve\"}{:ky->f" + this.$obj.data.jPack;
+                  
+                } else {
+                    var data = "{\"Opinion\":\"REJECT\",\"Remark\":\"" + this.$obj.content + "\",\"TaskId\":\"" + this.$obj.data.taskId + "\",\"FlowId\":\"" + this.$obj.data.flowid + "\",\"DataVersion\":\"" + this.$obj.data.dataVersion + "\",\"StartTime\":\"" + this.$obj.data.startTime + "\",\"FuncName\":\"wf.RuntimeHandler.Approve\"}{:ky->f" + this.$obj.data.jPack;
+                }
+                this.submit(data);
+            }
+            if (this.$obj.buttonSav == "backTrace") {
+                if (this.$obj.content == "") {
+                    common.alert("请填写意见!Please fill in the comments!",function(){
+                        self.$obj.tabIndex = 1;
+                        $('.opinions').focus();
+                    });
+                } else {
+                    var data = "{\"TaskId\":\"" + this.$obj.data.taskId + "\",\"Remark\":\"" + this.$obj.content + "\",\"StartTime\":\"" + this.$obj.data.startTime + "\",\"FlowId\":\"" + this.$obj.data.flowid + "\",\"FuncName\":\"wf.RuntimeHandler.BackTrace\"}";
+                    this.submit(data);
+                }
+            }
+            if (this.$obj.buttonSav == "returnStart") {
+                if (this.$obj.content == "") {
+                    common.alert("请填写意见!Please fill in the comments!",function(){
+                        self.$obj.tabIndex = 1;
+                        $('.opinions').focus();
+                    });
+                } else {
+                    var data = "{\"TaskId\":\"" + this.$obj.data.taskId + "\",\"Remark\":\"" + this.$obj.content  + "\",\"StartTime\":\"" + this.$obj.data.startTime + "\",\"FlowId\":\"" + this.$obj.data.flowid  + "\",\"FuncName\":\"wf.RuntimeHandler.ReturnStart\"}";
+                    this.submit(data);
+                }
+            }
+            if (this.$obj.buttonSav == "showHistoryList") {
+                if (this.$obj.content == "") {
+                    common.alert("请填写意见!Please fill in the comments!",function(){
+                        self.$obj.tabIndex = 1;
+                        $('.opinions').focus();
+                    });
+                } else {
+                    location.href = '#/History?flag='+this.$obj.buttonFow+'&page=aui-PljbDetail';
+                }
+            }
+            if (this.$obj.buttonSav == "inquire") {
+                if (this.$obj.content == "") {
+                     common.alert("请填写意见!Please fill in the comments!",function(){
+                        self.$obj.tabIndex = 1;
+                        $('.opinions').focus();
+                    });
+                } else {
+                    location.href = '#/Choose?caoZuo=Inquire&page=aui-PljbDetail';
+                }
+            }
+            if (this.$obj.buttonSav == "FinishInquire") {
+                if (this.$obj.content == "") {
+                     common.alert("请填写意见!Please fill in the comments!",function(){
+                        self.$obj.tabIndex = 1;
+                        $('.opinions').focus();
+                    });
+                } else {
+                    var data = "{\"Remark\":\"" + this.$obj.content + "\",\"TaskId\":\"" + this.$obj.data.taskId + "\",\"FlowId\":\"" + this.$obj.data.flowid + "\",\"StartTime\":\"" + this.$obj.data.startTime + "\",\"FuncName\":\"wf.RuntimeHandler.FinishInquire\"}{:ky->f" + this.$obj.data.jPack;
+                    this.submit(data);
+                }
+            }
+            if (this.$obj.buttonSav == "forward") {
+                if (this.$obj.content == "") {
+                     common.alert("请填写意见!Please fill in the comments!",function(){
+                        self.$obj.tabIndex = 1;
+                        $('.opinions').focus();
+                    });
+                }  else {
+                     location.href = '#/Choose?caoZuo=Forward&page=aui-PljbDetail';
+                }
+            }
+        }
+        submit(jsonData){
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : common.hrUrl+'/qingjiasubmit',
+                data: {
+                    jsonData:jsonData,
+                },
+                type: 'post',
+                success: function(dataInfo){
+                   if (dataInfo.flag == "success") {
+                        common.alert("操作成功!Successful Done!", function() {
+                            document.querySelector('.aui-refresher-PljbList').component.refresher.triggerDownScroll();
+                            history.go(-1);
+                        });
+                    } else {
+                        common.alert("操作失败!Fail Done!");
+                    }
+                }
+            });
+        }
+        onload(){
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : common.hrUrl+'/jiaqiandetail.jsp',
+                data: {
+                    unid:router.getQueryObj().unid,
+                },
+                type: 'post',
+                success: function(infos){
+                    self.$obj.data = infos;
+                    console.log(self.$obj.data);
+                    self.$vm = $(self.$el).render(self.$obj);
+                    $(".tabbar").css("display","block");
+                }
+            });
+        }
+    }
+</script>
+<style type='less'>
+@import url('../../assets/less/theme/default/common.less');
+.PljbDetail{
+    .tabbar{
+         position: absolute;
+        top: 45px;
+    }
+    .content{
+        position: absolute;
+        top: 85px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        background: white;
+        .page1,.page2{
+            display: none;
+            width: 100%;
+            margin-bottom: 15px;
+            .list-cell{
+                border-top: 0;
+                .toogle-title{
+                    color:#428bca !important;
+                }
+            }
+            .toggle1-line{
+                height: 1px;
+                background: #A0C8E8;
+                margin: 0px 15px 0px 15px;
+            }
+            .toggle-box{
+                border: 1px solid #AAAAAA;
+                margin: 0px 15px 0px 15px;
+                margin-top: 5px;
+                // display: flex;
+                // flex-direction: column;
+                .box1{
+                    padding: 8px 10px 8px 10px;
+                    border-bottom: 1px solid @border-color;
+                    .label-content{
+                        margin-top:5px;
+                        text-align: right;
+                        color: #2E9BF2;
+                        .attach-list{
+                            li{
+                                display: flex;
+                                flex-direction: row;
+                                align-items: center;
+                                border-bottom: 1px solid @border-color;
+                                padding: 5px 0;
+                                .attach-icon{
+                                    width: 35px;
+                                    margin-right: 5px;
+                                }
+                                &:last-child{
+                                    border:0;
+                                }
+                                &:active{
+                                    background: #eee;
+                                }
+                            }
+                        }
+                    }
+                    .sp-text{
+                         border-top: 1px solid @border-color;
+                         margin-top: 8px;
+                        padding-top: 8px;
+                    }
+                    .sp-info{
+                        text-align:right;
+                        color:red;
+                    }
+                }
+                .opinions-title{
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    padding:8px 10px 8px 10px;
+                    border-bottom: 1px solid @border-color;
+                    .opinions-text{
+                        flex:1;
+                    }
+                    .auicon{
+                        font-size:24px;
+                    }
+                }
+                .opinions-textarea{
+                    width: 100%;
+                    padding: 8px 10px 8px 10px;
+                    .textarea-box{
+                        width: 100%;
+                        border: 1px solid @border-color;
+                        border-radius: 4px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: stretch;
+                        textarea{
+                            border:0;
+                            padding: 0;
+                            margin: 5px;
+                        }
+                    }
+                }
+               
+            }   
+        }
+        .curr{
+            display: block;
+        }
+    }
+}
+
+
+</style>

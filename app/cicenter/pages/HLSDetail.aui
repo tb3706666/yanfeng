@@ -1,0 +1,173 @@
+<ui>
+<div id="all_content">
+    <aui-header>
+        <aui-titlebar id="shenpi">
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <!-- 合理化查询详情 -->
+            <caption-area v-for="item in items">
+                <aui-text>{{item.title}}</aui-text>
+            </caption-area>
+        </aui-titlebar>
+    </aui-header>
+
+    <aui-scroller id="toggle1" class="content active" action-target style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;">
+        <aui-list >
+            <list-cell v-for="item in items2" id="lists" >
+                <div v-if="item.name=='合理化建议附件'" >
+                    <a>
+                        {{item.name}}
+                    </a><br>
+                    <a  >
+                        <a v-for="files in item.value" v-on:click="func.downloads(files.fileName,files.attachSeriNo)" v-filter="func.getAttachShowInfo">
+                            <i v-class="files.class" v-style="{color:files.color}"></i>{{files.fileName}}
+                        </a>
+                    </a>
+                </div>
+                <div v-if="item.name=='实施报告附件'" >
+                    <a>
+                        {{item.name}}
+                    </a><br>
+                    <a  >
+                        <a v-for="files in item.value" v-on:click="func.downloads(files.fileName,files.attachSeriNo)" v-filter="func.getAttachShowInfo">
+                            <i v-class="files.class" v-style="{color:files.color}"></i>{{files.fileName}}
+                        </a>
+                    </a>
+                </div>
+                <div v-if="item.name!='合理化建议附件'&&item.name!='实施报告附件'" >
+                    <a>
+                    {{item.name}}
+                    </a><br>
+                    <a style="color:red;" v-for="values in item.value">
+                        {{values.text}}
+                    </a><br>
+                </div>
+            </list-cell>
+        </aui-list>
+    </aui-scroller>
+    </div>
+</ui>
+
+
+<script>
+import '@auicomp/header/Header.aui';
+import '@auicomp/button/Button.aui';
+import '@auicomp/scroller/Scroller.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auicomp/tabbar/Tabbar.aui';
+import '@auicomp/datetime/DateTime.aui';
+import '@auiutil/mobiscroll3/css/mobiscroll.javascript.min.css';
+import Actionsheet from '@auicomp/actionsheet/Actionsheet.aui';
+import Action from '@auicomp/action/Action.aui';
+import tool from '@comm/utils/tool';
+import mobiscroll from '@auiutil/mobiscroll3/js/mobiscroll.javascript.min';
+import Confirm from '@auicomp/confirm/Confirm.aui';
+import fetch from '@comm/utils/xfetch';
+import { router } from '@auicomp/action/Action.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import './Frame.aui';
+// import $ from 'agile-ce';
+
+export default class HLSDetail{
+    
+    static get tag(){
+        return 'hlsdetail';
+    }
+
+    created(){
+        var seriId = router.getQueryObj(location.search).seriId||router.getQueryObj().seriId;//获取当前列表表单
+        var jfcout=[];
+        var jfcout2=[];
+        auiLoading.show();
+        fetch({
+                appId: 'ci',
+                url : 'http://ciurl/hlh_query_detail.jsp',
+                data: {
+                    seriId:seriId,
+                    closeFlag:"1",
+                    excel:"1",
+                    noData:"0"
+                },
+                type: 'get',
+                success: function(json){
+                    var jfjson={title:json.title};
+                    jfcout.push(jfjson);
+                    $.each(json.list, function(e,e1) {
+                        jfcout2.push(e1);
+                    });
+
+                    auiLoading.hide();
+                },
+                error: function(rs){
+                    auiLoading.hide();
+                    Toast.show(rs.errmsg);
+               
+                }
+            });
+
+            var obj = {
+                items:jfcout,
+                items2:jfcout2,
+               func:{
+                downloads:function(fname,id){
+                    auiLoading.show();
+                        fetch.download({
+                        appId: "ci",
+                        url:'http://ciurl/bizProp/download?attachSeriNo='+id,
+                        fileName: fname,
+                        path: "res:download",
+                        success: function(rs) {
+                            appnest.native.openFile({
+                                path: rs.path 
+                                });
+                                auiLoading.hide();
+                        },
+                        error: function(rs) {
+                            auiLoading.hide();
+                          Toast.show(rs.errmsg);
+                        }
+                        });
+                },
+                getAttachShowInfo:function(index,files){
+                    var atinfo = tool.getAttachIcon(files.fileName);
+                    files.class = atinfo.class;
+                    files.color = atinfo.color;
+                },
+               }
+            };
+          $('#all_content').render(obj);
+    }
+
+}
+
+</script>
+
+<style type="less">
+[type="toggle"].active .icon-arrowdown::before,
+[type="control"].active .icon-arrowdown::before{
+    content: '\e694';
+}
+.content-tips{
+    font-size: 13px;
+    color: #7F8C8D;
+    margin: 10px;
+}
+#toggle a{
+    display: inline-block;
+}
+.attach{
+    display: flex;
+    align-items: center;
+    i{
+        color: #428bca;
+        position: static;
+        transform: none;
+        font-size: 20px;
+        margin-right: 5px;
+    }
+}
+</style>
+
+

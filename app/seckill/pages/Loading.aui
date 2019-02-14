@@ -1,0 +1,48 @@
+<ui>
+    <div class="LoadingPage">
+    </div>
+</ui>
+<script>
+import '@auicomp/action/Action.aui';
+import '@auicomp/scroller/Scroller.aui';
+import Alert from '@auicomp/alert/Alert.aui';
+import { router } from '@auicomp/action/Action.aui';
+
+export default class LoadingPage {
+
+    static get tag() {
+        return 'loading';
+    }
+    created(){
+        $(document).on('plusready', function(){
+            appnest.config.getUserInfo({
+                success:function(r){
+                    var locahref = 'https://app.yfjci.com/seckill/login/login?username='+r.loginId+'&password='+r.password;
+                    window.location.replace(locahref);
+                },
+                fail:function(res){
+                    Alert.show({
+                        content: res.errMsg,
+                        doOk: function(){
+                            appnest.navigation.closeWindow();
+                        }
+                    });
+                }
+            });
+        });
+    }
+}
+</script>
+<style type='less'>
+@import url('../assets/less/theme/default/common.less');
+
+.LoadingPage{
+    background-image: url(../assets/imgs/loading.png);
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 100%;
+    background-size:100% 100%;    
+    position:absolute;    
+    filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='../assets/imgs/loading.png',sizingMethod='scale');
+}
+</style>

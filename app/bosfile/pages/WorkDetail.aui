@@ -1,0 +1,659 @@
+<ui>
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>详情detail</aui-text>
+            </caption-area>
+            <right-area>
+                <a id="subIcon"><i class="icon auicon icon-hook-fill"></i></a>
+            </right-area>
+        </aui-titlebar>
+        <aui-tabbar class="tabbar tabbar-line tabbar-line-width70 animated" style="width:100%;margin-top:4px">
+            <tabbar-cell class="active" href="#baseInfo">
+                <label class="tab-label">基本信息</label>
+            </tabbar-cell>
+            <tabbar-cell href="#process">
+                <label class="tab-label">流程办理</label>
+            </tabbar-cell>
+        </aui-tabbar>
+    </aui-header>
+    <div tpl>
+
+        <aui-scroller id="baseInfo" action-target class="content detail-scroller active" >
+            <aui-list >
+                <aui-action class="list-cell" href="#authorinfo" type="toggle">
+                    <a>
+                        申请者信息 <i class="icon auicon icon-arrowdown"></i>
+                    </a>
+                </aui-action>
+                <div id="authorinfo" action-target class="togdiv">
+                    <div class="item-div">
+                        <aui-text class="line1">填单人</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.tdr"></aui-text>
+                    </div>
+                    <div class="item-div">
+                        <aui-text class="line1">部门/工厂</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.bmgc"></aui-text>
+                    </div>
+                </div>
+            </aui-list>
+            <aui-list >
+                <aui-action class="list-cell active" href="#filechangeinfo" type="toggle">
+                    <a>
+                        文件更改信息 <i class="icon auicon icon-arrowdown"></i>
+                    </a>
+                </aui-action>
+                <div id="filechangeinfo" action-target class="togdiv active">
+                    <div class="item-div">
+                        <aui-text class="line1">主题</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.zt"></aui-text>
+                    </div>
+                    <div class="item-div">
+                        <aui-text class="line1">文件级别</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.wjjb"></aui-text>
+                    </div>
+                    <div class="fileset" v-if="hasfileInfo">
+                        <div class="file-desc"><aui-text>附件</aui-text></div>
+                        <aui-list>
+                            <list-cell  v-for="atitem in formDetailData.fileInfo" v-filter="func.getAttachShowInfo" v-on:click="func.openAttach('http://baseurl/ekp/sys/attachment/sys_att_main/sysAttMain.do?method=download&fdId='+item.fhref,item.fname)">
+                                <a class="attach"><i v-class="atitem.class" v-style="{color:atitem.color}"></i>{{atitem.fname}}</a>
+                            </list-cell>
+                        </aui-list>
+                    </div>
+                    <div class="item-div">
+                        <aui-text class="line1">过程类别</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.gclb+formDetailData.gclbdiv"></aui-text>
+                    </div>
+                    <div v-if="arrlength.hasinArr" >
+                        <div class="fileset" v-for="fileset in formDetailData.inArr">
+                            <div class="file-desc"><aui-text v-text="fileset.td2"></aui-text></div>
+                            <aui-list>
+                                <list-cell  v-for="item in fileset.td4" v-filter="func.getAttachShowInfo" v-on:click="func.openAttach('http://baseurl/ekp/sys/attachment/sys_att_main/sysAttMain.do?method=download&fdId='+item.fhref,item.fname)">
+                                    <a class="attach"><i v-class="item.class" v-style="{color:item.color}"></i>{{item.fname}}</a>
+                                </list-cell>
+                            </aui-list>
+                        </div>
+                    </div>
+                    <div class="item-div">
+                        <aui-text class="line1">是否涉及参考文件的更新？</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.sfwjgx"></aui-text>
+                    </div>
+                    <div class="item-div">
+                        <aui-text class="line1">是否涉及IT系统的更新？</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.sfitgx"></aui-text>
+                    </div>
+                    <div class="item-div">
+                        <aui-text class="line1">更改益处</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.ggyc"></aui-text>
+                    </div>
+                    <div class="item-div">
+                        <aui-text class="line1">更改原因</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.ggyy"></aui-text>
+                    </div>
+                    <div class="item-div">
+                        <aui-text class="line1">背景描述</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.bjms"></aui-text>
+                    </div>
+                    <div class="item-div">
+                        <aui-text class="line1">备注</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.bzbz"></aui-text>
+                    </div>
+                </div>
+            </aui-list>
+            <aui-list >
+                <aui-action class="list-cell" href="#doprocess" type="toggle">
+                    <a>
+                        文件执行过程 <i class="icon auicon icon-arrowdown"></i>
+                    </a>
+                </aui-action>
+                <div id="doprocess" action-target class="togdiv">
+                    <div class="item-div">
+                        <aui-text class="line1">文件实施方式</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.wjssfs"></aui-text>
+                    </div>
+                    <div class="item-div">
+                        <aui-text class="line1">培训师</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.pxs"></aui-text>
+                    </div>
+                    <div class="item-div">
+                        <aui-text class="line1">培训时间</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.pxsj"></aui-text>
+                    </div>
+                    <div class="item-div">
+                        <aui-text class="line1">要求参加培训人员</aui-text>
+                        <aui-text class="line2" v-text="formDetailData.yqry"></aui-text>
+                    </div>
+                </div>
+            </aui-list>
+        </aui-scroller>
+        <aui-scroller id="process" action-target class="content detail-scroller" >
+            <aui-list >
+                <aui-action class="list-cell" href="#dclog" type="toggle">
+                    <a>
+                        审批记录 Display circulation log <i class="icon auicon icon-arrowdown"></i>
+                    </a>
+                </aui-action>
+                <div id="dclog" action-target class="dclog" >
+                    <aui-list v-for="item in formDetailData.shenPiInfo">
+                        <list-cell>
+                            {{item.czz}}
+                            <p>于 {{item.sj}} 在 {{item.jdmc}}环节 {{item.cz}}</p>
+                        </list-cell>
+                        <list-cell>
+                            处理意见 Process opinion
+                            <p  v-for="yj in item.clyj">{{yj.text}}</p>
+                            <p  v-for="fileatt in item.file" v-filter="func.getProcessFileShowInfo"  v-on:click="func.openAttach('http://baseurl/ekp/sys/attachment/sys_att_main/sysAttMain.do?method=download&fdId='+fileatt.fileId1,fileatt.fileName)"><a class="attach"><i v-class="fileatt.class" v-style="{color:fileatt.color}"></i> {{fileatt.fileName}}</a></p>
+                        </list-cell>
+                    </aui-list>
+                </div>
+            </aui-list>
+            <aui-list >
+                <aui-action class="list-cell active" href="#pharea" type="toggle">
+                    <a>
+                        流程办理 Procedure handling <i class="icon auicon icon-arrowdown"></i>
+                    </a>
+                </aui-action>
+                <div id="pharea" action-target class="active">
+                    <div id="procedure" v-if="arrlength.hasbutton">                   
+                        <div class="nopt">操作 Next operation</div>
+                        <div class="radio-area" v-for="radio in formDetailData.buttonInfo" >
+                            <div v-if="$index==0" ><input type="radio" checked class="magic-radio"   v-bind:id="radio.buttonValue" v-bind:value="radio.buttonValue+':'+radio.buttonName" v-model="handlerval"  name="oprGroup"></input><label v-bind:for="radio.buttonValue">{{radio.buttonName}}</label></div>
+                            <div v-else><input type="radio" class="magic-radio"   v-bind:id="radio.buttonValue" v-bind:value="radio.buttonValue+':'+radio.buttonName" v-model="handlerval"  name="oprGroup"></input><label v-bind:for="radio.buttonValue">{{radio.buttonName}}</label></div>
+                        </div>
+                        <div class="p10-bt" v-show="handlerval=='handler_pass:通过 Approve' && formDetailData.isPass=='1'" >                   
+                            <p class="line1">即将流向</font><br>
+                            <p class="line2" v-if="arrlength.haspass" v-text="formDetailData.pass[0].nodeid+'.'+formDetailData.pass[0].nodeusername"></p>
+                        </div>
+                        
+                        <div v-show="handlerval=='handler_refuse:驳回 Refuse'">
+                            <div v-if="formDetailData.isRefuse=='1'">
+                                <p class="line1 p10-bt">驳回到</font><br>
+                                <div class="p10-bt flex-row-between select" style="border-top:0" v-on:click="func.selectRefuse">
+                                    <input type="hidden" id="jumpToNodeIdSelectObj" name="jumpToNodeIdSelectObj" needsub v-bind:value="submitData.refuseSelect.value"/>
+                                    <font v-text="submitData.refuseSelect.value+'.'+submitData.refuseSelect.text"></font>
+                                    <i class="icon auicon icon-rdodown"></i>
+                                </div>
+                                <div class="radio-area" style="padding-top:10px">
+                                    <div><input type="checkbox" class="magic-checkbox"  value="true"  id="refusePassedToThisNode"/><label for="refusePassedToThisNode">驳回的节点通过后直接返回本人</label></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p10-bt"   v-show="handlerval=='handler_commission:转办 Forward'" >
+                            <div v-if="formDetailData.isForward=='1'">
+                                <p class="line1">转办 Forward人员</font><br>
+                                <div class="flex-row-between">
+                                    <input type="text" id="ForwardtoOtherHandlerIds" v-model="submitData.ForwardtoOtherHandlerIds" readonly ></input>
+                                    <aui-button id="forward_btn" class="btn btn-primary" v-on:click="func.forwardChoose">选择人员</aui-button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p10-bt"   v-show="handlerval=='handler_communicate:沟通 Communicate'" >
+                            <div v-if="formDetailData.isCommunicate=='1'">
+                                <p class="line1">沟通 Communicate人员</font><br>
+                                <div v-if="formDetailData.isCancelCommunicate=='1'">
+                                    <p style="padding-top:5px" v-text="coms.userName"  v-for="coms in formDetailData.communicate"></p>
+                                </div>
+                                <div class="flex-row-between">
+                                    <input type="text" id="CommunicatetoOtherHandlerIds" readonly v-model="submitData.CommunicatetoOtherHandlerIds"></input>
+                                    <aui-button id="communicate_btn" class="btn btn-primary" v-on:click="func.communicateChoose">选择人员</aui-button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div v-if="formDetailData.isCommunicate=='1'|| formDetailData.isForward == '1'">
+                            <input type="hidden" id="toOtherHandlerIds" name="toOtherHandlerIds" needsub v-like="text" v-model="submitData.toOtherHandlerIds"/>
+                            <input type="hidden" id="toOtherHandlerNames" name="toOtherHandlerNames" needsub v-like="text" v-model="submitData.toOtherHandlerNames"/>
+                        </div>
+
+                        <div class="p10-bt"   v-show="handlerval=='handler_cancelCommunicate:取消沟通 Communicate'" >
+                            <div v-if="formDetailData.isCancelCommunicate=='1'">
+                                <p class="line1">取消沟通 Communicate人员</font><br>
+                                <div class="radio-area" style="padding:10px 0">
+                                    <div v-for="item in formDetailData.communicate"><input type="checkbox" class="magic-checkbox" v-bind:id="item.itemId" v-bind:value="item.itemId"  name="WorkFlow_CelRelationWorkitems" needsub></input><label v-bind:for="item.itemId" v-text="item.userName"></label></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="nopt select" v-on:click="func.selectUsageContent">
+                            处理意见 Process opinion
+                            <!-- <input type="hidden" name="commonUsages" needsub  v-like="text" v-model="submitData.fdUsageContent"/> -->
+                            <input type="hidden" name="commonUsages" needsub  />
+                            <i class="icon auicon icon-rdodown"></i>
+                        </div>
+                        <div style="text-align:center;padding:10px 0;">
+                            <textarea rows="3" v-model="submitData.fdUsageContent" name="fdUsageContent" needsub></textarea>
+                        </div>
+                        
+                        <input type="hidden" hidfor  needsub v-for="hidparam in formDetailData.hidden" v-bind:id="hidparam.hiddenName" v-bind:name="hidparam.hiddenName" v-bind:value="hidparam.hiddenValue"></input>
+                        
+                        <input type="hidden" id="taskId" name="taskId" needsub v-bind:value="formDetailData.submitjson[0].taskId"</input>
+                        <input type="hidden" id="istongyongflag" name="istongyongflag" needsub value="1"></input>
+                        <input type="hidden" id="userkey" v-bind:value="formDetailData.userkey" />
+                        <input type="hidden" id="sj_taskId" v-bind:value="formDetailData.submitjson[0].sj_taskId"></input>
+                        <input type="hidden" id="sj_processId" v-bind:value="formDetailData.submitjson[0].sj_processId"></input>
+                        <input type="hidden" id="sj_activityType" v-bind:value="formDetailData.submitjson[0].sj_activityType"></input>
+                        <input type="hidden" id="sj_notifyLevel" v-bind:value="formDetailData.submitjson[0].sj_notifyLevel"></input>
+                    </div>
+                    <p v-else style="color:red;padding:0 0 15px 15px;">没有操作选项</font>
+                </div>
+            </aui-list>
+        </aui-scroller>
+    </div>
+
+</ui>
+<script>
+import '@auicomp/text/Text.aui';
+import '@auicomp/grid/Grid.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auicomp/list/List.aui';
+import '@auicomp/tabbar/Tabbar.aui';
+import '@auicomp/button/Button.aui';
+import fetch from '@comm/utils/xfetch';
+import tool from '@comm/utils/tool';
+import Alert from '@auicomp/alert/Alert.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+import Action,{ router } from '@auicomp/action/Action.aui';
+
+import auiLoading from '@auicomp/loading/Loading.aui';
+import Selectsheet from '@comm/components/Selectsheet.aui';
+import 'magic-check/css/magic-check.min.css';
+
+
+export default class WorkDetail {
+
+    static get tag() {
+        return 'workdetail';
+    }
+
+    created(){
+
+        const $el = $(this.$el);
+        const pageThis = this;
+        Action.listener($el.find('tabbar-cell').attr('type', 'control'));
+
+        //提交整个表单
+        $el.find("#subIcon").on("click",function(){
+            if(obj.handlerval == ""){
+                Toast.show("请选择流程下一步操作!Please select the next opertaion of the flow!", function(){});
+                return;
+            }
+            var auditNotValue = obj.submitData.fdUsageContent;
+            var finalsubJson = {};
+            var json_param = {};
+            finalsubJson.taskId = $el.find("#sj_taskId").val();
+            finalsubJson.processId = $el.find("#sj_processId").val();
+            finalsubJson.activityType = $el.find("#sj_activityType").val();
+            finalsubJson.operationType = obj.handlerval.split(":")[0];
+
+            json_param.operationName = obj.handlerval.split(":")[1];
+            json_param.notifyType = "";
+            json_param.notifyLevel = $el.find("#sj_notifyLevel").val();
+            json_param.notifyOnFinish = false;
+            json_param.auditNote = auditNotValue;
+            json_param.auditNoteFdId = $el.find("[name='sysWfBusinessForm.fdAuditNoteFdId']").val();
+             
+            if(obj.handlerval.indexOf("handler_commission") > -1){
+                if($el.find("#ForwardtoOtherHandlerIds").val() == ""){
+                    Toast.show("请选择转办人员!", function(){});
+                    return;
+                }
+                json_param.toOtherHandlerIds = $el.find("#toOtherHandlerIds").val();
+				json_param.toOtherHandlerNames = $el.find("#toOtherHandlerNames").val();
+            }else if(obj.handlerval.indexOf("handler_communicate") > -1){
+                if($el.find("#CommunicatetoOtherHandlerIds").val() == ""){
+                    Toast.show("请选择沟通人员!", function(){});
+                    return;
+                }
+                json_param.toOtherHandlerIds = $el.find("#toOtherHandlerIds").val();
+				json_param.toOtherHandlerNames = $el.find("#toOtherHandlerNames").val();
+            }else if(obj.handlerval.indexOf("handler_cancelCommunicate") > -1){
+                var cancelObj = $el.find("[name='WorkFlow_CelRelationWorkitems']:checked");
+                if(cancelObj.length < 1){
+                    Toast.show("请选择取消沟通人员!", function(){});
+                    return;
+                }
+                var cancelStr = "";
+                cancelObj.each(function(i,e){
+                    cancelStr += $(this).val()+";"; 
+                });
+                json_param.cancelHandlerIds = cancelStr.substr(0,cancelStr.length - 1);
+            }else if(obj.handlerval.indexOf("handler_refuse") > -1){
+                json_param.jumpToNodeId = $el.find("#jumpToNodeIdSelectObj").val();
+                json_param.jumpToNodeInstanceId = "";
+                if($el.find("#refusePassedToThisNode").is(":checked")){
+                    json_param.refusePassedToThisNode = true;
+                }else{
+                    json_param.refusePassedToThisNode = false;
+                }
+            }
+            finalsubJson.param = json_param;
+            let fdPval = JSON.stringify(finalsubJson).replace(/\"true\"/g,"true").replace(/\"false\"/g,"false");
+            $el.find("[name='sysWfBusinessForm.fdParameterJson']").val(fdPval);
+            var fetchParams = [];
+            fetchParams.push({
+                type:0,
+                name:'oprGroup',
+                value:obj.handlerval
+            })
+            $el.find("[needsub]").each(function(i,e){
+                let fpobj = {
+                    type:0,
+                    name:$(this).attr("name"),
+                    value:$(this).val()
+                }
+                fetchParams.push(fpobj);
+            });
+            // alert(JSON.stringify(finalsubJson));
+            auiLoading.show();
+            fetch({
+                appId: 'bosfile',
+                url : obj.formDetailData.action.replace(/&amp;/g,"&"),
+                data : fetchParams,
+                reqCharset: 'UTF-8',
+                success:function(rsp){
+                    auiLoading.hide();
+                    Toast.show(rsp.info, function(){
+                        if(rsp.flag == "success"){
+                            history.go(-1);
+                        }
+                    });
+                },
+                error:function(rsp){
+                    auiLoading.hide();
+                    Toast.show(rsp.errmsg, function(){});
+                }
+            });
+        });
+
+        //初始化请求流程详情数据
+        auiLoading.show();
+        fetch({
+            appId: 'bosfile',
+            url : 'http://baseurl/tongyongdetail.jsp',
+            data: {fdId:router.getQueryObj().fdId},
+            success:function(rsp){
+                
+                obj.formDetailData = rsp;
+                if(rsp.fileInfo.length > 0){
+                    obj.arrlength.hasfileInfo = true;
+                }
+                if(rsp.inArr.length > 0){
+                    obj.arrlength.hasinArr = true;
+                }
+                if(rsp.pass && rsp.pass.length > 0){
+                    obj.arrlength.haspass = true;
+                }
+                if(rsp.buttonInfo.length > 0){
+                    obj.arrlength.hasbutton = true;
+                }
+                if(rsp.isRefuse == "1"){
+                    $.extend(true,obj.submitData.refuseSelect,rsp.refuse[0]);
+                }
+
+                pageThis.$vm = $el.render(obj);//请求成功后注入
+                auiLoading.hide();
+            },
+            error: function(rsp){
+                auiLoading.hide();
+                Toast.show(rsp.errmsg, function(){
+                    console.log('Toast Close');
+                });
+            }
+        });
+        const obj = this.$obj = {
+            handlerval:'',
+            arrlength:{
+                hasfileInfo:false,
+                hasinArr:false,
+                haspass:false,
+                hasbutton:false
+            },
+            formDetailData:{},
+            submitData:{
+                fdUsageContent:"同意",
+                refuseSelect:{text:'',value:''},
+                CommunicatetoOtherHandlerIds:'',
+                ForwardtoOtherHandlerIds:'',
+                toOtherHandlerIds:'',
+                toOtherHandlerNames:''
+
+            },
+            func:{
+                openAttach:function(fileUrl,fileName){
+                    // alert(fileUrl);
+                    auiLoading.show();
+                    fetch.download({
+                        appId: 'bosfile',
+                        url: fileUrl,
+                        fileName: fileName,
+                        path: "res:download",
+                        success: function(rs) {
+                            auiLoading.hide();
+                            // alert(rs.path);
+                            appnest.native.openFile({
+                                path: rs.path //需要打开本地文件地址路径，支持全路径或res:前缀路径
+                            });
+                        },
+                        error: function(rs) {
+                            auiLoading.hide();
+                            Toast.show(rsp.errmsg, function(){});
+                        }
+                    });
+                },
+                communicateChoose:function(){
+                    var cur_user = $("#sysWfBusinessForm.fdCurHanderId").val();
+                    var handle_people = $("#toOtherHandlerIds").val();
+                    router.go("/chooseCommunicateperson?cur_user+"+cur_user+"&handle_people="+handle_people);
+                },
+                forwardChoose:function(){
+                    var cur_user = $("#sysWfBusinessForm.fdCurHanderId").val();
+                    var handle_people = $("#toOtherHandlerIds").val();
+                    router.go("/chooseforwardperson?cur_user+"+cur_user+"&handle_people="+handle_people);
+                },
+                getAttachShowInfo:function(index,item){
+                    var atinfo = tool.getAttachIcon(item.fname);
+                    item.class = atinfo.class;
+                    item.color = atinfo.color;
+                },
+                getProcessFileShowInfo:function(index,item){
+                    var atinfo = tool.getAttachIcon(item.fileName);
+                    item.class = atinfo.class;
+                    item.color = atinfo.color;
+                },
+                selectUsageContent:function(){
+                    Selectsheet.show({
+                        list: obj.formDetailData.select.map(function(item){
+                            return item.selectVale
+                        }),
+                        func:function(index){
+                            obj.submitData.fdUsageContent = obj.formDetailData.select[index].selectVale;
+                        }
+                    });
+                },
+                selectRefuse:function(){
+                    Selectsheet.show({
+                        list: obj.formDetailData.refuse.map(function(item){
+                            return item.value+"."+item.text;
+                        }),
+                        func:function(index){
+                            $.extend(true,obj.submitData.refuseSelect,obj.formDetailData.refuse[index]);
+                        }
+                    });
+                }
+            }
+        };
+    }
+
+
+    detached(){
+        this.$vm && this.$vm.destroy();
+    }
+}
+</script>
+<style type="less">
+@defaultborder:1px solid #ddd;
+.select{
+    background: rgb(243, 243, 243);
+    &:active{
+        background: rgb(209, 207, 207);
+    }
+}
+textarea{
+    border: 0;
+    width: 95%;
+    margin: 5px 0px;
+    padding: 10px 5px;
+    font-size: 14px;
+}
+.attach{
+    display: flex;
+    align-items: center;
+    i{
+        color: #428bca;
+        position: static;
+        transform: none;
+        font-size: 20px;
+        margin-right: 5px;
+    }
+};
+.flex-col{
+    display: flex;
+    flex-direction: column;
+}
+.flex-row-between{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.line1{
+    text-align: left;
+    color:#8E8E93;
+    line-height: 14px;
+}
+.line2{
+    text-align: right;
+    font-size: 15px;
+    color:#000000;
+    line-height: 20px;
+}
+.p10-bt{
+    padding: 10px;
+    border-top: @defaultborder;
+}
+
+.radio-area{
+    .flex-col;
+    padding: 0 10px 10px 10px;
+    div{
+        padding: 5px 0;
+        &:first-child{
+            padding-top: 0;
+        }
+        &:last-child{
+            padding-bottom: 5px 0 10px 0;
+        }
+        label:before,label:after{
+            box-sizing:border-box;
+        }
+    }
+}
+.detail-scroller{
+    position: absolute; 
+    top: 80px; right: 0px; bottom: 0px;left: 0px;
+    padding: 5px 0px; 
+    background-color: transparent;
+    aui-list{
+        margin-top:5px;
+        aui-action{
+            text-align: left;
+        }
+    }
+    #procedure{
+        border: @defaultborder;
+        margin: 5px 10px;
+        .nopt{
+            .p10-bt;
+            .flex-row-between;
+            &:first-child{
+                border-top:0;
+            }
+        }
+        input[type=text]:read-only{
+            font-size: 14px;
+            border: 0;
+            flex: 1;
+        }
+        
+    }
+    .dclog{
+        padding: 10px;
+        aui-list{
+            border: @defaultborder;
+            background-color:#f7f7f7;
+            border-radius: 8px;
+            list-cell{
+                padding: 11px 15px;
+                border-bottom: @defaultborder;
+                border-top: 0;
+                p{
+                    display: flex;
+                    justify-content: flex-end;
+                    align-items: center;
+                    .attach;
+                }
+                &:first-child{
+                    p{color:rgb(126, 124, 124);}
+                }
+                &:last-child{
+                    border-bottom: 0;
+                }
+                
+            }
+        }
+    }
+    .togdiv{
+        margin-left: 16px;
+        .item-div{
+            padding: 11px 16px 11px 0px;
+            .flex-col;
+            border-bottom: @defaultborder;
+            &:last-child{
+                border-bottom: 0;
+            }
+
+
+        }
+    }
+}
+
+.fileset{
+    margin: 10px 10px 10px 0;
+    .flex-col;
+    background-color:#f7f7f7;
+    .file-desc{
+        border-bottom:@defaultborder;
+        display: flex;
+        padding: 10px;
+        font-size: 14px;
+    }
+    aui-list{
+        margin-bottom: 0;
+        border-bottom: 0;
+        border-top: 0;
+        list-cell{
+            a{
+                .attach;
+            }
+        }
+    }
+}
+[type="toggle"].active .icon-arrowdown::before,
+[type="control"].active .icon-arrowdown::before{
+    content: '\e694';
+}
+</style>

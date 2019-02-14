@@ -1,0 +1,155 @@
+<ui>
+    <aui-header>
+        <aui-titlebar style="background-color:#ffffff">
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>首页</aui-text>
+            </caption-area>
+            <right-area>
+                <a><i class="icon auicon icon-appshop"></i> </a>
+            </right-area>
+        </aui-titlebar>
+    </aui-header>
+    <aui-scroller class="content" style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;">
+        
+        
+        <p class="tipfont">我的关注</p>
+        <div class="divgrid">
+            <div class="divcell">
+                <i class="icon auicon icon-rdoclose-fill deleteIcon"></i>
+                <img src="./assets/imgs/jbsq.png" class="logo"/>
+                <font>加班申请</font>
+            </div>
+            <div class="divcell" v-on:click="func.goAddModules">
+                <div class="appendEnter">
+                    <i class="icon auicon icon-plus" style="color:#c8c8c8;font-size:20px"></i>
+                </div>
+                <font>添加关注</font>
+            </div>
+        </div>
+
+    </aui-scroller>
+</ui>
+<script>
+import '@auicomp/header/Header.aui';
+import '@auicomp/scroller/Scroller.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auicomp/tabbar/Tabbar.aui';
+import '@auicomp/text/Text.aui';
+import '@auicomp/button/Button.aui';
+import '@auicomp/action/Action.aui';
+
+import tool from '@comm/utils/tool';
+import Swiper from 'swiper';
+import 'swiper/dist/css/swiper.css';
+import Toast from '@auicomp/toast/Toast.aui';
+import Action,{ router } from '@auicomp/action/Action.aui';
+import { clearTimeout, setTimeout } from 'timers';
+
+export default class Index{
+    static get tag(){
+        return 'index';
+    }
+    
+    created(){
+        
+
+        const $el = $(this.$el);
+        const _self = this;
+        const obj = this.$obj = {
+            func:{
+                goAddModules:function(){
+                    console.log(123);
+                    router.go("/addmodule");
+                }
+            }
+        }
+        this.$vm = $el.render(obj);
+    }
+
+
+    detached(){
+        this.$vm && this.$vm.destroy();
+    }
+}
+</script>
+<style type="less">
+* {
+moz-user-select: -moz-none;
+-moz-user-select: none;
+-o-user-select: none;
+-khtml-user-select: none;
+-webkit-user-select: none;
+-ms-user-select: none;
+user-select: none;
+}
+@defaultborder:1px solid #dedede;
+.tipfont{
+    color:#aaa;
+    background-color:#f6f6f6;
+    padding:4px 15px;
+}
+.divgrid{
+    background-color:#fff;
+    display:flex;
+    flex-wrap: wrap;
+    .divcell{
+        position: relative;
+        width:25%;
+        // border-right:@defaultborder;
+        // border-bottom:@defaultborder;
+        // -webkit-box-sizing: border-box;
+        // box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 15px 0;
+        .deleteIcon{
+            position: absolute;
+            top: 10px;
+            right: 18px;
+            font-size: 16px;
+            color:red;
+        }
+        .appendEnter{
+            width: 42px;
+            height: 42px;
+            border-radius: 21px;
+            background-color: #e4e4e4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .logo{
+            width: 45px;
+            height: 45px;;
+        }
+        font{
+            margin-top: 5px;
+            color: #333333;
+        }
+        &:nth-child(4){
+            border-right: 0;
+        }
+        &:after{
+            content: '';
+            position: absolute;
+            pointer-events:none;
+            top: 0;
+            left: 0;
+            border-right:@defaultborder;
+            border-bottom:@defaultborder;
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+            width: 200%;
+            height: 200%;
+            -webkit-transform: scale(0.5);
+            transform: scale(0.5);
+            -webkit-transform-origin: left top;
+            transform-origin: left top;
+        }
+    }
+}
+</style>

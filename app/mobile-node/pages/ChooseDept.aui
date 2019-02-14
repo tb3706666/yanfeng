@@ -1,0 +1,160 @@
+<ui>
+    <div class="ChooseDept">
+        <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action v-on:click="func.closeWindow"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>选择类别</aui-text>
+                </caption-area>
+                <right-area>
+                     <a v-on:click="func.submit">
+                        <i class="icon auicon icon-rdook"></i>
+                    </a>
+                </right-area>
+            </aui-titlebar>
+        </aui-header>
+        <aui-scroller class="content">
+            <ul class="tree">
+                <li class="item">
+                    <div class="title">
+                        <img src="./assets/imgs/tree-jian.png" class="title-img">
+                        请选择
+                    </div>
+                    <div class="child active" id="treeList">
+                        
+                    </div>
+                </li>
+            </ul>
+        </aui-scroller>
+    </div>
+</ui>
+<script>
+    import '@auicomp/refresher/Refresher.aui';
+    import '@auicomp/list/List.aui';
+    import Actionsheet from '../components/Actionsheet.aui';
+    import Alert from '@auicomp/alert/Alert.aui';
+    import fetch from "@libs/fetch";
+    import common from '@libs/common';
+    import { router } from '@auicomp/action/Action.aui';
+
+    export default class ChooseDept {
+
+        static get tag() {
+            return 'ChooseDept';
+        }
+        created() {
+            const self = this;
+            $(this.$el).on('click','.title-img',function(){
+                $(this).attr('src', $(this).attr('src')=='./assets/imgs/tree-jia.png'?'./assets/imgs/tree-jian.png':'./assets/imgs/tree-jia.png')
+                let child = $(this).parent('.title').siblings(".child");
+                child.toggleClass("active");
+                if(child.children().length==0){
+                    self.loadData($(this).data('value'),child)
+                }
+            })
+            $(this.$el).on('click','.tree-text',function(){
+                var prePageData = document.querySelector('aui-XiaoiNew2').component.$obj;
+                prePageData[router.getQueryObj().ids] = $(this).data('value');
+                prePageData[router.getQueryObj().ids+'Name'] = $(this).data('name');
+                history.go(-1);
+            })
+            this.loadData();
+        }
+        
+        loadData(values,node){
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : common.oaUrl+"/tree1",
+                data: {
+                    lei:router.getQueryObj().lei,
+                    values:values||''
+                },
+                type: 'post',
+                reqCharset:'UTF-8',
+                success: function(list){
+                    console.log(list);
+                    self.addTree(list,node)
+                }
+            });
+            
+        
+        }
+        addTree(list,node){
+            if(!node){
+                node =  $(this.$el).find('#treeList')
+            }
+            let html = `<ul class="tree">
+                    ${list.filter(item=>item.value!='').map(item=>{
+                        let icon,className;
+                        if(item.collapsed){
+                            icon = './assets/imgs/tree-jia.png';
+                            className = 'title-img';
+                        }else{
+                            icon = './assets/imgs/dept.png';
+                            className = 'title-node';
+                        }
+                        return `<li class="item">
+                                    <div class="title">
+                                        <img src="${icon}" class="${className}" data-value="${item.value}">
+                                        <div  class="tree-text"  data-value="${item.value}"  data-name="${item.name}">${item.name}</div>
+                                    </div>
+                                    <div class="child"></div>
+                                </li>`
+                    }).join('')}
+                    </ul>`;
+                    console.log(html)
+            node.append(html)
+        }
+        detached(){
+            this.$vm && this.$vm.destroy();
+        }
+    }
+</script>
+<style type='less'>
+@import url('../assets/less/theme/default/common.less');
+.ChooseDept{
+    width: 100%;
+    height: 100%;
+    position: relative;
+    .content { 
+        position: absolute;
+        padding:10px;
+        top: 44px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        .tree{
+            font-size: @fts-normal;
+            .item{
+                margin: 5px 0;
+                .title{
+                    display:flex;
+                    flex-direction: row;
+                    align-items: center;
+                    .title-img{
+                        width:30px;
+                        height: 30px;
+                        margin-right: 5px;
+                    }
+                    .title-node{
+                        width:30px;
+                        height: 30px;
+                        margin-right: 5px;
+                    }
+                }
+                .child{
+                    margin-left: 40px;
+                    display: none;
+                }
+                .active{
+                    display: block;
+                }
+            }
+        }
+    } 
+}
+
+</style>

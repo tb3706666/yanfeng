@@ -1,0 +1,225 @@
+<ui>
+<!-- <aui-header>
+    <aui-titlebar>
+        <left-area>
+            <aui-action type="back"><i class="icon auicon icon-arrowleft-fill"></i></aui-action>
+        </left-area>
+        <caption-area>
+            <aui-text>打卡记录</aui-text>
+        </caption-area>
+    </aui-titlebar>
+</aui-header> -->
+
+<aui-scroller id="auiscroller" class="content dakacont" style="position: absolute; top: 0pxp; right: 0px; bottom: 0px;left: 0px;text-align: center;border-top:0;">
+    <div style="display: inline-block; width:100%">
+            <form id="demo" style="display:none" mbsc-form>
+                <div class="mbsc-form-group">
+                    <aui-text class="dakatext">日期 Data</aui-text>
+                    <label>
+                    <aui-datetime  class="dakadate" v-on:change="func.datechange" type="date" v-bind:value="defaultDateStr">
+                    
+                    </aui-datetime>
+                    </label>
+                </div>
+            </form>
+    </div>
+
+    <aui-list id="dakalist">
+        <list-cell class="grid" v-for="item in items">
+            <grid-cell>
+                <img class="media-object pull-left" style="width:24px;height:24px" src="./assets/imgs/qd.png">
+            </grid-cell>
+            <grid-cell class="flex-1 padded">
+                <aui-text>{{item.dakatime}}</aui-text>
+                <p>{{item.dakadi}}</p>
+            </grid-cell>
+        </list-cell>
+    </aui-list>
+</aui-scroller>
+<div class="tipinfo">
+    <aui-text class="tiptext">仅限7天内考勤打卡查询</aui-text>
+</div>
+</ui>
+
+
+<script>
+import '@auicomp/grid/Grid.aui';
+import '@auicomp/text/Text.aui';
+import '@auicomp/list/List.aui';
+import '@auicomp/action/Action.aui';
+import '@auicomp/scroller/Scroller.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auicomp/datetime/DateTime.aui';
+import '@auiutil/mobiscroll3/css/mobiscroll.javascript.min.css';
+import mobiscroll from '@auiutil/mobiscroll3/js/mobiscroll.javascript.min';
+import fetch from '@comm/utils/xfetch';
+import Alert from '@auicomp/alert/Alert.aui';
+import { router } from '@auicomp/action/Action.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+
+import moment from 'moment';
+
+
+
+export default class Daka{
+    static get tag(){
+        return 'daka';
+    }
+
+    created () {
+        // alert(moment().format('YYYY-MM-DD'));
+        var badge = router.getQueryObj().badge;//获取用户工号
+        //请求
+        var dakacout=[];
+        auiLoading.show();
+            fetch({
+                appId: 'dakajilu',
+                url : 'https://dzzw/recordQuery.jsp',
+                data: {
+                    username: badge
+                },
+                success: function(data1){
+                    auiLoading.hide();
+                    if(data1.list.length==0){
+                        Alert.show({
+                            content: '没有数据'
+                        });
+                    }else{
+                        $.each(data1.list, function(e,e1) {
+                            var dakajson={dakatime:e1.login_time,dakadi:e1.are_name}
+                            dakacout.push(dakajson);
+                        });
+                    }
+                },
+                error: function(rs){
+                    auiLoading.hide();
+                    Alert.show({
+                        content: '请求错误',
+                    });
+                }
+            });
+
+
+        var obj = {
+            items : dakacout,
+            defaultDateStr:moment().format('YYYY-MM-DD'),
+            func:{
+                datechange:function(e){
+                    auiLoading.show();
+                    fetch({
+                        appId: 'dakajilu',
+                        url : 'https://dzzw/recordQuery.jsp',
+                        data: {
+                            username: badge,
+                            date:e.target.value
+                        },
+                        success: function(data1){
+                            auiLoading.hide();
+                              if(data1.list.length==0){
+                                    Alert.show({
+                                        content: '没有数据'
+                                    });
+                                    dakacout.splice(0,dakacout.length);
+                                 
+                               }else{
+                                   dakacout.splice(0,dakacout.length);
+                                    $.each(data1.list, function(e,e1) {
+                                        var dakajson={dakatime:e1.login_time,dakadi:e1.are_name}
+                                        dakacout.push(dakajson);
+                                    });  
+                               }
+                        },
+                        error: function(rs){
+                            auiLoading.hide();
+                             Alert.show({
+                                   content: '请求错误',
+                                    
+                                });
+                            // alert(rs.errmsg+'未请求成功');
+                        }
+                    });
+                }
+            }
+        };
+       
+        $('#auiscroller').render(obj);
+
+
+        //日期组件
+        mobiscroll.settings = {
+            theme: 'ios',
+            lang: 'zh',
+        };
+
+        var date, select, widget,
+            now = new Date(),
+            form = document.getElementById("demo");
+
+        mobiscroll.form('#demo');
+
+        // date = mobiscroll.date('.dakadate', {
+        //     defaultValue: new Date(),
+        //     min: new Date(now.getFullYear() - 100, now.getMonth(), now.getDate()),
+        //     max: new Date(now.getFullYear() - 13, now.getMonth(), now.getDate())
+        // });
+
+
+
+    }
+}
+
+
+</script>
+
+<style>
+    
+    .mbsc-form-group{
+        margin: 0;
+    }
+.flex-1{
+    text-align: left;
+}
+.flex-1 p{
+    color:#B9B9B9;
+}
+aui-datetime>input{
+    font-size: 16px;
+}
+.tipinfo{
+    position: fixed;
+    bottom: 0px;
+    right: 0px;
+    width: 100%;
+    height: 40px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.tiptext{
+    position: absolute;
+    left:10px;
+    color: #005baa;
+}
+.dakacont{
+    position: absolute; 
+    top: 0px; 
+    right: 0px; 
+    bottom: 0px;
+    left: 0px;
+    text-align: center;
+    padding:5px;
+}
+.dakadate{
+    padding:15px;
+    display:block;
+    background:#EBEBEB;
+    width:60%;
+    float:right;
+    border-radius: 5px;
+}
+.dakatext{
+    padding:15px;
+    float:left;
+    margin-right:10px;
+}
+</style>

@@ -1,0 +1,538 @@
+<ui>
+    <div class="mainpage">
+        <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <div v-on:click="func.closeWindow()"><i class="icon auicon icon-arrowleft"></i></div>
+                </left-area>
+                <caption-area>
+                    <aui-text>主页</aui-text>
+                </caption-area>
+                <right-area>
+                </right-area>
+            </aui-titlebar>
+        </aui-header>
+
+        <aui-scroller class="content">
+            <div class="row">
+                <div class="f1  padding5">
+                    <img src="./assets/imgs/Model-Y01.png" style="width:80%"  v-on:click="func.nodate">
+                </div>
+                <div class="f1 " style="padding: 5px 15px 5px 5px">
+                    <img src="./assets/imgs/XVS3_01.png" style="width:100%"  v-on:click="func.nodate">
+                </div>
+                <div class="f3">
+                    <div class="f1 padding5">
+                        <img src="./assets/imgs/spot10.png" style="width:100%"  v-on:click="func.operh3">
+                    </div>
+                    <div class="f1 padding5">
+                        <img src="./assets/imgs/spot9.png" style="width:100%"  v-on:click="func.operh4">
+                    </div>
+                    <div class="f1 padding5">
+                        <img src="./assets/imgs/spot8.png" style="width:100%"   v-on:click="func.operh5">
+                    </div>
+                    <div class="f1 padding5">
+                        <img src="./assets/imgs/spot7.png" style="width:100%"    v-on:click="func.operh6">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="f1" style="padding: 5px 10px 5px 15px" >
+                    <img src="./assets/imgs/Model-Y02.png" style="width:60%"  v-on:click="func.nodate">
+                </div>
+                <div class="f1"  style="padding: 5px 15px 25px 5px">
+                    <img src="./assets/imgs/XVS3_02.png" style="width:100%" class="smallheigth"   v-on:click="func.nodate">
+                </div>
+                <div class="f3">
+                    <div class="f1 padding5">
+                        <img src="./assets/imgs/spot5.png" style="width:100%"   v-on:click="func.operh9">
+                    </div>
+                    <div class="f1 padding5">
+                        <img src="./assets/imgs/spot4.png" style="width:100%"   v-on:click="func.operh10">
+                    </div>
+                    <div class="f1 padding5">
+                        <img src="./assets/imgs/spot3.png" style="width:100%"  v-on:click="func.operh11">
+                    </div>
+                    <div class="f1 padding5">
+                        <img src="./assets/imgs/spot2.png" style="width:100%"   class="smallheigth"  v-on:click="func.operh12">
+                    </div>
+                    <div class="f1 padding5">
+                        <img src="./assets/imgs/spot1.png" style="width:100%"   class="smallheigth"  v-on:click="func.operh13">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="f1" style="padding: 5px 10px 5px 15px">
+                    <img src="./assets/imgs/MQB.png" style="width:80%"  v-on:click="func.nodate">
+                </div>
+                <div class="f1" style="padding: 5px 10px 5px 15px">
+                    <img src="./assets/imgs/XVS3_03.png" style="width:80%"  class="smallheigth"  v-on:click="func.nodate">
+                </div>
+                <div class="f3">
+                    <div class="f1 padding5">
+                        <img src="./assets/imgs/arc5.png" style="width:100%"  v-on:click="func.operh16">
+                    </div>
+                    <div class="f1 padding5">
+                        <img src="./assets/imgs/arc4.png" style="width:100%" v-on:click="func.operh17" >
+                    </div>
+                    <div class="f1 padding5">
+                        <img src="./assets/imgs/arc3.png" style="width:100%" v-on:click="func.operh18">
+                    </div>
+                    <div class="f1 padding5">
+                        <img src="./assets/imgs/arc2.png" style="width:100%" v-on:click="func.operh19" >
+                    </div>
+                    <div class="f1 padding5">
+                        <img src="./assets/imgs/arc1.png" style="width:100%" v-on:click="func.operh20" >
+                    </div>
+                </div>
+            </div>
+        </aui-scroller>
+        <div class="popup" v-bind:class="{show:showPop}" v-on:click="func.closePop">
+            <div class="popup-center anim" v-bind:class="{bounceIn:showPop,bounceOut:!showPop}">
+                <div class="fd-row padding10 border-bt1">
+                    <div class="flex3">当前版面</div>
+                    <div class="flex7">{{address}}</div>
+                </div>
+                <div class="fd-row padding10 ">
+                    <div class="flex3">选择班次</div>
+                    <div class="dsp-f flex7 align-c" v-on:click="func.openSelect">
+                        <div class="flex1">     </div>
+                        <li class="icon auicon icon-arrowright"></li>
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+</ui>
+
+
+<script>
+import '@auicomp/scroller/Scroller.aui';
+    import '@auicomp/header/Header.aui';
+    import '@auicomp/text/Text.aui';
+    import '@auicomp/grid/Grid.aui';
+    import '@auicomp/titlebar/Titlebar.aui';
+    import '@auiutil/mobiscroll3/css/mobiscroll.javascript.min.css';
+    import Actionsheet from '../components/Actionsheet.aui';
+    import {
+        router
+    } from '@auicomp/action/Action.aui';
+    import common from '@libs/common';
+    import fetch from "@libs/xfetch";
+    import { Base64 } from "js-base64";
+    import Popup from '@auicomp/popup/Popup.aui';
+    import Selectsheet from '@comm/components/Selectsheet.aui';
+
+    export default class MainPage {
+
+        static get tag() {
+            return 'mainpage';
+        }
+        created() {
+             $(this.$el).on('enter',function(){
+                 $('aui-Gdsj').remove();
+             });
+            //删除缓存的列表页面
+            let self = this;
+            const obj = this.$obj = {
+                showPop:false,
+                address:'',
+                func: {
+                    closeWindow(){
+                         appnest.navigation.closeWindow();
+                    },
+                    closePop(e){
+                       if($(e.target).hasClass('popup')){
+                            obj.showPop = false;
+                       }
+                    },
+                    openSelect(){
+                        let  self = this;
+                        Selectsheet.show({
+                            list:["A班","B班"],
+                            func:function(index){
+                                location = "#/Gdsj?address="+obj.address+"&shift="+(index==1?'A':'B')
+                            }
+                        });
+                    },
+                    nodate(){
+                        common.alert('数据暂未开通');
+                    },
+                    operh3(){
+                        Actionsheet.show({
+                            list: [
+                                {
+                                    text: 'A',
+                                    handler: function () {
+                                         self.dakai('Spot10#','A')
+                                    }
+                                },
+                                {
+                                    text: 'B',
+                                    handler: function () {
+                                         self.dakai('Spot10#','B')
+                                     }
+                                },
+                                {
+                                    text: 'C',
+                                    handler: function () {
+                                       self.dakai('Spot10#','C')
+                                    }
+                                }
+                            ],
+                            doCancel: function () {
+                                console.log('点了取消');
+                            }
+                        });
+                    },
+                    operh4(){
+                        Actionsheet.show({
+                            list: [
+                                {
+                                    text: 'A',
+                                    handler: function () {
+                                         self.dakai('Spot9#','A')
+                                    }
+                                },
+                                {
+                                    text: 'B',
+                                    handler: function () {
+                                         self.dakai('Spot9#','B')
+                                     }
+                                },
+                                {
+                                    text: 'C',
+                                    handler: function () {
+                                       self.dakai('Spot9#','C')
+                                    }
+                                }
+                            ],
+                            doCancel: function () {
+                                console.log('点了取消');
+                            }
+                        });
+                    },
+                    operh5(){
+                        Actionsheet.show({
+                            list: [
+                                {
+                                    text: 'A',
+                                    handler: function () {
+                                         self.dakai('Spot8#','A')
+                                    }
+                                },
+                                {
+                                    text: 'B',
+                                    handler: function () {
+                                         self.dakai('Spot8#','B')
+                                     }
+                                }
+                            ],
+                            doCancel: function () {
+                                console.log('点了取消');
+                            }
+                        });
+                    },
+                    operh6(){
+                        Actionsheet.show({
+                            list: [
+                                {
+                                    text: 'A',
+                                    handler: function () {
+                                         self.dakai('Spot7#','A')
+                                    }
+                                },
+                                {
+                                    text: 'B',
+                                    handler: function () {
+                                         self.dakai('Spot7#','B')
+                                     }
+                                }
+                            ],
+                            doCancel: function () {
+                                console.log('点了取消');
+                            }
+                        });
+                    },
+                    operh9(){
+                        Actionsheet.show({
+                            list: [
+                                {
+                                    text: 'A',
+                                    handler: function () {
+                                         self.dakai('Spot5#','A')
+                                    }
+                                }
+                            ],
+                            doCancel: function () {
+                                console.log('点了取消');
+                            }
+                        });
+                    },
+                    operh10(){
+                        Actionsheet.show({
+                            list: [
+                                {
+                                    text: 'A',
+                                    handler: function () {
+                                         self.dakai('Spot4#','A')
+                                    }
+                                }
+                            ],
+                            doCancel: function () {
+                                console.log('点了取消');
+                            }
+                        });
+                    },
+                    operh11(){
+                        Actionsheet.show({
+                            list: [
+                                {
+                                    text: 'A',
+                                    handler: function () {
+                                         self.dakai('Spot3#','A')
+                                    }
+                                }
+                            ],
+                            doCancel: function () {
+                                console.log('点了取消');
+                            }
+                        });
+                    },
+                    operh12(){
+                        Actionsheet.show({
+                            list: [
+                                {
+                                    text: 'A',
+                                    handler: function () {
+                                         self.dakai('Spot2#','A')
+                                    }
+                                },
+                                {
+                                    text: 'B',
+                                    handler: function () {
+                                         self.dakai('Spot2#','B')
+                                    }
+                                }
+                            ],
+                            doCancel: function () {
+                                console.log('点了取消');
+                            }
+                        });
+                    },
+                    operh13(){
+                        Actionsheet.show({
+                            list: [
+                                {
+                                    text: 'A',
+                                    handler: function () {
+                                         self.dakai('Spot1#','A')
+                                    }
+                                },
+                                {
+                                    text: 'B',
+                                    handler: function () {
+                                         self.dakai('Spot1#','B')
+                                    }
+                                }
+                            ],
+                            doCancel: function () {
+                                console.log('点了取消');
+                            }
+                        });
+                    },
+                    operh16(){
+                        Actionsheet.show({
+                            list: [
+                                {
+                                    text: 'A',
+                                    handler: function () {
+                                         self.dakai('Arc5#','A')
+                                    }
+                                },
+                                {
+                                    text: 'B',
+                                    handler: function () {
+                                         self.dakai('Arc5#','B')
+                                    }
+                                }
+                            ],
+                            doCancel: function () {
+                                console.log('点了取消');
+                            }
+                        });
+                    },
+                    operh17(){
+                        Actionsheet.show({
+                            list: [
+                                {
+                                    text: 'A',
+                                    handler: function () {
+                                         self.dakai('Arc4#','A')
+                                    }
+                                },
+                                {
+                                    text: 'B',
+                                    handler: function () {
+                                         self.dakai('Arc4#','B')
+                                    }
+                                }
+                            ],
+                            doCancel: function () {
+                                console.log('点了取消');
+                            }
+                        });
+                    },
+                    operh18(){
+                        Actionsheet.show({
+                            list: [
+                                {
+                                    text: 'A',
+                                    handler: function () {
+                                         self.dakai('Arc3#','A')
+                                    }
+                                },
+                                {
+                                    text: 'B',
+                                    handler: function () {
+                                         self.dakai('Arc3#','B')
+                                    }
+                                }
+                            ],
+                            doCancel: function () {
+                                console.log('点了取消');
+                            }
+                        });
+                    },
+                    operh19(){
+                        Actionsheet.show({
+                            list: [
+                                {
+                                    text: 'A',
+                                    handler: function () {
+                                         self.dakai('Arc2#','A')
+                                    }
+                                },
+                                {
+                                    text: 'B',
+                                    handler: function () {
+                                         self.dakai('Arc2#','B')
+                                    }
+                                }
+                            ],
+                            doCancel: function () {
+                                console.log('点了取消');
+                            }
+                        });
+                    },
+                    operh20(){
+                        Actionsheet.show({
+                            list: [
+                                {
+                                    text: 'A',
+                                    handler: function () {
+                                         self.dakai('Arc1#','A')
+                                    }
+                                },
+                                {
+                                    text: 'B',
+                                    handler: function () {
+                                         self.dakai('Arc1#','B')
+                                    }
+                                }
+                            ],
+                            doCancel: function () {
+                                console.log('点了取消');
+                            }
+                        });
+                    }
+
+                }
+            }
+            this.$vm = $(this.$el).render(this.$obj);
+        }
+        detached() {
+            this.$vm && this.$vm.destroy();
+        }
+        dakai(temp1,temp2){
+            this.$obj.address = temp1+"-"+temp2;
+            let self = this;
+            setTimeout(function(){
+                self.$obj.showPop= true;
+            },300)
+        }
+    }
+</script>
+<style type="less">
+aui-titlebar{
+    background:#004ea2 !important;
+    left-area{
+        i{color: #ffffff !important;}
+    }
+    right-area{
+        i{color: #ffffff !important;}
+    }
+    aui-text{
+        color: #ffffff !important;
+    }
+}
+    @import url('../assets/less/theme/default/common.less');
+    .mainpage {
+        width: 100%;
+        height: 100%;
+        .content {
+            position: absolute;
+            top: 44px;
+            right: 0px;
+            bottom: 0px;
+            left: 0px;
+            background: #6DB86D;
+            padding: 5px;
+            .row{
+                display: flex;
+                flex-direction: row;
+                .f1{
+                    flex: 1;
+                    display: flex;
+                    align-items: center;
+                }
+                .f3{
+                    flex: 3;
+                    display: flex;
+                }
+                img{
+                    height: 80px;
+                }
+                .smallheigth{
+                    height:45px;
+                }
+            }
+        }
+        .popup{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.3);
+            z-index: 80;
+            visibility: hidden;
+            .popup-center{
+                padding: 10px;
+                background-color:white;
+                width: 80%;
+                border-radius: 6px;
+                box-shadow: 0px 1px 10px rgba(0, 0, 0, 0.6);
+            }
+        }
+        .show{
+            visibility: visible;
+        }
+    }
+</style>

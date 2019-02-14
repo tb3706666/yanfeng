@@ -1,0 +1,1201 @@
+<ui>
+    <div class="ShlcDetail">
+       <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>详情Detail</aui-text>
+                </caption-area>
+                <right-area>
+                    <a v-on:click="func.submit" v-if="data.isbjflag !='1'">
+                        <i class="icon auicon icon-rdook"></i>
+                    </a>
+                </right-area>
+            </aui-titlebar>
+        </aui-header>
+        <aui-tabbar class="tabbar tabbar-line tabbar-line-width70 animated" style="display:none">
+            <tabbar-cell v-bind:class="{active:tabIndex==0}" v-on:click="func.tabChange(0)">
+                <label class="tab-label">基本信息</label>
+            </tabbar-cell>
+            <tabbar-cell v-bind:class="{active:tabIndex==1}" v-on:click="func.tabChange(1)">
+                <label class="tab-label">流程办理</label>
+            </tabbar-cell>
+        </aui-tabbar>
+        <aui-scroller class="content">
+            <div class="page1 " v-bind:class="{curr:tabIndex==0}">
+                <aui-action class="list-cell active" href="#toggle1" type="toggle">
+                    <a class="toogle-title">
+                        采购收货单<i class="icon auicon icon-arrowright"></i>
+                    </a>
+                </aui-action>
+                <div class="toggle1-line"></div>
+                <div id="toggle1" action-target class="active toggle-box">
+                    <div class="box1">
+                        <div class="label-top">主题</div>
+                        <div class="label-content">{{data.zt}}</div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">实际收货人</div>
+                        <div class="label-content">{{data.sqrbm}}</div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">收货日期</div>
+                        <div class="label-content">{{data.shrq}}</div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">供应商</div>
+                        <div class="label-content">{{data.ccjssj}}</div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">预收货单类型</div>
+                        <div class="label-content">{{data.leixing}}</div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">收货类型</div>
+                        <div>
+                            <div v-for="item in data.shlxArr" class="padding-tb5">
+                                <input type="checkbox" disabled=true  v-model="item.checked" v-bind:id="'checkboxShlx'+$index" class="magic-checkbox"   name="oprGroup"/>
+                                <label v-bind:for="'checkboxShlx'+$index">
+                                    <div>{{item.name}}</div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">备注 </div>
+                        <div class="label-content">{{data.beizhu}}</div>
+                    </div>
+                    <div class="box1" v-if="data.fileInfo.length>0">
+                        <div class="label-top">附件 Attachment</div>
+                        <div class="label-content">
+                            <ul class="attach-list">
+                                <li v-for="item in data.fileInfo" v-filter="func.addAttachIcon" v-on:click="func.openAttach(item.fileId1,item.fileName)">
+                                    <img v-bind:src="item.icon" class="attach-icon"></img>
+                                    <div class="attach-text">{{item.fileName}}</div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <aui-action class="list-cell active" href="#toggle2" type="toggle">
+                    <a class="toogle-title">
+                        收货明细<i class="icon auicon icon-arrowright"></i>
+                    </a>
+                </aui-action>
+                <div class="toggle1-line"></div>
+                <div id="toggle2" action-target class="active toggle-box border0">
+                    <div v-for="itemArr in data.mxtableArr" class="border1 margin-b5">
+                        <div class="box1" v-for="item in itemArr" v-filter="func.addIndex">
+                            <div class="label-top">{{data.mxThtable[item.index]}}</div>
+                            <div class="label-content">{{item.value}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="page2"  v-bind:class="{curr:tabIndex==1}">
+                <aui-action class="list-cell " href="#toggle3" type="toggle">
+                    <a class="toogle-title">
+                        审批记录 Display circulation log<i class="icon auicon icon-arrowright"></i>
+                    </a>
+                </aui-action>
+                <div class="toggle1-line"></div>
+                <div id="toggle3" action-target class=" toggle-box">
+                    <div v-if="data.shenPiInfo.length==0">暂无数据!</div>
+                    <div v-else>
+                        <div v-for="item in data.shenPiInfo" class="model-box">
+                            <div class="sp-top">
+                                <div >{{item.czz}}</div>
+                                <div class="info1">于{{item.sj}} 在 {{item.jdmc}}环节 {{item.cz}}</div>
+                            </div>
+                            <div class="sp-btm">
+                                <div>处理意见 Process opinion</div>
+                                <div v-for="clyj_t in item.clyj" class="sp-opinion">
+                                    {{clyj_t.text}}
+                                </div>
+                                <div v-for="file_t in item.file" class="sp-file">
+                                    <span v-on:click="func.openAttach(file_t.fileId1,file_t.fileName)">{{file_t.fileName}}</span>
+                                </div>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+                <aui-action class="list-cell active" href="#toggle4" type="toggle">
+                    <a class="toogle-title">
+                        流程办理 Procedure handling<i class="icon auicon icon-arrowright"></i>
+                    </a>
+                </aui-action>
+                <div class="toggle1-line"></div>
+                <div id="toggle4" action-target class="active toggle-box">
+                    <div class="bt-box" v-if="data.buttonInfo.length > 0">
+                        <div class="bt-operation">操作 Next operation</div>
+                        <div class="bt-item" >
+                            <div v-for="item in data.buttonInfo" class="padding5">
+                                <input type="radio"  v-bind:value="item.buttonValue" v-model="oprGroup"  v-bind:id="'oprGroup'+item.buttonValue" class="magic-radio"   name="oprGroup" v-on:change="func.radioChange"/><label v-bind:for="'oprGroup'+item.buttonValue">{{item.buttonName}}</label>
+                            </div>
+                        </div>
+                        <div class="box1" v-if="data.isPass=='1'&&oprGroup=='handler_pass'">
+                            <div class="label-top">即将流向</div>
+                            <div class="label-content" v-for="item in data.pass" v-filter="func.passFilter"> {{item.nodeid}}.{{item.nodename}} {{item.nodeusername}}</div>
+                        </div>
+                        <div class="box1" v-if="data.isRefuse=='1'&&oprGroup=='handler_refuse'">
+                            <div class="row">
+                                <div class="text">驳回到</div>
+                                <div class="select" v-on:click="func.openRefuseSelect">
+                                    <div class="select-value">{{refuseName}}</div>
+                                    <li class="icon auicon icon-arrowright"></li>
+                                </div>
+                            </div>
+                            <div class="padding10">
+                                <input class="magic-checkbox" type="checkbox"  id="refusePassedToThisNode" v-model="refusePassedToThisNode">
+                                <label for="refusePassedToThisNode">驳回的节点通过后直接返回本人</label>
+                            </div>
+                        </div>
+                        <div class="box1" v-if="data.isForward=='1'&&oprGroup=='handler_commission'">
+                            <div class="label-top">转办Forward人员</div>
+                            <div class="forward-row" v-on:click="func.getForwardPeople">
+                                <div class="forward-name" v-bind:class={gray:forwardName==''} v-text="forwardName==''?'选择人员':forwardName"></div>
+                                <li class="icon auicon icon-arrowright"></li>
+                            </div>
+                        </div>
+                        <div class="box1" v-if="data.isCommunicate=='1'&&oprGroup=='handler_communicate'">
+                            <div class="label-top">沟通 Communicate人员</div>
+                            <div v-if="data.isCancelCommunicate=='1'"  class="label-content">
+                                <div v-for="item in data.communicate">{{item.userName}}</div>
+                            </div>
+                            <div class="forward-row" v-on:click="func.getCommunicatePeople">
+                                <div class="forward-name" v-bind:class={gray:communicateName==''} v-text="communicateName==''?'选择人员':communicateName"></div>
+                                <li class="icon auicon icon-arrowright"></li>
+                            </div>
+                        </div>
+                        <div class="box1" v-if="data.isCancelCommunicate=='1'&&oprGroup=='handler_cancelCommunicate'">
+                            <div class="label-top">取消沟通 Communicate人员</div>
+                            <div>
+                                <div class="padding5" v-for="item in data.communicate" v-filter="func.communicateFilter">
+                                    <input type="checkbox"   v-model="item.checked" v-bind:id="'communicate'+$index" class="magic-checkbox"   name="oprGroup"/>
+                                    <label v-bind:for="'communicate'+$index">
+                                        <div>{{item.userName}}</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box1">
+                            <div class="label-top">处理意见 Process opinion</div>
+                            <div class="forward-row" v-on:click="func.openOpinionSelect">
+                                <div class="forward-name">{{commonUsages}}</div>
+                                <li class="icon auicon icon-arrowright"></li>
+                            </div>
+                        </div>
+                        <div class="box1">
+                            <div class="textarea-box">
+                                <textarea rows="5" v-model="fdUsageContent" ></textarea>
+                            </div>
+                        </div>
+                        <div class="box1 border0">
+                            <div class="fd-row">
+                                <div class="flex1">附件</div>
+                                <li class="icon auicon icon-rdoadd fts20" v-on:click="func.uploadFile"></li>
+                            </div>
+                            <div v-for="item in fileNames">{{item}}</div>
+                        </div>
+                    </div>
+                    <div v-else>没有操作选项</div>
+                </div>
+            </div>
+        </aui-scroller>
+    </div>
+</ui>
+<script>
+    import '@auicomp/list/List.aui';
+
+    import fetch from "@libs/xfetch";
+    import common from '@libs/common';
+    import { router } from '@auicomp/action/Action.aui';
+    import Selectsheet from '@comm/components/Selectsheet.aui';
+    import Action from '@auicomp/action/Action.aui';
+    import '@auicomp/tabbar/Tabbar.aui';
+    import 'magic-check/css/magic-check.min.css';
+    
+
+    export default class ShlcDetail {
+
+        static get tag() {
+            return 'ShlcDetail';
+        }
+        created() {
+            var self = this;
+            const obj = this.$obj = {
+                tabIndex:0,
+                oprGroup:"",
+                refuseValue:"",
+                refuseName:"",
+                refusePassedToThisNode:false,
+                forwardValue:"",
+                forwardName:"",
+                communicateValue:"",
+                communicateName:"",
+                commonUsages:"常用意见Common approval comment",
+                fdUsageContent:"",
+                fileNames:[],
+                fpflag1:false,//预定机票 checkBox显示相关
+                fpflag2:false,//预定机票 checkBox显示相关
+                data:{},             
+                func:{
+                    addIndex(index,item){
+                        item.index = index;
+                    },
+                    tabChange(index){
+                        obj.tabIndex = index;
+                    },
+                    openOpinionSelect(){
+                        Selectsheet.show({
+                            list: obj.data.select.map(function(item){
+                                return item.selectVale
+                            }),
+                            func:function(index){
+                                obj.commonUsages = obj.data.select[index].selectVale;
+                                if(index!=0){
+                                    if(obj.fdUsageContent == "同意"){
+                                        obj.fdUsageContent = obj.data.select[index].selectVale;
+                                    }else{
+                                        obj.fdUsageContent = obj.fdUsageContent + "\n" + obj.data.select[index].selectVale;
+                                    }
+                                }
+                            }
+                        });
+                    },
+                    submit(){
+                        self.doSubmit();
+                    },
+                    addAttachIcon(index,item){
+                        let name = item.fileName;
+                        let houzui = name.substring(name.lastIndexOf(".") + 1, name.length).toLowerCase();;
+                        let imgType = "jpg,bmp,pcx,tiff,gif,jpeg,tga,exif,fpx,svg,psd,cdr,pcd,dxf,ufo,eps,al,png,hdri,raw,wmf,lic,emf,";
+                        let imgstr;
+                        if (houzui == "pdf") {
+                            imgstr = './assets/imgs/filetype/pdf.png';
+                        } else if (houzui == "doc" || houzui == "docx") {
+                            imgstr = './assets/imgs/filetype/word.png';
+                        } else if (houzui == "txt") {
+                            imgstr = './assets/imgs/filetype/txt.png';
+                        } else if (houzui == "xls" || houzui == "xlsx") {
+                            imgstr = './assets/imgs/filetype/excel.png';
+                        } else if (imgType.indexOf(houzui + ",") > -1) {
+                            imgstr = './assets/imgs/filetype/picture.png';
+                        } else if (houzui == "rar" || houzui == "zip") {
+                            imgstr = './assets/imgs/filetype/zip.png';
+                        } else {
+                            imgstr = './assets/imgs/filetype/unknow.png';
+                        }
+                        item.icon = imgstr;
+                    },
+                    openAttach(fileId1,name){
+                        let url = "http://baseurl/ekp/sys/attachment/sys_att_main/sysAttMain.do?method=download&fdId="+fileId1;
+                        common.openAttach(url,name);
+                    },
+                    //添加pass的nodename默认值
+                    passFilter(index,item){
+                        if(!item.nodename){
+                            item.nodename = '';
+                        }
+                    },
+                    //添加communicate的checked默认值
+                    communicateFilter(index,item){
+                        item.checked = false;
+                    },
+                    //驳回select选择
+                    openRefuseSelect(){
+                        Selectsheet.show({
+                            list: obj.data.refuse.map(function(item){
+                                return item.text
+                            }),
+                            func:function(index){
+                                obj.refuseValue =  obj.data.refuse[index].value;
+                                obj.refuseName =  obj.data.refuse[index].text;
+                            }
+                        });
+                    },
+                    //转办选人
+                    getForwardPeople(){
+                        let cur_user = self.getHiddenValue('sysWfBusinessForm.fdCurHanderId');
+                        console.log(cur_user)
+                        location="#/ForwardPeople?cur_user="+cur_user+"&handle_id="+obj.forwardValue+"&page=aui-ShlcDetail";
+                    },
+                    //沟通人员
+                    getCommunicatePeople(){
+                         let cur_user = self.getHiddenValue('sysWfBusinessForm.fdCurHanderId');
+                         location="#/CommunicatePeople?cur_user="+cur_user+"&handle_id="+obj.communicateValue+"&page=aui-ShlcDetail";
+                    },
+                    //上传附件
+                    uploadFile(){
+                        common.selectFile(function(path){
+                           self.uploadFile(path);
+                        });
+                    },
+                    //radio切换，意见默认设为 同意
+                    radioChange(){
+                        if(obj.fdUsageContent == ""){
+                            obj.fdUsageContent="同意";
+                        }
+                    }
+                }
+            }
+            /*var dataInfo ={
+                "mxtableArr": [["1","5900056612","00001","","日常运维以及需求变更实施","1.000","总部工厂","0.500","0.500","EA","111"],["2","5900056612","00001","","日常运维以及需求变更实施","1.000","总部工厂","0.500","0.500","EA","111"]],
+                "mxThtable":["序号","采购订单号","订单行项目号","零件号","产品名称","采购订单数量","收货地点","已收数量","本次实际数量","单位","批号"],
+                "submitjson": [
+                    {
+                        "sj_notifyLevel": "3",
+                        "sj_activityType": "reviewWorkitem",
+                        "sj_taskId": "166e254934741ddc856379942feb9e90",
+                        "sj_processId": "166c7b31e41e82d4ae87b23461cacb5c"
+                    }
+                ],
+                "buttonInfo": [
+                    {
+                        "buttonType": "handler",
+                        "buttonName": "通过 Approve",
+                        "buttonValue": "handler_pass"
+                    },
+                    {
+                        "buttonType": "handler",
+                        "buttonName": "驳回 Refuse",
+                        "buttonValue": "handler_refuse"
+                    },
+                    {
+                        "buttonType": "handler",
+                        "buttonName": "转办 Forward",
+                        "buttonValue": "handler_commission"
+                    },
+                    {
+                        "buttonType": "handler",
+                        "buttonName": "沟通 Communicate",
+                        "buttonValue": "handler_communicate"
+                    },
+                    {
+                        "buttonType": "handler",
+                        "buttonName": "废弃 Discard",
+                        "buttonValue": "handler_abandon"
+                    }
+                ],
+                "isPass": "1",
+                "shenPiInfo": [
+                    {
+                        "clyj": [
+                            {
+                                "text": ""
+                            }
+                        ],
+                        "czz": "徐依迪Xu Yidi",
+                        "jdmc": "起草节点",
+                        "file": [],
+                        "cz": "提交文档",
+                        "sj": "2018-10-31 09:18"
+                    },
+                    {
+                        "clyj": [
+                            {
+                                "text": "同意"
+                            }
+                        ],
+                        "czz": "徐依迪Xu Yidi",
+                        "jdmc": "实际收货人审批",
+                        "file": [
+                            {
+                                "fileName": "test.docx",
+                                "fileId2": "166c8eb0ebc17e74fdebea94d4180137",
+                                "fileId1": "166e2548ec01699e719dc3348a1bc432"
+                            }
+                        ],
+                        "cz": "通过 Approve",
+                        "sj": "2018-11-05 13:24"
+                    }
+                ],
+                "caigoudanhao": "",
+                "isCommunicate": "1",
+                "ccjssj": "0009000995-上海友亚信息科技有限公司",
+                "zt": "\n\t\t\t\t\n\t\t\t\t\n\t\t\t\t\t采购收货单-600000023710\n\t\t\t\t\n\t\t\t",
+                "action": "http://baseurl/ekp/km/review/km_review_main/kmReviewMain.do?method=publishDraft&amp;fdId=166c7b31e41e82d4ae87b23461cacb5c&amp;s_seq=1",
+                "userkey": "S7gUNrrTenJL6do%2B0zR3o0XBOO8NZ36yxdjZ2GO%2FGg%2BAnHkO10p6yg%3D%3D%0D",
+                "isbjflag": "0",
+                "tdr": "10011340-陆蓉婷Lu Rongting",
+                "leixing": "收货 ",
+                "isForward": "1",
+                "select": [
+                    {
+                        "selectVale": "很好"
+                    },
+                    {
+                        "selectVale": "测试专用"
+                    }
+                ],
+                "sqrbm": "82984-徐依迪Xu Yidi",
+                "sqr": "600000023710",
+                "beizhu": "PR与Workflow描述类型的对照关系，请参照《PR采购类型&amp;WF收货审批类型对照表》\n",
+                "pass": [
+                    {
+                        "nodeusername": "",
+                        "nodeid": "N8"
+                    }
+                ],
+                "mxtable": "<table align=\"center\" class=\"tb_normal\"  id=\"TABLE_DL_FD_GR_DETAIL\" label=\"收货明细\" showindex=\"true\" showrow=\"1\" showstatisticrow=\"true\" style=\"margin:0 0 10 0\" tablename=\"fd_30fb2d31ca0cbc\"><tr class=\"tr_normal_title\" type=\"titleRow\"><td align=\"center\" coltype=\"noTitle\" column=\"0\" row=\"0\" style=\"\">序号</td><td column=\"1\" row=\"0\" >采购订单号</td><td align=\"center\" column=\"2\" row=\"0\" >订单行项目号</td><td align=\"center\" column=\"3\" row=\"0\" >零件号</td><td align=\"center\" column=\"4\" row=\"0\" >产品名称</td><td column=\"5\" row=\"0\" >采购订单数量</td><td column=\"6\" row=\"0\" >收货地点</td><td column=\"7\" row=\"0\" >已收数量</td><td column=\"8\" row=\"0\" >本次实际数量</td><td column=\"9\" row=\"0\" >单位</td><td column=\"10\" row=\"0\" >批号</td></tr><tr kmss_isreferrow=\"1\" style=\"display:none\" type=\"templateRow\"><td align=\"center\" coltype=\"noTemplate\" column=\"0\" kmss_isrowindex=\"1\" row=\"1\" style=\"\">{1}</td><td column=\"1\" row=\"1\"><div canshow=\"true\" style=\"; DISPLAY: inline\"/><input name=\"extendDataFormInfo.value(FD_GR_DETAIL.!{index}.fdId)\" type=\"hidden\" value=\"\"/></td><td align=\"center\" column=\"2\" row=\"1\"><div canshow=\"true\" style=\"; DISPLAY: inline\"/></td><td align=\"center\" column=\"3\" row=\"1\"><div canshow=\"true\" style=\"; DISPLAY: inline\"/></td><td align=\"center\" column=\"4\" row=\"1\"><div canshow=\"true\" style=\"; DISPLAY: inline\"/></td><td column=\"5\" row=\"1\"><div canshow=\"true\" style=\"; DISPLAY: inline\"/></td><td column=\"6\" row=\"1\"><div canshow=\"true\" style=\"; DISPLAY: inline\"/></td><td column=\"7\" row=\"1\"><div canshow=\"true\" style=\"; DISPLAY: inline\"/></td><td column=\"8\" row=\"1\"><div canshow=\"true\" style=\"; DISPLAY: inline\"/></td><td column=\"9\" row=\"1\"><div canshow=\"true\" style=\"; DISPLAY: inline\"/></td><td column=\"10\" row=\"1\"><div canshow=\"true\" style=\"; DISPLAY: inline\"/></td></tr><tr kmss_iscontentrow=\"1\" type=\"templateRow\"><td align=\"center\" coltype=\"noTemplate\" column=\"0\" kmss_isrowindex=\"1\" row=\"1\" style=\"\">1</td><td column=\"1\" row=\"1\"><div canshow=\"true\" style=\"; DISPLAY: inline\">5900056612</div><input name=\"extendDataFormInfo.value(FD_GR_DETAIL.0.fdId)\" type=\"hidden\" value=\"166c7b31d9eba55bd7b827e4211a664d\"/></td><td align=\"center\" column=\"2\" row=\"1\"><div canshow=\"true\" style=\"; DISPLAY: inline\">00001</div></td><td align=\"center\" column=\"3\" row=\"1\"><div canshow=\"true\" style=\"; DISPLAY: inline\"/></td><td align=\"center\" column=\"4\" row=\"1\"><div canshow=\"true\" style=\"; DISPLAY: inline\">日常运维以及需求变更实施</div></td><td column=\"5\" row=\"1\"><div canshow=\"true\" style=\"; DISPLAY: inline\">1.000</div></td><td column=\"6\" row=\"1\"><div canshow=\"true\" style=\"; DISPLAY: inline\">总部工厂</div></td><td column=\"7\" row=\"1\"><div canshow=\"true\" style=\"; DISPLAY: inline\">0.500</div></td><td column=\"8\" row=\"1\"><div canshow=\"true\" style=\"; DISPLAY: inline\">0.500</div></td><td column=\"9\" row=\"1\"><div canshow=\"true\" style=\"; DISPLAY: inline\">EA</div></td><td column=\"10\" row=\"1\"><div canshow=\"true\" style=\"; DISPLAY: inline\">111</div></td></tr><tr type=\"statisticRow\"><td align=\"center\" coltype=\"noFoot\" column=\"0\" row=\"2\" style=\"\"> </td><td column=\"1\" row=\"2\"> </td><td align=\"center\" column=\"2\" row=\"2\"> </td><td align=\"center\" column=\"3\" row=\"2\"> </td><td align=\"center\" column=\"4\" row=\"2\"> </td><td column=\"5\" row=\"2\"> </td><td column=\"6\" row=\"2\"> </td><td column=\"7\" row=\"2\"> </td><td column=\"8\" row=\"2\"> </td><td column=\"9\" row=\"2\"> </td><td column=\"10\" row=\"2\"> </td></tr></table>",
+                "refuse": [
+                    {
+                        "text": "起草节点",
+                        "value": "N2"
+                    },
+                    {
+                        "text": "实际收货人审批",
+                        "value": "N4"
+                    }
+                ],
+                "shlxs": "PGlucHV0IGNoZWNrZWQ9InRydWUiIGRpc2FibGVkPSJ0cnVlIiB0eXBlPSJjaGVja2JveCIgY2FwdGlvbj0i5pyN5YqhwqAiLz48YnIvPjxpbnB1dCBkaXNhYmxlZD0idHJ1ZSIgdHlwZT0iY2hlY2tib3giIGNhcHRpb249IuWunueJqS3lt6XnqIvln7rlu7rpobnnm67CoCIvPjxici8+PGlucHV0IGRpc2FibGVkPSJ0cnVlIiB0eXBlPSJjaGVja2JveCIgY2FwdGlvbj0i5a6e54mpLeWFtuS7lsKgIi8+PGJyLz48aW5wdXQgY2hlY2tlZD0idHJ1ZSIgZGlzYWJsZWQ9InRydWUiIHR5cGU9ImNoZWNrYm94IiBjYXB0aW9uPSLlrp7niakt6K6+5aSH57G777yI5bimQ0FS77yJwqAiLz48YnIvPg==",
+                "hidden": [
+                    {
+                        "hiddenValue": "166c7b31e41e82d4ae87b23461cacb5c",
+                        "hiddenName": "fdId"
+                    },
+                    {
+                        "hiddenValue": "采购收货单-600000023710",
+                        "hiddenName": "docSubject"
+                    },
+                    {
+                        "hiddenValue": "20",
+                        "hiddenName": "docStatus"
+                    },
+                    {
+                        "hiddenValue": "201810310918048",
+                        "hiddenName": "fdNumber"
+                    },
+                    {
+                        "hiddenValue": "view",
+                        "hiddenName": "method_GET"
+                    },
+                    {
+                        "hiddenValue": "km/review/xform/define/1471f7d4ce6e063190e972d4d938b37c/1471f7d4ce6e063190e972d4d938b37c_v3",
+                        "hiddenName": "extendDataFormInfo.extendFilePath"
+                    },
+                    {
+                        "hiddenValue": "SAP",
+                        "hiddenName": "extendDataFormInfo.value(FD_GR_DB)"
+                    },
+                    {
+                        "hiddenValue": "SAP",
+                        "hiddenName": "extendDataFormInfo.value(FD_GR_SOURCE)"
+                    },
+                    {
+                        "hiddenValue": "75471.7",
+                        "hiddenName": "extendDataFormInfo.value(FD_GR_TOTALAMOUNT)"
+                    },
+                    {
+                        "hiddenValue": "AXU296",
+                        "hiddenName": "extendDataFormInfo.value(FD_GR_RECGID)"
+                    },
+                    {
+                        "hiddenValue": "0009000995",
+                        "hiddenName": "extendDataFormInfo.value(FD_GR_VEND)"
+                    },
+                    {
+                        "hiddenValue": "上海友亚信息科技有限公司",
+                        "hiddenName": "extendDataFormInfo.value(FD_GR_VENDNAME)"
+                    },
+                    {
+                        "hiddenValue": "ALUR9",
+                        "hiddenName": "extendDataFormInfo.value(FD_GR_OPGID)"
+                    },
+                    {
+                        "hiddenValue": "<font color='red'>请提交以下附件：<br>间接材料采购收货单-服务类Receiving Sign-off Form for Service<br>1.设备工装安装调整验收单Facilities Installation Test Inspection Form 2.合同中付款方式章节Payment method described in the contract<br><\\/font>",
+                        "hiddenName": "extendDataFormInfo.value(fd_tips)"
+                    },
+                    {
+                        "hiddenValue": "",
+                        "hiddenName": "extendDataFormInfo.value(FD_GR_DETAIL.!{index}.fdId)"
+                    },
+                    {
+                        "hiddenValue": "166c7b31d9eba55bd7b827e4211a664d",
+                        "hiddenName": "extendDataFormInfo.value(FD_GR_DETAIL.0.fdId)"
+                    },
+                    {
+                        "hiddenValue": "13ef3e1c55671378b7d750942e2b54ff",
+                        "hiddenName": "docCreatorId"
+                    },
+                    {
+                        "hiddenValue": "",
+                        "hiddenName": "sysWfBusinessForm.fdParameterJson"
+                    },
+                    {
+                        "hiddenValue": "",
+                        "hiddenName": "sysWfBusinessForm.fdAdditionsParameterJson"
+                    },
+                    {
+                        "hiddenValue": "",
+                        "hiddenName": "sysWfBusinessForm.fdIsModify"
+                    },
+                    {
+                        "hiddenValue": "13ef3e6447bb5f523bc80874003a0cff",
+                        "hiddenName": "sysWfBusinessForm.fdCurHanderId"
+                    },
+                    {
+                        "hiddenValue": "<reviewing><tasks><task type=\\\"reviewWorkitem\\\" id=\\\"166e254934741ddc856379942feb9e90\\\" nodeId=\\\"N5\\\" data=\\\"同意\\\"/><\\/tasks><\\/reviewing>",
+                        "hiddenName": "sysWfBusinessForm.fdCurNodeSavedXML"
+                    },
+                    {
+                        "hiddenValue": "<process dayOfNotifyPrivileger=\\\"15\\\" fdId=\\\"160258d2ee5a96e66ab40ee4f84b4b00\\\" hourOfNotifyPrivileger=\\\"0\\\" iconType=\\\"2\\\" linesIndex=\\\"22\\\" minuteOfNotifyPrivileger=\\\"0\\\" nodesIndex=\\\"17\\\" notifyDraftOnFinish=\\\"true\\\" notifyOnFinish=\\\"false\\\" notifyType=\\\"todo;email\\\" orgAttribute=\\\"privilegerIds:privilegerNames\\\" orgAttributes=\\\"privilegerIds:privilegerNames\\\" privilegerIds=\\\"13ef3e1c9f9c81542c51b1c425aa443a;13f534b56287b2125de87084211abd1f;13ef3e1cec0b6aec7dae37c4e7e9d65b\\\" privilegerNames=\\\"胡蓉Hu Rong;张晋Zhang Jin;潘晨雨Pan Chenyu\\\" recalculateHandler=\\\"true\\\" rejectReturn=\\\"false\\\">\\n<nodes>\\n<startNode id=\\\"N1\\\" name=\\\"开始节点\\\" x=\\\"540\\\" y=\\\"60\\\"/>\\n<draftNode id=\\\"N2\\\" name=\\\"起草节点\\\" x=\\\"540\\\" y=\\\"140\\\"/>\\n<reviewNode handlerIds=\\\"$组织架构.根据登录名取用户$($FD_GR_RECGID$)\\\" handlerNames=\\\"$组织架构.根据登录名取用户$($实际收货人Gid$)\\\" handlerSelectType=\\\"formula\\\" id=\\\"N4\\\" ignoreOnHandlerEmpty=\\\"true\\\" name=\\\"实际收货人审批\\\" optHandlerCalType=\\\"2\\\" optHandlerSelectType=\\\"org\\\" processType=\\\"0\\\" recalculateHandler=\\\"true\\\" useOptHandlerOnly=\\\"false\\\" x=\\\"540\\\" y=\\\"220\\\"/>\\n<reviewNode handlerIds=\\\"if($docCreator$!=null) return $组织架构.根据登录名取用户$($docCreator$.fdDirectReportTo);\\\" handlerNames=\\\"if($申请人$!=null)return $组织架构.根据登录名取用户$($申请人$.fdDirectReportTo);\\\" handlerSelectType=\\\"formula\\\" id=\\\"N5\\\" ignoreOnHandlerEmpty=\\\"true\\\" name=\\\"直接经理审批\\\" optHandlerCalType=\\\"2\\\" optHandlerSelectType=\\\"org\\\" processType=\\\"0\\\" recalculateHandler=\\\"true\\\" useOptHandlerOnly=\\\"false\\\" x=\\\"540\\\" y=\\\"300\\\"/>\\n<autoBranchNode id=\\\"N8\\\" name=\\\"判断公司\\\" x=\\\"540\\\" y=\\\"420\\\"/>\\n<autoBranchNode id=\\\"N9\\\" name=\\\"JCYM类别金额判断\\\" x=\\\"300\\\" y=\\\"500\\\"/>\\n<autoBranchNode id=\\\"N15\\\" name=\\\"类别金额判断\\\" x=\\\"760\\\" y=\\\"500\\\"/>\\n<reviewNode handlerIds=\\\"$流程.根据人员工号获取汇报对象$($组织架构.根据登录名取用户$($FD_GR_RECGID$).fdNo,&amp;quot;OM1_BADGE&amp;quot;)\\\" handlerNames=\\\"$流程.根据人员工号获取汇报对象$($组织架构.根据登录名取用户$($实际收货人Gid$).fdNo,&amp;quot;OM1_BADGE&amp;quot;)\\\" handlerSelectType=\\\"formula\\\" id=\\\"N16\\\" ignoreOnHandlerEmpty=\\\"true\\\" name=\\\"工厂经理审批\\\" optHandlerCalType=\\\"2\\\" optHandlerIds=\\\"\\\" optHandlerNames=\\\"\\\" optHandlerSelectType=\\\"org\\\" orgAttributes=\\\"optHandlerIds:optHandlerNames;otherCanViewCurNodeIds:otherCanViewCurNodeNames\\\" processType=\\\"2\\\" recalculateHandler=\\\"true\\\" useOptHandlerOnly=\\\"false\\\" x=\\\"760\\\" y=\\\"620\\\"/>\\n<reviewNode handlerIds=\\\"$组织架构.解释角色线$($docCreator$, &amp;quot;JCYM-基于财务业务的角色线&amp;quot;, &amp;quot;30部门负责人&amp;quot;)\\\" handlerNames=\\\"$组织架构.解释角色线$($申请人$, &amp;quot;JCYM-基于财务业务的角色线&amp;quot;, &amp;quot;30部门负责人&amp;quot;)\\\" handlerSelectType=\\\"formula\\\" id=\\\"N10\\\" ignoreOnHandlerEmpty=\\\"true\\\" name=\\\"部门经理审批\\\" optHandlerCalType=\\\"2\\\" optHandlerSelectType=\\\"org\\\" processType=\\\"0\\\" recalculateHandler=\\\"true\\\" useOptHandlerOnly=\\\"false\\\" x=\\\"220\\\" y=\\\"740\\\"/>\\n<sendNode handlerIds=\\\"$组织架构.根据登录名取用户$($FD_GR_OPGID$)\\\" handlerNames=\\\"$组织架构.根据登录名取用户$($填单人Gid$)\\\" handlerSelectType=\\\"formula\\\" id=\\\"N11\\\" ignoreOnHandlerEmpty=\\\"true\\\" name=\\\"抄送填单人\\\" optHandlerCalType=\\\"2\\\" optHandlerSelectType=\\\"org\\\" useOptHandlerOnly=\\\"false\\\" x=\\\"540\\\" y=\\\"740\\\"/>\\n<sendNode handlerSelectType=\\\"org\\\" id=\\\"N12\\\" ignoreOnHandlerEmpty=\\\"true\\\" name=\\\"手工设置邮件抄送节点\\\" optHandlerCalType=\\\"2\\\" optHandlerSelectType=\\\"org\\\" useOptHandlerOnly=\\\"false\\\" x=\\\"540\\\" y=\\\"820\\\"/>\\n<endNode id=\\\"N3\\\" name=\\\"结束节点\\\" x=\\\"540\\\" y=\\\"900\\\"/>\\n<\\/nodes>\\n<lines>\\n<line endNodeId=\\\"N2\\\" endPosition=\\\"1\\\" id=\\\"L1\\\" points=\\\"540,80;540,120\\\" startNodeId=\\\"N1\\\" startPosition=\\\"3\\\"/>\\n<line endNodeId=\\\"N4\\\" endPosition=\\\"1\\\" id=\\\"L2\\\" points=\\\"540,160;540,200\\\" startNodeId=\\\"N2\\\" startPosition=\\\"3\\\"/>\\n<line endNodeId=\\\"N5\\\" endPosition=\\\"1\\\" id=\\\"L3\\\" points=\\\"540,240;540,280\\\" startNodeId=\\\"N4\\\" startPosition=\\\"3\\\"/>\\n<line endNodeId=\\\"N8\\\" endPosition=\\\"1\\\" id=\\\"L4\\\" points=\\\"540,320;540,380\\\" startNodeId=\\\"N5\\\" startPosition=\\\"3\\\"/>\\n<line condition=\\\"&amp;quot;9000&amp;quot;.equals(  $组织架构.根据登录名取用户$($FD_GR_RECGID$).fdCompanyCode )\\\" disCondition=\\\"&amp;quot;9000&amp;quot;.equals(  $组织架构.根据登录名取用户$($实际收货人Gid$).fdCompanyCode )\\\" endNodeId=\\\"N9\\\" endPosition=\\\"1\\\" id=\\\"L11\\\" name=\\\"AYM\\\" points=\\\"540,460;300,460\\\" priority=\\\"0\\\" startNodeId=\\\"N8\\\" startPosition=\\\"3\\\"/>\\n<line condition=\\\"return true\\\" disCondition=\\\"return true\\\" endNodeId=\\\"N15\\\" endPosition=\\\"1\\\" id=\\\"L22\\\" points=\\\"540,460;760,460\\\" priority=\\\"2\\\" startNodeId=\\\"N8\\\" startPosition=\\\"3\\\"/>\\n<line condition=\\\"&amp;quot;5600&amp;quot;.equals(  $组织架构.根据登录名取用户$($FD_GR_RECGID$).fdCompanyCode )\\\" disCondition=\\\"&amp;quot;5600&amp;quot;.equals(  $组织架构.根据登录名取用户$($实际收货人Gid$).fdCompanyCode )\\\" endNodeId=\\\"N11\\\" endPosition=\\\"1\\\" id=\\\"L8\\\" name=\\\"DFAS\\\" points=\\\"540,460;540,720\\\" priority=\\\"1\\\" startNodeId=\\\"N8\\\" startPosition=\\\"3\\\"/>\\n<line condition=\\\"if($字符串.包含$($FD_GR_PARTTYPE$, &amp;quot;服务&amp;quot;)&amp;amp;&amp;amp;$FD_GR_TOTALAMOUNT$&amp;gt;=50000){   return true; }else{   return false; }  \\\" disCondition=\\\"if($字符串.包含$($收货类型 Receiving Type$, &amp;quot;服务&amp;quot;)&amp;amp;&amp;amp;$总金额(含税)$&amp;gt;=50000){  return true;}else{  return false;}\\\" endNodeId=\\\"N10\\\" endPosition=\\\"1\\\" id=\\\"L12\\\" name=\\\"服务&amp;amp;&amp;amp;金额大于5万\\\" points=\\\"300,540;220,540;220,720\\\" priority=\\\"0\\\" startNodeId=\\\"N9\\\" startPosition=\\\"3\\\"/>\\n<line condition=\\\"true\\\" disCondition=\\\"true\\\" endNodeId=\\\"N11\\\" endPosition=\\\"4\\\" id=\\\"L13\\\" points=\\\"300,540;480,540;480,740\\\" priority=\\\"1\\\" startNodeId=\\\"N9\\\" startPosition=\\\"3\\\"/>\\n<line condition=\\\"if($字符串.包含$($FD_GR_PARTTYPE$, &amp;quot;服务&amp;quot;)&amp;amp;&amp;amp;$FD_GR_TOTALAMOUNT$&amp;gt;=500000){   return true; }else{   return false; }  \\\" disCondition=\\\"if($字符串.包含$($收货类型Receiving Type$, &amp;quot;服务&amp;quot;)&amp;amp;&amp;amp;$总金额(含税)$&amp;gt;=500000){  return true;}else{  return false;}\\\" endNodeId=\\\"N16\\\" endPosition=\\\"1\\\" id=\\\"L18\\\" name=\\\"服务&amp;amp;&amp;amp;金额大于50万\\\" points=\\\"760,540;760,600\\\" priority=\\\"0\\\" startNodeId=\\\"N15\\\" startPosition=\\\"3\\\"/>\\n<line condition=\\\"true\\\" disCondition=\\\"true\\\" endNodeId=\\\"N11\\\" endPosition=\\\"2\\\" id=\\\"L21\\\" points=\\\"760,540;600,540;600,740\\\" priority=\\\"1\\\" startNodeId=\\\"N15\\\" startPosition=\\\"3\\\"/>\\n<line endNodeId=\\\"N11\\\" endPosition=\\\"2\\\" id=\\\"L20\\\" points=\\\"760,640;760,740;600,740\\\" startNodeId=\\\"N16\\\" startPosition=\\\"3\\\"/>\\n<line endNodeId=\\\"N11\\\" endPosition=\\\"4\\\" id=\\\"L17\\\" points=\\\"280,740;480,740\\\" startNodeId=\\\"N10\\\" startPosition=\\\"2\\\"/>\\n<line endNodeId=\\\"N12\\\" endPosition=\\\"1\\\" id=\\\"L15\\\" points=\\\"540,760;540,800\\\" startNodeId=\\\"N11\\\" startPosition=\\\"3\\\"/>\\n<line endNodeId=\\\"N3\\\" endPosition=\\\"1\\\" id=\\\"L16\\\" points=\\\"540,840;540,880\\\" startNodeId=\\\"N12\\\" startPosition=\\\"3\\\"/>\\n<\\/lines>\\n<\\/process>\\n",
+                        "hiddenName": "sysWfBusinessForm.fdFlowContent"
+                    },
+                    {
+                        "hiddenValue": "166c7b31e41e82d4ae87b23461cacb5c",
+                        "hiddenName": "sysWfBusinessForm.fdProcessId"
+                    },
+                    {
+                        "hiddenValue": "reviewMainDoc",
+                        "hiddenName": "sysWfBusinessForm.fdKey"
+                    },
+                    {
+                        "hiddenValue": "166c7b31e41e82d4ae87b23461cacb5c",
+                        "hiddenName": "sysWfBusinessForm.fdModelId"
+                    },
+                    {
+                        "hiddenValue": "com.landray.kmss.km.review.model.KmReviewMain",
+                        "hiddenName": "sysWfBusinessForm.fdModelName"
+                    },
+                    {
+                        "hiddenValue": "<reviewing><nodes><reviewNode canModifyFlow=\\\"false\\\" canModifyMainDoc=\\\"false\\\" canModifyNotionPopedom=\\\"false\\\" dayOfNotify=\\\"7\\\" dayOfPass=\\\"0\\\" handlerIds=\\\"if($docCreator$!=null) return $组织架构.根据登录名取用户$($docCreator$.fdDirectReportTo);\\\" handlerNames=\\\"if($申请人$!=null)return $组织架构.根据登录名取用户$($申请人$.fdDirectReportTo);\\\" handlerSelectType=\\\"formula\\\" hasInitSysOrgElment=\\\"false\\\" id=\\\"N5\\\" ignoreOnHandlerEmpty=\\\"true\\\" ignoreOnHandlerSame=\\\"false\\\" name=\\\"直接经理审批\\\" optHandlerCalType=\\\"2\\\" optHandlerSelectType=\\\"org\\\" processType=\\\"0\\\" recalculateHandler=\\\"true\\\" tranNotifyDraft=\\\"0\\\" tranNotifyPrivate=\\\"0\\\" useOptHandlerOnly=\\\"false\\\" x=\\\"540\\\" y=\\\"300\\\">\\n<operations refId=\\\"132b972e49f02386061a4f640b4843c9\\\"/>\\n<variants/>\\n<\\/reviewNode>\\n<\\/nodes><tasks><task type=\\\"reviewWorkitem\\\" id=\\\"166e254934741ddc856379942feb9e90\\\" nodeId=\\\"N5\\\" taskFrom=\\\"workitem\\\" expectedName=\\\"丁炜Ding Wei\\\"><operations><operation id=\\\"handler_pass\\\" name=\\\"通过 Approve\\\" operationHandlerType=\\\"handler\\\"/><operation id=\\\"handler_refuse\\\" name=\\\"驳回 Refuse\\\" operationHandlerType=\\\"handler\\\"/><operation id=\\\"handler_commission\\\" name=\\\"转办 Forward\\\" operationHandlerType=\\\"handler\\\"/><operation id=\\\"handler_communicate\\\" name=\\\"沟通 Communicate\\\" operationHandlerType=\\\"handler\\\"/><operation id=\\\"handler_abandon\\\" name=\\\"废弃 Discard\\\" operationHandlerType=\\\"handler\\\"/><\\/operations><\\/task><\\/tasks><\\/reviewing>",
+                        "hiddenName": "sysWfBusinessForm.fdCurNodeXML"
+                    },
+                    {
+                        "hiddenValue": "",
+                        "hiddenName": "sysWfBusinessForm.fdTemplateModelName"
+                    },
+                    {
+                        "hiddenValue": "",
+                        "hiddenName": "sysWfBusinessForm.fdTemplateKey"
+                    },
+                    {
+                        "hiddenValue": "",
+                        "hiddenName": "sysWfBusinessForm.canStartProcess"
+                    },
+                    {
+                        "hiddenValue": "<process-status><runningNodes><node id=\\\"N5\\\" /><\\/runningNodes><historyNodes><node id=\\\"N1\\\" routeType=\\\"NORMAL\\\" targetId=\\\"N2\\\" targetName=\\\"起草节点\\\" modelId=\\\"166c7b31f302a0527a12dae48d9820fb\\\"/><node id=\\\"N2\\\" routeType=\\\"NORMAL\\\" targetId=\\\"N4\\\" targetName=\\\"实际收货人审批\\\" modelId=\\\"166c7b3203ca23a9ea29f14463c927dd\\\"/><node id=\\\"N4\\\" routeType=\\\"NORMAL\\\" targetId=\\\"N5\\\" targetName=\\\"直接经理审批\\\" modelId=\\\"166c7b3228ef8d7cc74b8e94d0fa6701\\\"/><\\/historyNodes><\\/process-status>",
+                        "hiddenName": "sysWfBusinessForm.fdTranProcessXML"
+                    },
+                    {
+                        "hiddenValue": "13ef3e1c55671378b7d750942e2b54ff",
+                        "hiddenName": "sysWfBusinessForm.fdDraftorId"
+                    },
+                    {
+                        "hiddenValue": "徐依迪Xu Yidi",
+                        "hiddenName": "sysWfBusinessForm.fdDraftorName"
+                    },
+                    {
+                        "hiddenValue": "13ef3e6447bb5f523bc80874003a0cff;13ee9e47e16c6fa288273a245fe83a1d",
+                        "hiddenName": "sysWfBusinessForm.fdHandlerRoleInfoIds"
+                    },
+                    {
+                        "hiddenValue": "丁炜Ding Wei;ITSP项目经理ITSP Program Manager",
+                        "hiddenName": "sysWfBusinessForm.fdHandlerRoleInfoNames"
+                    },
+                    {
+                        "hiddenValue": "166e2c79353f240715dce6d42ef95358",
+                        "hiddenName": "sysWfBusinessForm.fdAuditNoteFdId"
+                    },
+                    {
+                        "hiddenValue": "20",
+                        "hiddenName": "docStatus"
+                    },
+                    {
+                        "hiddenValue": "13ef3e1c55671378b7d750942e2b54ff",
+                        "hiddenName": "sysWfBusinessForm.fdIdentityId"
+                    },
+                    {
+                        "hiddenValue": "",
+                        "hiddenName": "sysWfBusinessForm.fdProcessStatus"
+                    },
+                    {
+                        "hiddenValue": "",
+                        "hiddenName": "attachmentForms.166e2c79353f240715dce6d42ef95358.fdModelId"
+                    },
+                    {
+                        "hiddenValue": "",
+                        "hiddenName": "attachmentForms.166e2c79353f240715dce6d42ef95358.extParam"
+                    },
+                    {
+                        "hiddenValue": "com.landray.kmss.km.review.model.KmReviewMain",
+                        "hiddenName": "attachmentForms.166e2c79353f240715dce6d42ef95358.fdModelName"
+                    },
+                    {
+                        "hiddenValue": "166e2c79353f240715dce6d42ef95358",
+                        "hiddenName": "attachmentForms.166e2c79353f240715dce6d42ef95358.fdKey"
+                    },
+                    {
+                        "hiddenValue": "",
+                        "hiddenName": "attachmentForms.166e2c79353f240715dce6d42ef95358.fdAttType"
+                    },
+                    {
+                        "hiddenValue": "",
+                        "hiddenName": "attachmentForms.166e2c79353f240715dce6d42ef95358.fdMulti"
+                    },
+                    {
+                        "hiddenValue": "",
+                        "hiddenName": "attachmentForms.166e2c79353f240715dce6d42ef95358.deletedAttachmentIds"
+                    },
+                    {
+                        "hiddenValue": "",
+                        "hiddenName": "attachmentForms.166e2c79353f240715dce6d42ef95358.attachmentIds"
+                    },
+                    {
+                        "hiddenValue": "",
+                        "hiddenName": "sysWfBusinessForm.fdSystemNotifyType"
+                    },
+                    {
+                        "hiddenValue": "",
+                        "hiddenName": "wf_nodeCanViewCurNodeIds"
+                    },
+                    {
+                        "hiddenValue": "",
+                        "hiddenName": "wf_otherCanViewCurNodeIds"
+                    },
+                    {
+                        "hiddenValue": "false",
+                        "hiddenName": "authAttNocopy"
+                    },
+                    {
+                        "hiddenValue": "false",
+                        "hiddenName": "authAttNodownload"
+                    },
+                    {
+                        "hiddenValue": "false",
+                        "hiddenName": "authAttNoprint"
+                    },
+                    {
+                        "hiddenValue": "3",
+                        "hiddenName": "sysWfBusinessForm.fdNotifyLevel"
+                    }
+                ],
+                "shlxArr": [
+                    {
+                        "name": "服务 ",
+                        "checked": true
+                    },
+                    {
+                        "name": "实物-工程基建项目 ",
+                        "checked": false
+                    },
+                    {
+                        "name": "实物-其他 ",
+                        "checked": false
+                    },
+                    {
+                        "name": "实物-设备类（带CAR） ",
+                        "checked": true
+                    }
+                ],
+                "shrq": "20160310",
+                "caigoudantitle": "收货类型\n",
+                "isRefuse": "1",
+                "fileInfo": [
+                    {
+                        "fileName": "test.txt",
+                        "fileId2": "166c8eaf3cdfaa202a85df4451f9d1e9",
+                        "fileId1": "166e2548ee14f6ed4f4da2247d996cd3"
+                    }
+                ]
+            };
+            //添加操作默认选中
+            for(let i =0;i<dataInfo.buttonInfo.length;i++){
+                if(dataInfo.buttonInfo[i].buttonValue.indexOf('pass') > 0){
+                    self.$obj.oprGroup = dataInfo.buttonInfo[i].buttonValue;
+                    break;
+                }
+            }
+                //添加驳回默认选中
+            if(dataInfo.refuse&&dataInfo.refuse.length>0){
+                self.$obj.refuseValue = dataInfo.refuse[0].value;
+                self.$obj.refuseName = dataInfo.refuse[0].text;
+            }
+            //添加常用意见默认选项
+            dataInfo.select.unshift({selectVale:"常用意见Common approval comment"});
+            self.$obj.data = dataInfo;
+            self.$vm = $(self.$el).render(self.$obj);
+
+            
+
+            $(".tabbar").css("display","block");*/
+            this.onload();
+        }
+        detached(){
+            this.$vm && this.$vm.destroy();
+        }
+        doNext(flag, flag1){
+            switch(flag) {
+				case "同意":
+					this.$obj.buttonSav = "approve";
+					this.$obj.buttonFow = "ACCEPT";
+					break;
+				case "Approve":
+					this.$obj.buttonSav = "approve";
+					this.$obj.buttonFow = "ACCEPT";
+					break;
+				case "拒绝":
+					this.$obj.buttonSav = "approve";
+					this.$obj.buttonFow = "REJECT";
+					break;
+				case "Reject":
+					this.$obj.buttonSav = "approve";
+					this.$obj.buttonFow = "REJECT";
+					break;
+				case "回退上一步":
+					this.$obj.buttonSav = "backTrace";
+					this.$obj.buttonFow = "";
+					break;
+				case "Back to previous step":
+					this.$obj.buttonSav = "backTrace";
+					this.$obj.buttonFow = "";
+					break;
+				case "退回开端":
+					this.$obj.buttonSav = "returnStart";
+					this.$obj.buttonFow = "";
+					break;
+				case "Back to Initiator":
+					this.$obj.buttonSav = "returnStart";
+					this.$obj.buttonFow = "";
+					break;
+				case "回退历史审批人":
+					this.$obj.buttonSav = "showHistoryList";
+					this.$obj.buttonFow = flag1;
+					break;
+				case "征询意见":
+					this.$obj.buttonSav = "inquire";
+					this.$obj.buttonFow = "";
+					break;
+				case "consultation":
+					this.$obj.buttonSav = "inquire";
+					this.$obj.buttonFow = "";
+					break;
+				case "提交":
+					this.$obj.buttonSav = "FinishInquire";
+					this.$obj.buttonFow = "";
+					break;
+				case "Submit":
+					this.$obj.buttonSav = "FinishInquire";
+					this.$obj.buttonFow = "";
+					break;
+				case "转办":
+					this.$obj.buttonSav = "forward";
+					this.$obj.buttonFow = "";
+					break;
+				case "transfer to others":
+					this.$obj.buttonSav = "forward";
+					this.$obj.buttonFow = "";
+					break;
+				default:
+					alert("该操作暂不支持,请联系管理员!This operation hasn't done yet,Please contact the IT department!");
+					break;
+				}
+				this.doSubmit();
+        }
+        doSubmit() {
+            if(this.$obj.oprGroup == ''){
+                common.alert("请选择流程下一步操作!Please select the next opertaion of the flow!");
+				return;
+            }
+
+            let operate_name = "";
+            let operate_handle = this.$obj.oprGroup;
+            let buttonInfo = this.$obj.data.buttonInfo;
+            for(let i =0;i<buttonInfo.length;i++){
+                if(buttonInfo[i].buttonValue==this.$obj.oprGroup){
+                    operate_name = buttonInfo[i].buttonName;
+                    break;
+                }
+            }
+
+            var json = {};
+            var json_param = {};
+            json.taskId = this.$obj.data.submitjson[0].sj_taskId;
+            json.processId = this.$obj.data.submitjson[0].sj_processId;
+            json.activityType =this.$obj.data.submitjson[0].sj_activityType;
+            json.operationType = this.$obj.oprGroup;
+            
+            json_param.operationName = operate_name;
+            json_param.notifyType = "";
+            json_param.notifyLevel = this.$obj.data.submitjson[0].sj_notifyLevel;
+            json_param.notifyOnFinish = false;
+            json_param.auditNote = this.$obj.fdUsageContent;
+            json_param.auditNoteFdId = this.getHiddenValue("sysWfBusinessForm.fdAuditNoteFdId");
+            if(operate_handle == "handler_commission"){
+                json_param.toOtherHandlerIds = this.$obj.forwardValue;
+                json_param.toOtherHandlerNames = this.$obj.forwardName;
+            }else if( operate_handle == "handler_communicate"){
+                json_param.toOtherHandlerIds = this.$obj.communicateValue;
+                json_param.toOtherHandlerNames = this.$obj.communicateName;
+            }else if(operate_handle == "handler_cancelCommunicate"){
+                let canelStr = this.$obj.data.communicate.filter(item => item.checked).map(item => item.itemId).join(';')
+                if(canelStr == ""){
+                    common.alert("请选择取消沟通人员!");
+                    return;
+                }
+                json_param.cancelHandlerIds = canelStr;
+            }else if(operate_handle == "handler_refuse"){
+                json_param.jumpToNodeId = this.$obj.refuseValue;
+                json_param.jumpToNodeInstanceId = "";
+                if(this.$obj.refusePassedToThisNode){
+                    json_param.refusePassedToThisNode = true;
+                }else{
+                    json_param.refusePassedToThisNode = false;
+                }
+            }
+            json.param = json_param;
+            console.log(json)
+            this.setHiddenValue("sysWfBusinessForm.fdParameterJson",JSON.stringify(json))
+
+            let postData = [];
+            for(let i = 0;i<this.$obj.data.hidden.length;i++){
+                postData.push({
+                    type:0,
+                    name:this.$obj.data.hidden[i].hiddenName,
+                    value:this.$obj.data.hidden[i].hiddenValue
+                })
+            }
+            postData.push({
+                type:0,
+                name:"taskId",
+                value:this.$obj.data.submitjson[0].sj_taskId
+            })
+            console.log(postData)
+            console.log( this.$obj.data.action.replace(/&amp;/g,'&'))
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : this.$obj.data.action.replace(/&amp;/g,'&'),
+                data:postData,
+                type: 'post',
+                reqCharset:'UTF-8',
+                success: function(dataInfo){
+                    console.log(dataInfo)
+                    common.alert(dataInfo.info,function(){
+                        if(dataInfo.flag == "success"){
+                            document.querySelector('.aui-refresher-ShlcList').component.refresher.triggerDownScroll();
+                            history.go(-1);
+                        }
+                    });
+                }
+            });
+
+        }
+        onload(){
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : common.oaUrl+'/cgshddetail.jsp',
+                data: {
+                    fdId:router.getQueryObj().fdId,
+                },
+                type: 'post',
+                success: function(dataInfo){
+                    console.log(JSON.stringify(dataInfo))
+                    
+                    //添加操作默认选中
+                    for(let i =0;i<dataInfo.buttonInfo.length;i++){
+                        if(dataInfo.buttonInfo[i].buttonValue.indexOf('pass') > 0){
+                            self.$obj.oprGroup = dataInfo.buttonInfo[i].buttonValue;
+                            break;
+                        }
+                    }
+                     //添加驳回默认选中
+                    if(dataInfo.refuse&&dataInfo.refuse.length>0){
+                        self.$obj.refuseValue = dataInfo.refuse[0].value;
+                        self.$obj.refuseName = dataInfo.refuse[0].text;
+                    }
+                    //添加常用意见默认选项
+                    dataInfo.select.unshift({selectVale:"常用意见Common approval comment"});
+                    self.$obj.data = dataInfo;
+                    self.$vm = $(self.$el).render(self.$obj);
+
+                    
+
+                    $(".tabbar").css("display","block");
+                    if(dataInfo.isbjflag=="1"){
+                        common.alert("该环节需要编辑，手机端只能查看，处理流程请到电脑端操作!");
+                    }
+                }
+            });
+        }
+        //判断hidde数组中是否含有对应的name
+        hasHiddenName(name){
+            let hiddens = this.$obj.data.hidden;
+            let value = false;
+            for(let i =0;i<hiddens.length;i++){
+                if(hiddens[i].hiddenName==name){
+                    value = true;
+                    break;
+                }
+            }
+            return value;
+        }
+        //获取hidden数组中对应name的值
+        getHiddenValue(name){
+            let hiddens = this.$obj.data.hidden;
+            let value = '';
+            for(let i =0;i<hiddens.length;i++){
+                if(hiddens[i].hiddenName==name){
+                    value = hiddens[i].hiddenValue;
+                    break;
+                }
+            }
+            return value;
+        }
+        //设置hidden数组中对应name的值
+        setHiddenValue(name,value){
+             let hiddens = this.$obj.data.hidden;
+             for(let i =0;i<hiddens.length;i++){
+                if(hiddens[i].hiddenName==name){
+                    hiddens[i].hiddenValue = value;
+                    break;
+                }
+            }
+        }
+        //上传附件
+        uploadFile(file_path){
+            var file_name = file_path.substring(file_path.lastIndexOf("/")+1);
+            //过滤不可上传文件类型
+            if(file_name.indexOf(".js")>-1 || file_name.indexOf(".bat")>-1 || file_name.indexOf(".exe")>-1 ||file_name.indexOf(".sh")>-1){
+                common.alert("基于安全考虑,系统不允许上传'.js .bat .exe .sh'类型的文件");
+                return;
+            }
+            var userkey = this.$obj.data.userkey;
+            var getFileKey =  "http://baseurl/ekp/sys/attachment/uploaderServlet?gettype=upload&userkey=" + userkey;
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : getFileKey,
+                data: [
+                    {
+                        type:1,
+                        name:'Filedata',
+                        value:file_path
+                    },
+                    {
+                        type:0,
+                        name:'Upload',
+                        value:'Submit Query'
+                    },
+                     {
+                        type:0,
+                        name:'Filename',
+                        value:file_name
+                    },
+                ],
+                success: function(dataInfo){
+                   common.alert(dataInfo.info,function(){
+                       if(dataInfo.flag == "success"){
+                        self.$obj.fileNames.push(dataInfo.attname);
+                        let hiddenname = "attachmentForms."+dataInfo.fdAuditNoteFdId+".attachmentIds";
+
+                        let hiddenvalue = self.getHiddenValue(hiddenname);
+                        if(hiddenvalue!=''){
+                            self.setHiddenValue(hiddenname,hiddenvalue+';'+dataInfo.attid)
+                        }else{
+                                self.setHiddenValue(hiddenname,dataInfo.attid)
+                        }
+                       }
+                   });
+                }
+            });
+        }
+    }
+</script>
+<style type='less'>
+@import url('../../assets/less/theme/default/common.less');
+.ShlcDetail{
+    .tabbar{
+         position: absolute;
+        top: 45px;
+    }
+    .content{
+        position: absolute;
+        top: 85px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        background: white;
+        .page1,.page2{
+            display: none;
+            width: 100%;
+            margin-bottom: 15px;
+            .list-cell{
+                border-top: 0;
+                .toogle-title{
+                    color:#428bca !important;
+                }
+            }
+            .toggle1-line{
+                height: 1px;
+                background: #A0C8E8;
+                margin: 0px 15px 0px 15px;
+            }
+            .toggle-box{
+                border: 1px solid #AAAAAA;
+                margin: 0px 15px 0px 15px;
+                margin-top: 5px;
+                // display: flex;
+                // flex-direction: column;
+                .box1{
+                    padding: 8px 10px 8px 10px;
+                    border-bottom: 1px solid @border-color;
+                    .label-content{
+                        margin-top:5px;
+                        text-align: right;
+                        color: #2E9BF2;
+                        .attach-list{
+                            li{
+                                display: flex;
+                                flex-direction: row;
+                                align-items: center;
+                                border-bottom: 1px solid @border-color;
+                                padding: 5px 0;
+                                .attach-icon{
+                                    width: 35px;
+                                    margin-right: 5px;
+                                }
+                                &:last-child{
+                                    border:0;
+                                }
+                                &:active{
+                                    background: #eee;
+                                }
+                            }
+                        }
+                    }
+                    .sp-text{
+                         border-top: 1px solid @border-color;
+                         margin-top: 8px;
+                        padding-top: 8px;
+                    }
+                    .sp-info{
+                        text-align:right;
+                        color:red;
+                    }
+                    .row{
+                        display:flex;
+                        flex-direction: row;
+                        align-items: center;
+                        padding: 10px;
+                        border-bottom: 1px solid #C7C7CC;
+                        .text{
+                            flex:3
+                        }
+                        .select{
+                            display:flex;
+                            flex-direction: row;
+                            align-items: center;
+                            flex:7;
+                            .select-value{
+                                flex:1;
+                                text-align: right;
+                                margin-right: 5px;
+                            }
+                        }
+                    }
+                    .forward-row{
+                        display:flex;
+                        flex-direction: row;
+                        align-items: center;
+                        padding: 10px 0px;
+                        .forward-name{
+                            flex: 1;
+                        }
+                        .gray{
+                            color:@ftc-gray;
+                        }
+                    }
+                    .textarea-box{
+                        width: 100%;
+                        border: 1px solid @border-color;
+                        border-radius: 4px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: stretch;
+                        textarea{
+                            border:0;
+                            padding: 0;
+                            margin: 5px;
+                        }
+                    }
+                }
+                .opinions-title{
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    padding:5px 3px;
+                    border-bottom: 1px solid @border-color;
+                    .opinions-text{
+                        flex:1;
+                    }
+                    .auicon{
+                        font-size:24px;
+                    }
+                }
+                .opinions-textarea{
+                    width: 100%;
+                    padding: 5px;
+                    .opinions{
+                        width: 100%
+                    }
+                }
+                .model-box{
+                    border: 1px solid #AAAAAA;
+                    margin: 5px 2px;
+                    border-radius: 4px;
+                    .sp-top{
+                        border-bottom: 1px solid @border-color;
+                        padding: 5px;
+                        .info1{
+                            font-size: @fts-small;
+                            color:@ftc-gray;
+                            margin-top: 5px;
+                        }
+                    }
+                    .sp-btm{
+                        padding: 5px;
+                        .sp-opinion{
+                            margin-top: 5px;
+                            text-align: right;
+                        }
+                        .sp-file{
+                            margin-top: 5px;
+                            text-align: right;
+                            span{
+                                color:#2471C5
+                            }
+                        }
+                    }
+                    
+                }
+                .checkbox-box{
+                    padding-left: 10px;
+                }
+                .bt-box{
+                    .bt-operation{
+                        border-bottom: 1px solid @border-color;
+                        padding: 5px;
+                        text-align: center;
+                    }
+                    .bt-item{
+                       border-bottom: 1px solid @border-color;
+                    }
+                }
+            }   
+        }
+        .curr{
+            display: block;
+        }
+    }
+    label:before,label:after{
+        box-sizing:border-box;
+    }
+}
+
+
+</style>

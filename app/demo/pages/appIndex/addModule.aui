@@ -1,0 +1,126 @@
+<ui>
+    <aui-header>
+        <aui-titlebar style="background-color:#ffffff">
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>我的关注</aui-text>
+            </caption-area>
+            <right-area>
+                <a v-on:click="func.saveModule"><i class="icon auicon icon-rdohook"></i> </a>
+            </right-area>
+        </aui-titlebar>
+    </aui-header>
+    <aui-scroller class="content" style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;">
+        <p class="toptip">您最多可选择8个关注</p>
+        <div v-for="app in amarray"  v-filter="func.addEachIndex">
+            <p class="moduletip" v-text="app.appName" v-on:click="func.removeCache"></p>
+            <div class="modulesArea">
+                <div class="modulediv" v-for="item in app.modules" v-filter="func.addEachIndex">
+                    <aui-button v-if="item.checked" checkedBtn v-on:click="func.clickMoudle(app.index,item.index)" class="btn btn-outlined btn-primary module">{{item.text}}<span class="badge badge-primary badge-inverted"><i class="icon auicon icon-hook-fill"></i></span></aui-button>
+                    <aui-button v-else v-on:click="func.clickMoudle(app.index,item.index)" class="btn module">{{item.text}}</aui-button>
+                </div>
+            </div>
+        </div>
+    </aui-scroller>
+</ui>
+<script>
+import '@auicomp/button/Button.aui';
+import Action,{ router } from '@auicomp/action/Action.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+import appModules from '@libs/moduleData';
+
+export default class AddModule{
+    static get tag(){
+        return 'addmodule';
+    }
+    
+    created(){
+        const $el = $(this.$el);
+        const obj = this.$obj = {
+            amarray:[],
+            func:{
+                addEachIndex:function(index,item){
+                    item.index = index;
+                },
+                removeCache:function(){
+                    localStorage.clear();
+                },
+                saveModule:function(){
+                    if($el.find('[checkedBtn]').length > 8){
+                        Toast.show('最多选择8个关注');
+                        return;
+                    }
+                    obj.amarray.forEach(app=>{
+                        let mtextArr = [],cacheKey = app.appId+'_modules';
+                        app.modules.forEach(m=>{
+                            if(m.checked){
+                                mtextArr.push(m.text);
+                            }
+                        });
+                        if(mtextArr.length > 0){
+                            localStorage.setItem(cacheKey,mtextArr.join(','));
+                        }else{
+                            localStorage.setItem(cacheKey,'');
+                        }
+
+                    });
+                    history.go(-1);
+                },
+                clickMoudle:function(appIndex,moduleIndex){
+
+                    obj.amarray[appIndex].modules[moduleIndex].checked = !obj.amarray[appIndex].modules[moduleIndex].checked;
+                }
+            }
+        }
+        obj.amarray = JSON.parse(JSON.stringify(appModules));
+        obj.amarray.forEach(app=>{
+            var cacheModules = localStorage.getItem(app.appId+'_modules');
+            if(cacheModules && cacheModules!=''){
+                var marry = cacheModules.split(',');
+                marry.forEach(ecm=>{
+                    app.modules.forEach(m=>{
+                        if(m.text == ecm){
+                            m.checked = true;
+                        }
+                    });
+                });
+            }
+        });
+        this.$vm = $el.render(obj);
+    }
+
+
+    detached(){
+        this.$vm && this.$vm.destroy();
+    }
+}
+</script>
+<style type="less">
+aui-addmodule{
+    .toptip{
+        text-align: center;
+        padding: 8px 0;
+        color:#aaa;
+    }
+    .moduletip{
+        color:#aaa;
+        background-color:#f6f6f6;
+        padding:4px 12px;
+    }
+    .modulesArea{
+        display: flex;
+        flex-wrap: wrap;
+        .modulediv{
+            width:33%;
+            box-sizing: border-box;
+            padding: 10px;
+            display: flex;
+            .module{
+                width: 100%;
+            }
+        }
+    }
+}
+</style>

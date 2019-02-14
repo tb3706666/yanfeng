@@ -1,0 +1,119 @@
+<ui>
+<aui-header>
+    <aui-titlebar>
+        <left-area>
+            <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+        </left-area>
+        <caption-area>
+            <aui-text>故障查询</aui-text>
+        </caption-area>
+    </aui-titlebar>
+    <div class="searchArea">
+        <div style="display:flex;flex:1;padding:5px;">
+            <input type="text" class="searchItem" placeholder="编码" v-model="searchItem.bianma"/>
+        </div>
+        <div style="display:flex;flex:2;padding:5px 0;">
+            <input type="text" class="searchItem" placeholder="描述" v-model="searchItem.miaoshu"/>
+        </div>
+    </div>
+</aui-header>
+<aui-scroller class="content" style="position: absolute; top: 90px; right: 0px; bottom: 45px;left: 0px;">
+    <aui-list>
+        <list-cell v-for="item in searchList" v-on:click="func.itemClick(item.failurecode,item.description,item.FAILURELIST)">
+            <a v-text="item.failurecode+'-'+item.description"></a>
+        </list-cell>
+    </aui-list>
+</aui-scroller>
+<aui-footer>
+    <div class="yf-footer">
+        <aui-button class="btn btn-outlined btn-primary" v-on:click="func.dosearch">查询</aui-button>
+    </div>
+</aui-footer>
+</ui>
+<style type="less">
+aui-guzhangquery{
+@defaultborder:1px solid #ddd;
+    .searchArea{
+        display: flex;
+        .searchItem{
+            width:100%;
+            border:@defaultborder;
+            height: 30px;
+            margin-right: 5px;
+            font-size: 14px;
+            padding-left:5px;
+        }
+    }
+    aui-list{
+        margin-top: 0 !important;
+    }
+}
+</style>
+<script>
+
+import auiLoading from '@auicomp/loading/Loading.aui';
+import fetch from '@comm/utils/nfetch';
+import Toast from '@auicomp/toast/Toast.aui';
+import Action,{ router } from '@auicomp/action/Action.aui';
+
+export default class guzhangQuery {
+    static get tag() {
+        return 'guzhangquery';
+    }
+    created() {
+        const $el = $(this.$el);
+        const obj = this.$obj = {
+            searchItem:{
+                bianma:'',
+                miaoshu:''
+            },
+            searchList:[],
+            func:{
+                itemClick:function(failurecode,description,FAILURELIST){
+                    let prepage = router.getQueryObj().backpage;//获取要回填的页面的选择器
+                    let caozuo = router.getQueryObj().caozuo;
+                    $(prepage).trigger("backfill",[failurecode,description,FAILURELIST,caozuo]);//触发要回填的页面对象注册的回填事件
+                    history.go(-1);
+                },
+                dosearch:function(){
+                    if(obj.searchItem.bianma.trim()=="" && obj.searchItem.miaoshu.trim() == ""){
+                        Toast.show("请输入查询条件！");
+                        return;
+                    }
+                    auiLoading.show();
+                    fetch({
+                        url: '/guzhang/gzquery',
+                        data:{
+                            maxORGID:window.lgInfo.ORGID,
+                            bm:obj.searchItem.bianma.trim(),
+                            DESCRIPTION:obj.searchItem.miaoshu.trim(),
+                            caozuo: router.getQueryObj().caozuo,
+                            PARENT: router.getQueryObj().PARENT
+                        },
+                        dataType: 'text',
+                        success:function(rsp){
+                            auiLoading.hide();
+                            var rspObj = $.JSON.parse(rsp.trim());
+                            if(rspObj.list.length > 0){
+                                obj.searchList.$reset(rspObj.list);
+                            }else{
+                                obj.searchList.$reset([]);
+                                Toast.show('未查询到数据');
+                            }
+                        },
+                        error:function(rsp){
+                            auiLoading.hide();
+                            Toast.show(rsp.errmsg);
+                        }
+                    });
+                }
+            }
+        }
+        this.$vm = $el.render(obj);
+    }
+
+    detached(){
+        this.$vm && this.$vm.destroy();
+    }
+}
+</script>

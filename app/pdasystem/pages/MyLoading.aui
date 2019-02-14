@@ -1,0 +1,184 @@
+<ui>
+    <div class="MyLoading">
+        <img class="loadimg" src="./assets/imgs/loading.png">
+        <div class="popup" v-bind:class="{show:showPop}" >
+            <div class="popup-center anim" v-bind:class="{bounceIn:showPop,bounceOut:!showPop}">
+                <div class="pop-title">请选择</div>
+                <div class="padding-lr10">
+                    <div class="fd-row  align-c padding10">
+                        <div  class="flex3">数据库</div>
+                        <div  class="flex7  fd-row align-c" v-on:click="func.openSelect">
+                            <div class="flex1">{{dbName}}</div>
+                            <i class="icon auicon icon-arrowright"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="confirm-handler">
+                    <a class="confirm-handler-ok" v-on:click="func.doOk">确定</a>
+                    <a class="confirm-handler-cancel" v-on:click="func.doCancel">取消</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</ui>
+
+
+<script>
+import '@auicomp/scroller/Scroller.aui';
+import '@auicomp/header/Header.aui';
+import '@auicomp/text/Text.aui';
+import '@auicomp/grid/Grid.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auiutil/mobiscroll3/css/mobiscroll.javascript.min.css';
+import mobiscroll from '@auiutil/mobiscroll3/js/mobiscroll.javascript.min';
+import Alert from '@auicomp/alert/Alert.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+import common from "@libs/common";
+import Selectsheet from '@comm/components/Selectsheet.aui';
+
+
+import fetch from "@libs/xfetch";
+import { router } from '@auicomp/action/Action.aui';
+
+import './Frame.aui';
+
+
+export default class MyLoading{
+    static get tag(){
+        return 'MyLoading';
+    }
+    
+    created(){
+        let self = this;
+        const obj = this.$obj = {
+            showPop:false,
+            username:"",
+            password:"",
+            dbName:"",
+            dbValue:"",
+            db:[
+                {
+                    "name":"沈阳数据库",
+                    "value":"pdadb1"
+                }
+            ],
+            func: {
+                openSelect(){
+                    Selectsheet.show({
+                            list: obj.db.map(function(item){
+                                return item.name
+                            }),
+                            func:function(index){
+                                obj.dbValue = obj.db[index].value;
+                                obj.dbName = obj.db[index].name;
+                            }
+                        });
+                },
+                doOk(){
+                    if(obj.dbValue==""){
+                        common.toast("请选择数据库");
+                        return;
+                    }
+                    localStorage.setItem('sel_DB',obj.dbValue);
+                    localStorage.setItem('username',obj.username);
+                    router.go('/Login',true)
+                },
+                doCancel(){
+                    appnest.navigation.closeWindow();
+                },
+            }
+        }
+        this.$vm = $(this.$el).render(this.$obj);
+        fetch.plusready(function(){
+            //android 返回键点击 删除模态框
+            common.closeModal();
+
+            appnest.config.getUserInfo({//获取用户信息
+                success:function(r){
+                    self.$obj.username = r.loginId;
+                    self.$obj.password= r.password;
+                    self.init();
+                },
+                fail:function(r){
+                    Alert.show({
+                        content: '获取平台用户信息失败，请联系管理员',
+                        doOk: function(){
+                            appnest.navigation.closeWindow();
+                        }
+                    });
+                }
+            });
+        });
+    }
+    init(){
+        if(localStorage.getItem('sel_DB')!=null){
+             router.go('/Login',true)
+        }else{
+            this.$obj.showPop = true;
+        }
+    }
+}
+</script>
+
+<style type="less">
+ @import url('../assets/less/theme/default/common.less');
+.MyLoading{
+    width: 100%;
+    height: 100%;
+    .loadimg{
+        width: 100%;
+        height: 100%;
+    }
+    .popup{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background-color: rgba(0, 0, 0, 0.3);
+        z-index: 80;
+        visibility: hidden;
+        .popup-center{
+            background: #e8e8e8;
+            width: 80%;
+            border-radius: 6px;
+            box-shadow: 0px 1px 10px rgba(0, 0, 0, 0.6);
+            .pop-title {
+                padding: 15px 15px 15px 25px;
+                font-weight: 500;
+                font-size: 18px;
+                color:  #428bca;
+            }
+            .confirm-handler {
+                margin-top: 16px;
+                line-height: 40px;
+                text-align: center;
+                display: block;
+                color: #222;
+                border-top: 1px solid rgba(0, 0, 0, 0.2);
+                color: @primary-color;
+                font-size: 16px;
+            }
+
+            .confirm-handler-ok {
+                border-right: 1px solid rgba(0, 0, 0, 0.2);
+            }
+
+            .confirm-handler-ok,
+            .confirm-handler-cancel {
+                display: inline-block;
+                width: 48%;
+                cursor: pointer;
+            }
+        }
+    }
+    .show{
+        visibility: visible;
+    }
+}
+</style>

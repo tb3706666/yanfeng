@@ -1,0 +1,158 @@
+<ui>
+    <div class="RecordQuery">
+       <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>打卡时间查询</aui-text>
+                </caption-area>
+                <right-area>
+                   
+                </right-area>
+            </aui-titlebar>
+        </aui-header>
+        <aui-scroller class="content">
+            <div class="row">
+                <div class="left">日期 Date</div>
+                <div class="right">
+                    <aui-datetime id="date" formate="yy-mm-dd"  type="date" placeholder="" v-on:change="func.dateChange"></aui-datetime>
+                </div>
+                <li class="icon auicon icon-arrowright"></li>
+            </div>
+            <ul class="record-list">
+                <li v-for="item in list">
+                    <img src="./assets/imgs/qd.png">
+                    <div class="right">
+                        <div>{{item.login_time}}</div>
+                        <div class="are-name">{{item.are_name}}</div>
+                    </div>
+                </li>
+            </ul>
+            <div v-if="isAjaxed&&!hasData" class="nodata">
+                <img src="./assets/imgs/nodata.png">
+            </div>
+        </aui-scroller>
+    </div>
+</ui>
+<script>
+    import commLang from '@lang/comm';
+
+    import fetch from "@libs/xfetch";
+    import common from '@libs/common';
+    import { router } from '@auicomp/action/Action.aui';
+    import Selectsheet from '@comm/components/Selectsheet.aui';
+    import Action from '@auicomp/action/Action.aui';
+
+    export default class RecordQuery {
+
+        static get tag() {
+            return 'RecordQuery';
+        }
+        created() {
+            let self = this;
+            const obj = this.$obj = {
+                list:[],
+                hasData:false,
+                isAjaxed:false,
+                func:{
+                    toggle:function(){
+                        obj.toggleFlag = !obj.toggleFlag;
+                    },
+                    dateChange:function(value){
+                       let date = value.target.value;
+                       self.getList(date);
+                    }
+                }
+            }
+            this.$vm = $(this.$el).render(this.$obj);
+            let date = common.getCurrData();
+            $('#date').attr('value',date);
+            this.getList(date);
+        }
+        detached(){
+            this.$vm && this.$vm.destroy();
+        }
+        getList(date){
+            let self = this;
+            console.log($('#date input').val())
+            fetch({
+                appId: common.appId,
+                url : common.hrUrl+'/recordQuery.jsp',
+                data: {
+                    username: localStorage.getItem("empcode"),
+                    date:date,
+                },
+                type: 'post',
+                success: function(infos){
+                    self.$obj.list = infos.list;
+                    self.$obj.isAjaxed = true;
+                    if(infos.list.length>0){
+                        self.$obj.hasData=true;
+                    }else{
+                        self.$obj.hasData=false;
+                    }
+                }
+            });
+        }
+    }
+</script>
+<style type='less'>
+@import url('../../assets/less/theme/default/common.less');
+.RecordQuery{
+    width: 100%;
+    height: 100%;
+    .content{
+        position: absolute;
+        top: 44px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        .row{
+            display:flex;
+            flex-direction: row;
+            align-items: center;
+            padding:5px 10px;
+            border-bottom: 1px solid @border-color;
+            .left{
+                flex: 3
+            }
+            .right{
+                flex: 7;   
+                aui-datetime{
+                    input{
+                        text-align:right;
+                    }
+                }
+            }
+            .icon-arrowright{
+                font-size: 20px;
+                margin-left: 10px;
+            }
+        }
+        .record-list{
+            li{
+                display:flex;
+                flex-direction: row;
+                align-items: center; 
+                padding:10px;
+                border-bottom: 1px solid @border-color;
+                img{
+                    width: 30px;
+                    margin-right: 10px;
+                }
+                .right{
+                    flex: 1;
+                    .are-name{
+                        font-size: @fts-small;
+                        color:@ftc-gray;
+                        margin-top:3px; 
+                    }
+                }
+            }
+        }
+    }
+}
+
+</style>

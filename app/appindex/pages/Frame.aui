@@ -1,0 +1,47 @@
+<ui>
+    <aui-page transition="slide"></aui-page>
+</ui>
+
+
+<script>
+import router from '../routers';
+import '@auifont/iconfont.css';
+
+
+/**
+ * 组件类仅仅为定义，当以aui-tag被创建或者inner到页面中之后该类就会被new为一个实例化对象，
+ * 并且把该对象作为组件对应的js原生dom对象的component属性值，也就是说每个组件的js原生dom对象都有一个对应的组件类实例化对象
+ * 比如执行$('#app').html('<aui-frame></aui-frame>');或者document.createElement('aui-frame);等都会产生实例化对象
+ * 
+ */
+export default class Frame{
+    
+    static get tag(){
+        return 'frame'; // 必须定义静态属性tag，调用组件的写法即为aui-tag
+    }
+
+    created(){
+        // 通过hash值来判断首次加载的路由
+        const hash = (location.hash||'/').replace('#', '');
+        router.go(hash, true);
+    }
+}
+
+</script>
+
+<style type="less">
+
+/* 引用皮肤 */
+@import url('~@theme/common.less');
+
+#app, aui-frame{
+    display: block;
+    height: 100%;
+}
+
+
+aui-titlebar .icon{
+    color: @color;/* 使用皮肤中的变量 */
+}
+</style>
+

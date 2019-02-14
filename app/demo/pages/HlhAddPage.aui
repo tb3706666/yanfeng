@@ -1,0 +1,161 @@
+<ui>
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>合理化录入</aui-text>
+            </caption-area>
+            <right-area>
+                <a id="subIcon"><i class="icon auicon icon-hook-fill"></i></a>
+            </right-area>
+        </aui-titlebar>
+    </aui-header>
+    <aui-scroller class="content" style="position:absolute;top:45px;right: 0px;bottom: 0px;left: 0px;">
+        <form id="addform1">
+            <div class="editdiv">
+                <label for="propName" class="leftlb">合理化名称</label>
+                <input type="text" name="propName" id="propName" placeholder="必填"/>
+            </div>
+            <div class="editdiv">
+                <input type="hidden" name="propDate" id="propDate" />
+                <label for="propName" class="leftlb">提出时间</label>
+                <div class="readonlyedit flex-row-between" style="flex:1;justify-content: flex-end;">
+                    <font style="margin-right:10px;">2018-11-01</font>
+                    <i class="icon auicon icon-calendar" style="font-size:20px"></i>
+                </div>
+            </div>
+            <div class="editdiv">
+                <label  for="doSelf" class="leftlb">自己实施</label>
+                <input type="checkbox" id="doSelf" name="doSelf" ></input>
+            </div>
+            <div class="editdiv">
+                <font  class="leftlb">合理化分类</font>
+                <input type="hidden" name="ptId" id="ptId" />
+                <div class="readonlyedit flex-row-between" style="flex:1;justify-content: flex-end;">
+                    <font style="margin-right:10px;">材料成本/价值分析</font>
+                    <i class="icon auicon icon-rdodown" style="font-size:20px"></i>
+                </div>
+                
+            </div>
+            <div class="editdiv">
+                <label for="pempMtel" class="leftlb">手机号码</label>
+                <input type="text" name="pempMtel" id="pempMtel"  placeholder="必填"/>
+            </div>
+            <div class="textareadiv">
+                <label for="pempMtel">现状说明(地点、现状缺点与不足)</label><br>
+                <textarea rows="3" id="propActu" name="propActu"  placeholder="必填"></textarea>
+            </div>
+            <div class="textareadiv">
+                <label for="pempMtel">改进措施/预期效果</label><br>
+                <textarea rows="3" id="propMeas" name="propMeas"  placeholder="必填"></textarea>
+            </div>
+            <div class="editdiv">
+                <input type="hidden" name="recAempId" id="recAempId" />
+                <font class="leftlb">建议实施人员</font>
+                <div class="readonlyedit flex-row-between" style="flex:1;justify-content: flex-end;">
+                    <font style="margin-right:10px;"></font>
+                    <i class="icon auicon icon-contact" style="font-size:20px"></i>
+                </div>
+            </div>
+            <div class="attchdiv">
+                <font class="leftlb">合理化建议附件</font>
+                <div style="flex:1;text-align:right">
+                
+                    <aui-botton class="btn btn-outlined btn-primary">附件上传</aui-botton>
+                    <aui-botton class="btn btn-outlined btn-primary">拍照上传</aui-botton>
+                </div>
+            </div>
+
+            <aui-list style="border-top:0">
+                <list-cell style="padding:10px">微服务架构实现规范.docx<button style="right:10px" class="btn btn-outlined btn-primary">删除</button></list-cell>
+            </aui-list>
+
+        </form>
+    </aui-scroller>
+</ui>
+
+
+<script>
+import '@auicomp/header/Header.aui';
+import '@auicomp/button/Button.aui';
+import '@auicomp/scroller/Scroller.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auicomp/list/List.aui';
+import '@auicomp/grid/Grid.aui';
+import Alert from '@auicomp/alert/Alert.aui';
+import fetch from '@comm/utils/xfetch';
+import { router } from '@auicomp/action/Action.aui';
+// import Actionsheet from '@auicomp/actionsheet/Actionsheet.aui';
+
+export default class HlhAddPage{
+    static get tag(){
+        return 'hlhadd';
+    }
+
+    created () {
+        
+        
+    }
+}
+
+
+</script>
+
+<style type="less">
+@defaultborder:1px solid #ddd;
+.flex-row-between{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.readonlyedit{
+    padding: 5px 0;
+    &:active{
+        background: rgb(209, 207, 207);
+    }
+}
+.leftlb{
+    color:#8E8E93;
+    width: 25%;
+}
+#addform1{
+    .editdiv{
+        padding: 0 10px;
+        height: 46px;
+        border-bottom: @defaultborder;
+        .flex-row-between;
+        input[type='checkbox']{
+            width: 20px;
+            height: 20px;
+        }
+        input[type='text']{
+            border: 0;
+            flex: 1;
+            font-size: 14px;
+            padding: 5px;
+            text-align: right;
+        }
+    }
+    .textareadiv{
+        padding: 10px;
+        border-bottom: @defaultborder;
+        label{
+            color:#8E8E93;
+        }
+        textarea{
+            font-size: 14px;
+            width: 97%;
+        }
+
+    }
+    .attchdiv{
+        padding: 10px;
+        border-bottom: @defaultborder;
+        display: flex;
+        align-items: center;
+
+    }
+}
+</style>

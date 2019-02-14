@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<!-- 代表要使用appnest的桥接类，不设置则无法使用桥接，当然，在管理端页面配置h5应用的时候同时也要设置使用桥接 -->
+<html nqbridge="true">
+
+<head>
+    <title>DEMO</title>
+    <meta charset="utf-8" />
+    <meta content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width" name="viewport">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style>
+    *{
+        padding: 0px;
+        margin: 0px;
+    }
+    #app #list{
+        display: none;
+    }
+    #list li{
+        line-height: 40px;
+    }
+    #app.active #list{
+        display: block;
+    }
+    #app.active #loading{
+        display: none;
+    }
+    #loading{
+        padding: 8px;
+        text-align: center;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <ul id="list">
+            <li id="post">ajax post请求</li>
+            <li id="get">ajax get请求</li>
+            <li id="formsubmit">FormSubmit请求</li>
+            <li id="download">download请求</li>
+        </ul>
+        <div id="loading">加载中</div>
+    </div>
+
+    <script>
+        function $(selector){
+            var ele = document.querySelector(selector);
+            ele.on = ele.addEventListener;
+            return ele;
+        };
+        // 当桥接类注入完毕会触发ready事件，代表桥接类可以使用
+        document.addEventListener('ready', function() {
+            $('#app').className = 'active';
+        });
+        
+        var isinit = false;
+        function init(){
+            // 如果已经初始化则不需要重复初始化
+            if(isinit) return Promise.resolve(true);
+            return new Promise((resolve, reject)=>{
+                // 第一步：设置服务器信息，类似于exmobi客户端的系统设置，注意setConfigInit不可设置多个，好比exmobi客户端只有一个系统设置，修改设置需要重启客户端一样
+                appnest.exmobiHttp.setConfigInfo({
+                    ip: '172.16.71.241',
+                    port: '8001',
+                    sslPort: '',
+                    isSsl: '',
+                    phone: '',
+                    userName: '',
+                    ec: '',
+                    success: function(){
+                        // 第二步：初始化exmobi客户端，相当于启动exmobi客户端（但是还没打开应用）
+                        appnest.exmobiHttp.init({
+                            success: function(){
+                                isinit = true;
+                                resolve(true);
+                            }
+                        });
+                    }
+                });
+            });
+        }
+        
+        $('#post').on('click', async function(){
+            await init();
+            // 对应exmobi的ajax类
+            appnest.exmobiHttp.ajax({
+                appId: 'test',
+                url : 'http://baseurl/login',
+				data: 'username=admin&password=bbad8d72c1fac1d081727158807a8798',
+				method: 'post',
+				success: function(rs){
+                    alert(rs.data);
+                },
+				fail: function(rs){
+                    alert(rs.errMsg);
+                }
+            });
+        });
+        $('#get').on('click', async function(){
+            await init();
+            // 对应exmobi的ajax类
+            appnest.exmobiHttp.ajax({
+                appId: 'test',
+                url : 'http://baseurl/list',
+				method: 'get',
+				success: function(rs){
+                    alert(rs.data);
+                },
+				fail: function(rs){
+                    alert(rs.errMsg);
+                }
+            });
+        });
+
+        function formSubmit(filePath){
+            // 对应exmobi的formsubmit类
+            appnest.exmobiHttp.formSubmit({
+                appId: 'test',
+                url: 'http://baseurl/upload',
+				data: [
+					{
+						type: 0,
+						name: 'display_name',
+						value: 'test'
+					},
+					{
+						type: 0,
+						name: 'iconfont_name',
+						value: 'test'
+					},
+					{
+						type: 0,
+						name: 'is_private',
+						value: '1'
+					},
+					{
+						type: 1,
+						name: 'iconfont_file',
+						value: filePath
+					}
+				],
+				success: function(rs){
+                    alert(rs.data);
+                },
+				fail: function(rs){
+                    alert(rs.errMsg);
+                }
+            });
+        }
+
+        $('#formsubmit').on('click', async function(){
+            await init();
+            appnest.photo.camera({
+                width: 1080,// 拍照后生成图片宽度,高度按等比例压缩,单位px
+                success: function (res) {
+                    formSubmit(res.thumbnailPath);
+                },
+                fail: function (res) {
+                    alert(res.errMsg);
+                }
+            });
+        });
+
+        $('#download').on('click', async function(){
+            await init();
+            // 对应exmobi的download类
+            appnest.exmobiHttp.download({
+                appId: 'test',
+                url : 'http://baseurl/download',
+                fileName: 'test.log',
+                path: 'res:download',
+				success: function(rs){
+                    alert(rs.path);
+                },
+				fail: function(rs){
+                    alert(rs.errMsg);
+                }
+            });
+        });
+        
+            
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,207 @@
+<ui>
+    <div class="mainpage">
+        <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <div v-on:click="func.closeWindow()"><i class="icon auicon icon-arrowleft"></i></div>
+                </left-area>
+                <caption-area>
+                    <aui-text>查看EODS</aui-text>
+                </caption-area>
+                <right-area>
+                    <div style="color:white;font-size:16px;" v-on:click="func.scan">扫描</div>
+                </right-area>
+            </aui-titlebar>
+        </aui-header>
+
+        <aui-scroller class="content">
+            <div class="title" v-on:click="func.getNext(pageHref)">{{pageName}}</div>
+            <ul>
+                <li v-for="item in list" class="border-bt1" v-on:click="func.getNext(item.td4href)">
+                    {{item.td2}} : {{item.td4}}
+                </li>
+            </ul>
+        </aui-scroller>
+        <div class="footer" v-on:click="func.loadFirstPage">回到一级目录</div>
+    </div>
+</ui>
+
+
+<script>
+    import {
+        router
+    } from '@auicomp/action/Action.aui';
+    import common from '@libs/common';
+    import fetch from "@libs/xfetch";
+    import { Base64 } from "js-base64";
+
+    export default class MainPage {
+
+        static get tag() {
+            return 'mainpage';
+        }
+        created() {
+            $(this.$el).on('enter', common.removeCacheListPage);
+            //删除缓存的列表页面
+            let self = this;
+            const obj = this.$obj = {
+                url:Base64.encode('http://10.178.185.127:8080/ekp/filepathinfo/file_path_info/filePathInfo.do?method=list'),
+                pageName:'目录',
+                pageHref:'',
+                list:[],
+                type:'',
+                func: {
+                    closeWindow(){
+                        appnest.navigation.closeWindow();
+                    },  
+                    getNext(href){
+                        if(href==''){
+                            return;
+                        }
+                        if(href.indexOf('getOutUrl')>-1){
+                            var re = /.*\('(.*?)'\)/;
+                            let result = re.exec(href);
+                            obj.url  = result[1];
+                            self.getDetail();
+                        }else{
+                            var re = /.*\((.*?),'(.*?)'\)/;
+                            let result = re.exec(href);
+                            obj.url = Base64.encode("http://10.178.185.127:8080/ekp//filepathinfo/file_path_info/filePathInfo.do?method=list&parentId="+result[1]+"&type="+result[2]);
+                            self.loadData();
+                        }
+                        
+                    },
+                    loadFirstPage(){
+                        obj.url = Base64.encode('http://10.178.185.127:8080/ekp/filepathinfo/file_path_info/filePathInfo.do?method=list');
+                        self.loadData();
+                    },
+                    scan(){
+                        appnest.barcode.scan({
+                            success: function (res) {
+                                var result= res.result; // 扫码结果
+                                if(result.indexOf("http")!=-1){
+                                    obj.url = Base64.encode(result);
+                                    self.loadData();
+                                }else{
+                                    cpmmon.alert("请扫描正确的文档地址");
+                                }
+                            },
+                            fail: function (res) {
+                                common.alert(res.errMsg);
+                            }
+                        });
+
+                    }
+                }
+            }
+            this.$vm = $(this.$el).render(this.$obj);
+            this.loadData()
+        }
+        detached() {
+            this.$vm && this.$vm.destroy();
+        }
+        loadData(){
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url: common.oaUrl + '/testfile.jsp',
+                data: {
+                    erweima: this.$obj.url,
+                },
+                success: function(data) {
+                    console.log(data);
+                    if(data.imgFlag=="false"){
+                         alert('imgFlag==false');
+                    }else if(data.imgFlag=="list"){
+                        if(data.tables&&data.tables.length>0&&data.tables[0].td3&&data.tables[0].td3!=''){
+                            self.$obj.pageName = data.tables[0].td3;
+                            self.$obj.pageHref = data.tables[0].td3href;
+                        }else{
+                             self.$obj.pageName = '目录';
+                             self.$obj.pageHref = '';
+                        }
+                        self.$obj.list = data.tables;
+                        self.$obj.type= data.imgFlag;
+                    }else{
+                        common.openAttach(common.oaUrl+data.fileHref,data.fileName);
+                    }
+                   
+                },
+                error: function(error) {
+                    console.log(error)
+                }
+             })
+        }
+        getDetail(){
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url: common.oaUrl + '/testfile.jsp',
+                data: {
+                    erweima: this.$obj.url,
+                },
+                success: function(data) {
+                    console.log(data);
+                    if(data.imgFlag=="false"){
+                        console.log('imgFlag==false');
+                        location="#/Webview?data="+data.htmlcontent
+                    }else{
+                        common.openAttach(common.oaUrl+data.fileHref,data.fileName);
+                    }
+                },
+                error: function(error) {
+                    console.log(error)
+                }
+             })
+        }
+    }
+</script>
+<style type="less">
+aui-titlebar{
+    background:#004ea2 !important;
+    left-area{
+        i{color: #ffffff !important;}
+    }
+    right-area{
+        i{color: #ffffff !important;}
+    }
+    aui-text{
+        color: #ffffff !important;
+    }
+}
+    @import url('../assets/less/theme/default/common.less');
+    .mainpage {
+        width: 100%;
+        height: 100%;
+        .content {
+            position: absolute;
+            top: 44px;
+            right: 0px;
+            bottom: 0px;
+            left: 0px;
+            .title{
+                background: #D6DDEF;
+                padding: 10px 5px;
+            }
+            ul{
+                li{
+                    padding:10px;
+                    &:active{
+                        background: #eee;
+                    }
+                }
+            }
+        }
+        .footer{
+            position: absolute;
+            height: 44px;
+            right: 0px;
+            bottom: 0px;
+            left: 0px;
+            color: white;
+            background: #2371AF;      
+            text-align: center;
+            line-height: 44px;
+        }
+    }
+</style>

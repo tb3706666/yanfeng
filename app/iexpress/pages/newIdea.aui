@@ -1,0 +1,580 @@
+<ui>
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>创新idea提交</aui-text>
+            </caption-area>
+        </aui-titlebar>
+    </aui-header>
+    <aui-scroller class="content" style="position:absolute;top:45px;right: 0px;bottom: 45px;left: 0px;">
+        <div class="textareadiv">
+            <label for="title">标题</label><br>
+            <textarea rows="3" id="title" v-model="subData.title"  placeholder="必填，少于200字符"></textarea>
+        </div>
+        <div class="textareadiv">
+            <label for="info">概念背景</label><br>
+            <textarea rows="4" id="info"  v-model="subData.info" placeholder="必填，少于1000字符"></textarea>
+        </div>
+        <div class="textareadiv">
+            <label for="program">概念方案</label><br>
+            <textarea rows="4" id="program"  v-model="subData.program" placeholder="必填，少于1000字符"></textarea>
+        </div>
+        <div class="textareadiv">
+            <label for="youshi">优势</label><br>
+            <textarea rows="4" id="youshi" v-model="subData.youshi"  placeholder="必填，少于1000字符"></textarea>
+        </div>
+        <div class="textareadiv">
+            <label for="tagsinput">标签</label><br>
+            <textarea rows="3" id="tagsinput" readonly v-model="subData.tags" style="background-color: #ececee;"></textarea>
+        </div>
+        <div class="tagsearch">
+            <div >
+                <input type="text" v-model="searchItem.tagSearch" placeholder="搜索标签"/>
+            </div>
+            <a v-on:click="func.tagSearch"><i class="icon auicon icon-search" style="font-size:18px;"></i></a>
+        </div>
+        <div class="tagsarea">
+            <aui-button class="btn btn-primary" v-for="item in searchItem.tagResult" v-text="item.tags_name" v-on:click="func.setTag(item.tags_name)"></aui-button>
+        </div>
+        <div style="padding: 5px 10px;display: flex;align-items:center">
+            <aui-button style="margin-top:0;" v-on:click="func.clickPhotoBtn" class="btn btn-outlined btn-primary">点此上传图片（限三张）<i class="icon auicon icon-camera" style="font-size:14px;margin-left:5px"></i></a></aui-button>
+        </div>
+        <div class="photoArea" v-if="hasImgs">
+            <div class="imgarea" v-for="item in chooseImgs" v-style="{background:item}">
+                <a v-on:click="func.deletePhoto($index)"><i class="icon auicon icon-rdominus-fill"></i></a>
+            </div>
+        </div>
+        <div class="editdiv">
+            <font style="color:#8E8E93">分类</font>
+            <div class="inputdiv" v-on:click="func.typeSelect">
+                <input type="hidden" v-like="text" id="idea_type_id" v-model="subData.idea_type_id"/>
+                <input type="text" id="idea_type_id_show" readonly v-model="subData.idea_type_id_show"/>
+                <i class="icon auicon icon-arrowleft icon-rdodown" style="font-size:18px;"></i>
+            </div>
+        </div>
+        <div class="editdiv">
+            <font style="color:#8E8E93">保密</font>
+            <div class="inputdiv">
+                <div class="radioDiv">
+                    <input type="radio" checked class="magic-radio" id="secret_yes" value="1" v-model="subData.if_secret" name="if_secret"></input><label for="secret_yes">是</label>
+                </div>
+                <div class="radioDiv">
+                    <input type="radio" checked class="magic-radio" id="secret_no" value="0" v-model="subData.if_secret" name="if_secret"></input><label for="secret_no">否</label>
+                </div>
+            </div>
+        </div>
+        <div class="authordiv">
+            <font style="color:#8E8E93;margin-right:10px">作者</font>
+            <div style="flex:1;display:flex;flex-direction:column;">
+                <div class="authorarea" v-for="item in author">
+                    <div style="padding:5px 10px;display:flex;border-bottom:1px solid #ddd;">
+                        <font style="flex:1" v-text="item.name+'|'+item.bm"></font>
+                        <a v-on:click="func.deleteAuthor($index)"><i class="icon auicon icon-arrowleft icon-trash" style="font-size:18px;"></i></a>
+                        <input type="hidden" v-like="text" v-model="item.gh"/>
+                        <input type="hidden" v-like="text" v-model="item.name"/>
+                    </div>
+                    <div style="padding:5px 10px;display:flex;align-items:center;">
+                        <font style="color:#8E8E93;flex:1">贡献比（%）</font>
+                        <div class="inputdiv">
+                            <input  type="number" v-like="text" placeholder="1~100整数" number v-model="item.ideaauthor" v-on:keyup="func.numlimit" v-on:afterpaste="func.numlimit" style="width:100%;height:30px;font-size:14px;padding-left:5px;border:0;"/>
+                        </div>
+                    </div>
+                    <div style="padding:5px 10px;display:flex;align-items:center;">
+                        <font style="color:#8E8E93;flex:1">后期开发</font>
+                        <div class="inputdiv" v-on:click="func.joinSelect($index)">
+                            <input type="hidden"  v-model="item.is_cy_hq" />
+                            <input type="text" readonly v-model="item.is_cy_hq_show" />
+                            <i class="icon auicon icon-arrowleft icon-rdodown" style="font-size:18px;"></i>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="tagsearch" style="margin-top:10px">
+            <div >
+                <input type="text" v-model="searchItem.authorSearch" placeholder="请输入(姓名、拼音、GID、工号)..."/>
+            </div>
+            <a v-on:click="func.authorSearch"><i class="icon auicon icon-search" style="font-size:18px;"></i></a>
+        </div>
+        
+        <input type="hidden" v-like="text" v-for="item in initData.hiddeninput" v-model="item.value" v-bind:name="item.name"/>
+    </aui-scroller>
+    <aui-footer>
+        <div class="yf-footer">
+            <aui-button class="btn btn-outlined btn-primary" v-on:click="func.dosave">提交</aui-button>
+        </div>
+    </aui-footer>
+</ui>
+
+
+<script>
+import 'magic-check/css/magic-check.min.css';
+
+import fetch from '@comm/utils/xfetch';
+import Alert from '@auicomp/alert/Alert.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+import { router } from '@auicomp/action/Action.aui';
+import Selectsheet from '@comm/components/Selectsheet.aui';
+import Actionsheet from '@auicomp/actionsheet/Actionsheet.aui';
+
+export default class newIdea{
+    static get tag(){
+        return 'newidea';
+    }
+
+    created () {
+        const $el = $(this.$el);
+        auiLoading.show();
+        fetch({
+            appId:"iexpress",
+            url:"http://IEXPRESS/newidea/new.jsp",
+            dataType:'text',
+            success:function(res){
+                var rsp =  $.JSON.parse(res.trim());
+                obj.initData = rsp;
+                obj.subData.idea_type_id_show = rsp.idea_type_id[0].text||'安全警示';
+                obj.subData.idea_type_id = rsp.idea_type_id[0].value||'1';
+                obj.author.push({
+                    name:rsp.firstauthorName,
+                    bm:rsp.firstbm,
+                    gh:rsp.firstgh,
+                    ideaauthor:'100',
+                    is_cy_hq:'0',
+                    is_cy_hq_show:'不参与'
+                });
+                $el.render(obj);
+                auiLoading.hide();
+            },
+            error: function(rsp){
+                auiLoading.hide();
+                Toast.show(rsp.errmsg);
+            }
+        })
+        const obj = this.$obj = {
+            hasImgs:false,
+            joinOpts:[{text:'不参与',value:'0'},{text:'参与',value:'1'}],
+            initData:{},
+            author:[],
+            searchItem:{
+                tagSearch:'',
+                tagResult:[],
+                selectedTags:[],
+                authorSearch:''
+            },
+            subData:{
+                title:'',
+                info:'',
+                program:'',
+                youshi:'',
+                tags:'',
+                idea_type_id:'',
+                idea_type_id_show:'',
+                if_secret:'0'
+            },
+            chooseImgs:[],
+            subImgs:[],
+            func:{
+                subform:function(){
+                    var finalSubDataArr = [];
+                    finalSubDataArr.push(//用户填写的参数
+                        {type:0,name:'title',value:obj.subData.title},
+                        {type:0,name:'info',value:obj.subData.info},
+                        {type:0,name:'program',value:obj.subData.program},
+                        {type:0,name:'youshi',value:obj.subData.youshi},
+                        {type:0,name:'tags',value:obj.subData.tags},
+                        {type:0,name:'idea_type_id',value:obj.subData.idea_type_id},
+                        {type:0,name:'if_secret',value:obj.subData.if_secret}
+                    )
+                    $.each(obj.initData.hiddeninput,function(i,e){//初始化返回的隐藏参数
+                        finalSubDataArr.push({
+                            type:0,
+                            name:e.name,
+                            value:e.value
+                        })
+                    });
+                    $.each(obj.author,function(i,e){//作者相关参数
+                        finalSubDataArr.push(
+                            {type:0,name:'authorPartyId',value:e.gh},
+                            {type:0,name:'authorName',value:e.name},
+                            {type:0,name:'ideaauthor',value:e.ideaauthor},
+                            {type:0,name:'is_cy_hq',value:e.is_cy_hq}
+                        )
+                    });
+                    fetch({
+                        appId:"iexpress",
+                        url:"http://IEXPRESS/wh/"+obj.initData.ajaxSubmit,
+                        dataType:'text',
+                        data:finalSubDataArr,
+                        success:function(rsp){
+                            auiLoading.hide();
+                            let ro = $.JSON.parse(rsp);
+                            Toast.show(ro.message);
+                            history.go(-1);
+                        },
+                        error:function(rsp){
+                            auiLoading.hide();
+                            Toast.show(rsp.errMsg);
+                        }
+                    });
+                },
+                dosave:function(){
+                    if(obj.subData.title == ""){
+                        Toast.show("请输入标题");
+                        return;
+                    }
+                    if(obj.subData.info == ""){
+                        Toast.show("请输入概念背景");
+                        return;
+                    }
+                    if(obj.subData.program == ""){
+                        Toast.show("请输入概念方案");
+                        return;
+                    }
+                    if(obj.subData.youshi == ""){
+                        Toast.show("请输入优势");
+                        return;
+                    }
+                    var percent = 0;
+                    for(let i=0;i<obj.author.length;i++){
+                        if(Number(obj.author[i].ideaauthor) ==0 || Number(obj.author[i].ideaauthor)>100){
+                            Toast.show("贡献比请输入1到100的整数");
+                            return;
+                        }
+                        percent += Number(obj.author[i].ideaauthor);
+                    }
+                    if(percent != 100){
+                        Toast.show("贡献比之和必须为100");
+                        return;
+                    }
+                    auiLoading.show();
+                    if(obj.subImgs.length > 0){//有附件先提交附件
+                        var promiseArr=[];
+                        $.each(obj.subImgs,function(i,e){
+                            var filename = e.substring(e.lastIndexOf("/")+1);
+                            let primg = new Promise((resolve,reject)=>{
+                                fetch({
+                                    appId:"iexpress",
+                                    url:"http://IEXPRESS/newidea/uploadfile.jsp",
+                                    dataType:'text',
+                                    data:[
+                                        {type:0,name:'someKey',value:'someValue'},
+                                        {type:0,name:'Upload',value:'Submit Query'},
+                                        {type:0,name:'Filename',value:filename},
+                                        {type:1,name:'Filedata',value:e}
+                                    ],
+                                    success:function(rsp){
+                                        let fileUpRsp = $.JSON.parse(rsp);
+                                        resolve("("+fileUpRsp.filename+")");
+                                    },
+                                    error:function(rsp){
+                                        reject(rsp);
+                                    }
+                                });
+                            });
+                            promiseArr.push(primg);
+                        });
+                        Promise.all(promiseArr).then(function(r){
+                            obj.initData.hiddeninput.forEach(e => {
+                                if(e.name == "info_ufs"){
+                                    e.value = r.join(",");
+                                }
+                            });
+                            obj.func.subform();
+                        }).catch(function(r){
+                            Toast.show("提交附件失败！");
+                        });
+                    }else{//无附件直接提交整个表单
+                        obj.func.subform();
+                    }
+                },
+                deleteAuthor:function(index){
+                    if(obj.author.length > 1){
+                        obj.author.splice(index,1);
+                    }
+                },
+                authorSearch:function(){
+                    fetch({
+                        appId:"iexpress",
+                        url:"http://IEXPRESS/newidea/getauthor.jsp",
+                        dataType:'text',
+                        data:{
+                            q:obj.searchItem.authorSearch.trim()
+                        },
+                        success:function(rsp){
+                            var rlJson = $.JSON.parse(rsp.trim());
+                            if(rlJson.list.length > 0){
+                                Selectsheet.show({
+                                    list: rlJson.list.map(function(item){
+                                        return item.text;
+                                    }),
+                                    func:function(index){
+                                        for(let i=0;i<obj.author.length;i++){
+                                            if(obj.author[i].gh == rlJson.list[index].gh){
+                                                Toast.show("该用户已添加！");
+                                                return;
+                                            }
+                                        }
+                                        obj.author.push({
+                                            name:rlJson.list[index].name,
+                                            bm:rlJson.list[index].bm,
+                                            gh:rlJson.list[index].gh,
+                                            ideaauthor:'',
+                                            is_cy_hq:'0',
+                                            is_cy_hq_show:'不参与'
+                                        });
+                                    }
+                                });
+                            }else{
+                                Toast.show("无此用户！");
+                                obj.searchItem.authorSearch = "";
+                            }
+                        },
+                        error:function(rsp){
+                            Toast.show(rsp.errmsg);
+                        }
+                    });
+                },
+                setTag:function(tagName){
+                    if(obj.searchItem.selectedTags.length == 5){
+                        Toast.show("最多只能添加5个标签");
+                        return;
+                    }
+                    if($.inArray(tagName,obj.searchItem.selectedTags) == -1){
+                        obj.searchItem.selectedTags.push(tagName);
+                        obj.subData.tags = obj.searchItem.selectedTags.join(",");
+                    }
+                },
+                tagSearch:function(){
+                    fetch({
+                        appId:"iexpress",
+                        url:"http://IEXPRESS/newidea/tags.jsp",
+                        dataType:'text',
+                        data:{
+                            tags:obj.searchItem.tagSearch
+                        },
+                        success:function(rsp){
+                            var rlJson = $.JSON.parse(rsp.trim());
+                            if(rlJson.length > 0){
+                                obj.searchItem.tagResult = rlJson;
+                            }else{
+                                Toast.show("未查询到标签！");
+                            }
+                        },
+                        error:function(rsp){
+                            Toast.show(rsp.errmsg);
+                        }
+                    });
+                },
+                joinSelect:function(aindex){
+                    Selectsheet.show({
+                        list: obj.joinOpts.map(function(item){
+                            return item.text;
+                        }),
+                        func:function(index){
+                            obj.author[aindex].is_cy_hq_show = obj.joinOpts[index].text;
+                            obj.author[aindex].is_cy_hq = obj.joinOpts[index].value;
+                        }
+                    });
+                },
+                typeSelect:function(){
+                    Selectsheet.show({
+                        list: obj.initData.idea_type_id.map(function(item){
+                            return item.text;
+                        }),
+                        func:function(index){
+                            obj.subData.idea_type_id = obj.initData.idea_type_id[index].value;
+                            obj.subData.idea_type_id_show = obj.initData.idea_type_id[index].text;
+                        }
+                    });
+                },
+                numlimit:function(e){
+                    this.value = this.value.replace(/[^0-9]+/g,'');
+                },
+                clickPhotoBtn:function(){
+                    if(obj.chooseImgs.length == 3){
+                        Toast.show("最多选择三张图片！");
+                        return;
+                    }
+                    Actionsheet.show({
+                        list: [
+                            {
+                                text: '拍照获取',
+                                handler: function (){
+                                    appnest.photo.camera({
+                                        success: function (res) {
+                                            var _imagePath= res.imagePath; // 拍照生成本地图片路径
+                                            var _thumbnailPath= res.thumbnailPath; // 拍照生成本地缩略图片路径
+                                            appnest.photo.getBase64Image({
+                                                imagePath:_thumbnailPath,
+                                                success:function(bres){
+                                                    obj.chooseImgs.push("url('"+bres.data+"') center no-repeat");
+                                                    obj.subImgs.push(_imagePath);
+                                                    obj.hasImgs = true;
+                                                },
+                                                fail: function (res) {
+                                                    Toast.show(res.errMsg);
+                                                }
+                                            })
+                                        },
+                                        fail: function (res) {
+                                            Toast.show(res.errMsg);
+                                        }
+                                    });
+                                }
+                            },
+                            {
+                                text: '系统相册',
+                                handler: function () {
+                                    var camax = 3 - obj.chooseImgs.length;
+                                    appnest.photo.customAlbum({
+                                        max:camax,
+                                        success: function (res) {
+                                            var _imagePaths= res.imagePaths; 
+                                            var _thumbnailPaths= res.thumbnailPaths;
+                                            $.each(_thumbnailPaths,function(i,e){
+                                                appnest.photo.getBase64Image({
+                                                    imagePath:e,
+                                                    success:function(bres){
+                                                        obj.chooseImgs.push("url('"+bres.data+"') center no-repeat");
+                                                        obj.subImgs.push(_imagePaths[i]);
+                                                    },
+                                                    fail: function (res) {
+                                                        Toast.show(res.errMsg);
+                                                    }
+                                                })
+                                            });
+                                            obj.hasImgs = true;
+                                        },
+                                        fail: function (res) {
+                                            Toast.show(res.errMsg);
+                                        }
+                                    });
+                                }
+                            }
+                        ]
+                    });
+                },
+                deletePhoto:function(index){
+                    obj.chooseImgs.splice(index,1);
+                    obj.subImgs.splice(index,1);
+                    if(obj.chooseImgs.length < 1){
+                        obj.hasImgs = false;
+                    }
+                }
+            }
+        }
+        
+        
+    }
+}
+
+
+</script>
+
+<style type="less">
+aui-newidea{
+    [readonly]{  pointer-events:none; }
+    @defaultborder:1px solid #ddd;
+    .yf-footer{
+        height: 45px;
+        padding: 0 5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        aui-button{
+            flex: 1;
+            margin: 0 5px;
+        }
+    }
+    .authordiv{
+        display: flex;
+        align-items: center;
+        padding: 5px 10px 0 10px;
+        .authorarea{
+            border: @defaultborder;
+            display: flex;
+            margin-top:10px;
+            flex-direction: column;
+        }
+    }
+    .textareadiv{
+        padding: 5px 10px 0 10px;
+        label{color:#8E8E93;}
+        textarea{
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 14px;
+            padding: 5px;
+            border:@defaultborder;
+        }
+    }
+    input[type=text]{
+        border: 0;
+        padding-left: 5px;
+        font-size: 14px;
+        width: 100%;
+        height: 30px;
+    }
+    .inputdiv{
+        margin-left: 10px;
+        flex: 1;
+        border-bottom: @defaultborder;
+        display: flex;
+        align-items: center;
+        padding: 0 5px;
+        .radioDiv{
+            height: 30px;
+            padding:0 10px 0 5px;
+            display: flex;
+            align-items: center;
+            label:before,label:after{
+                box-sizing:border-box;
+            }
+        }
+    }
+    .editdiv{
+        padding: 5px 10px 0 10px;
+        display: flex;
+        align-items: center;
+    }
+    .tagsearch{
+        border:@defaultborder;
+        display:flex;;
+        align-items: center;
+        margin: 0 10px 5px 10px;
+        padding: 0 5px;
+        div{
+            flex:1;
+            display:flex;
+            padding: 5px;
+            
+        }
+    }
+    .tagsarea{
+        padding: 5px 10px;
+        display: flex;
+        flex-wrap: wrap;
+        aui-button{
+            margin: 2px;
+        }
+    }
+    .photoArea{
+        padding: 5px 10px 0 10px;
+        flex: 1;
+        display: flex;
+        .imgarea{
+            width: 108px;
+            height: 81px;
+            margin-right: 15px;
+            text-align: right;
+            padding: 5px 5px 0 0;
+            a{i{font-size:18px;color: red;}}
+        }
+    }
+}
+</style>

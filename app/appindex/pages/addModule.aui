@@ -1,0 +1,158 @@
+<ui>
+    <aui-header>
+        <aui-titlebar style="background-color:#ffffff">
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>我的关注</aui-text>
+            </caption-area>
+            <right-area>
+                <a v-on:click="func.saveModule"><i class="icon auicon icon-rdohook"></i> </a>
+            </right-area>
+        </aui-titlebar>
+    </aui-header>
+    <aui-scroller class="content" style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;">
+        <p class="toptip">您最多可选择8个关注</p>
+        <div v-for="app in amarray"  v-filter="func.addEachIndex">
+            <p class="moduletip" v-text="app.appName" ></p>
+            <div class="modulesArea">
+                <div class="modulediv" v-for="item in app.modules" v-filter="func.addEachIndex">
+                    <aui-button v-if="item.checked" checkedBtn v-on:click="func.clickMoudle(app.index,item.index)" class="btn btn-outlined btn-primary module">{{item.text}}<span class="badge badge-primary badge-inverted"><i class="icon auicon icon-hook-fill"></i></span></aui-button>
+                    <aui-button v-else v-on:click="func.clickMoudle(app.index,item.index)" class="btn module">{{item.text}}</aui-button>
+                </div>
+            </div>
+        </div>
+    </aui-scroller>
+</ui>
+<script>
+import '@auicomp/button/Button.aui';
+import Action,{ router } from '@auicomp/action/Action.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+import appModules from '@libs/moduleData';
+
+export default class AddModule{
+    static get tag(){
+        return 'addmodule';
+    }
+    
+    created(){
+        const $el = $(this.$el);
+        const obj = this.$obj = {
+            amarray:[],
+            installedApps:[],
+            func:{
+                addEachIndex:function(index,item){
+                    item.index = index;
+                },
+                removeCache:function(){
+                    localStorage.clear();
+                },
+                saveModule:function(){
+                    if($el.find('[checkedBtn]').length > 8){
+                        Toast.show('最多选择8个关注');
+                        return;
+                    }
+                    let mtextArr = [];
+                    obj.amarray.forEach(app=>{
+                        app.modules.forEach(m=>{
+                            if(m.checked){
+                                mtextArr.push(app.appId+'|'+m.text+'|'+m.scheme+'|'+m.icon);
+                            }
+                        });
+
+                    });
+                    if(mtextArr.length > 0){
+                        localStorage.setItem('h5AppModules',mtextArr.join(','));
+                    }else{
+                        localStorage.setItem('h5AppModules','');
+                    }
+                    history.go(-1);
+                },
+                clickMoudle:function(appIndex,moduleIndex){
+                    let appInstalled = false;
+                    for(let i=0;i<obj.installedApps.length;i++){
+                        if(obj.installedApps[i].appId == obj.amarray[appIndex].appId){
+                            appInstalled = true;
+                            break;
+                        }
+                    }
+                    if(appInstalled){
+                        obj.amarray[appIndex].modules[moduleIndex].checked = !obj.amarray[appIndex].modules[moduleIndex].checked;
+                    }else{
+                        Toast.show('请先至应用超市安装'+obj.amarray[appIndex].appName+'应用');
+                    }
+                }
+            }
+        }
+        obj.amarray = JSON.parse(JSON.stringify(appModules));
+        appnest.worktable.getInstalledApps({
+            success:function(res){
+                obj.installedApps = res.appInfos;
+            },
+            fail:function(res){
+                Toast.show(res.errMsg);
+            }
+        });
+        obj.amarray.forEach(app=>{
+            var cacheModules = localStorage.getItem('h5AppModules');
+            if(cacheModules && cacheModules!=''){
+                var mdarry = cacheModules.split(',');
+                mdarry.forEach(ecm=>{
+                    let _md = ecm.split('|');
+                    app.modules.forEach(m=>{
+                        if(app.appId == _md[0] && m.text == _md[1]){
+                            m.checked = true;
+                        }
+                    });
+                });
+            }
+        });
+        this.$vm = $el.render(obj);
+    }
+
+
+    detached(){
+        this.$vm && this.$vm.destroy();
+    }
+}
+</script>
+<style type="less">
+aui-titlebar{
+    background:#004ea2 !important;
+    left-area{
+        i{color: #ffffff !important;}
+    }
+    right-area{
+        i{color: #ffffff !important;}
+    }
+    aui-text{
+        color: #ffffff !important;
+    }
+}
+aui-addmodule{
+    .toptip{
+        text-align: center;
+        padding: 8px 0;
+        color:#aaa;
+    }
+    .moduletip{
+        color:#aaa;
+        background-color:#f6f6f6;
+        padding:4px 12px;
+    }
+    .modulesArea{
+        display: flex;
+        flex-wrap: wrap;
+        .modulediv{
+            width:33%;
+            box-sizing: border-box;
+            padding: 10px;
+            display: flex;
+            .module{
+                width: 100%;
+            }
+        }
+    }
+}
+</style>

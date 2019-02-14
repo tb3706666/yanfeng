@@ -1,0 +1,88 @@
+<ui>
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+            <aui-action type="back"><i class="icon auicon icon-arrowleft-fill"></i></aui-action>
+            </left-area>
+            <caption-area>
+            <aui-text>Ajax</aui-text>
+            </caption-area>
+        </aui-titlebar>
+    </aui-header>
+    <aui-scroller class="content" style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;text-align: center;">
+        <form id="demo" style="display:none" mbsc-form>
+            <div class="mbsc-form-group">
+                <div class="mbsc-form-group-title">请登录</div>
+
+                <label>
+                    <input name="username" type="text" placeholder="Username" v-model="formData.username" minlength="2" required data-icon="user4">
+                </label>
+
+                <label>
+                    <input name="password" type="password" placeholder="Password" v-model="formData.password" minlength="6" required data-icon="lock2" data-password-toggle="true">
+                </label>
+
+                <div class="mbsc-btn-group">
+                    <button data-icon="checkmark" type="button" v-on:click="func.doSubmit">登录</button>
+                </div>
+            </div>
+            
+
+        </form>
+
+    </aui-scroller>
+</ui>
+
+<script>
+import '@auiutil/mobiscroll3/css/mobiscroll.javascript.min.css';
+import mobiscroll from '@auiutil/mobiscroll3/js/mobiscroll.javascript.min';
+
+import fetch from '@comm/utils/fetch';
+
+import Toast from '@auicomp/toast/Toast.aui';
+
+
+
+export default class AjaxPage{
+
+    constructor(){
+        const obj = this.$obj = {
+            formData: {
+                username: 'nandy007',
+                password: '111111'
+            },
+            func: {
+                doSubmit(){
+                    fetch({
+                        url: 'access/login',
+                        data: obj.formData,
+                        success: function(rs){
+                            fetch.goTo('#/ajaxlist');
+                            Toast.show('登录成功');
+                        }
+                    });
+                }
+            }
+        };
+    }
+
+    static get tag(){
+        return 'loginpage';
+    }
+
+    created(){
+        this.$vm = $(this.$el).render(this.$obj);
+        mobiscroll.form('#demo');
+    }
+
+    detached(){
+        this.$vm && this.$vm.destroy();
+    }
+}
+
+</script>
+
+<style>
+
+
+</style>

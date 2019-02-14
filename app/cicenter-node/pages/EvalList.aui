@@ -1,0 +1,153 @@
+<ui>
+   <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+            <!-- 评奖信息维护列表 -->
+                <aui-text>评奖信息维护</aui-text>
+            </caption-area>
+        </aui-titlebar>
+    </aui-header>
+
+
+    <aui-refresher delay class="search-refresher" style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;text-align: center; background-color:white;" v-on:pulldown="func.doPullDown" v-on:pullup="func.doPullUp" auto>
+        <aui-list style="text-align:left;">
+                <list-cell class="grid" v-for="item in listDatas" v-on:click="func.listclick(item.SERI_ID)">
+                    <grid-cell class="flex-1 padded">
+                        {{item.PROP_NAME}}<br>
+                        <p style="color:#ccc;">提出日期：{{item.PROP_DATE}} 状态：{{item.NOW_STATUS_NAME}}</p>
+                    </grid-cell>
+                </list-cell>
+        </aui-list>
+        <img src="./assets/imgs/nodata.png" v-if="!noimg">
+        <div v-if="!hasData" style="text-align:center;padding:10px;color:#ddd;">没有更多数据</div>
+    </aui-refresher>
+</ui>
+
+<script>
+import auiLoading from '@auicomp/loading/Loading.aui';
+import Refresher from '@auicomp/refresher/Refresher.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+import fetch from '@comm/utils/nfetch';
+import { router } from '@auicomp/action/Action.aui';
+import './Frame.aui';
+import '@auicomp/list/List.aui';
+import { get } from 'http';
+
+export default class EvalList{
+    static get tag(){
+        return 'evallist';
+    }
+    
+
+    created () {
+
+         Refresher.init(".search-refresher",{});
+
+        var nowpage=1;
+        const obj = this.$obj ={
+            currentPage:1,
+            totalPage:1,
+            listDatas:[],
+            hasData:true,
+            noimg:true,
+            datas:window.evalData,
+            func:{
+                searchData:function(cb){
+                    obj.datas.page=obj.currentPage;
+                    auiLoading.show();
+                    fetch({
+                        appId: 'ci',
+                        url : '/EvalList',
+                        data: obj.datas,
+                        success:function(rsp){
+                            nowpage=obj.currentPage;
+                             cb && cb(rsp);
+                             auiLoading.hide();
+                        },
+                        error: function(rsp){
+                            auiLoading.hide();
+                            Toast.show(rsp.errmsg);
+                        }
+                    });
+                },
+                doPullDown:function(e, $refresh){
+                    obj.currentPage = 1;
+                    obj.totalPage = 1;
+                    obj.hasData=true;
+                    obj.listDatas.$reset([]);
+                    obj.func.searchData(function(rsp){
+                        if(nowpage == Math.ceil((rsp.total/20))){
+                            obj.hasData=true;
+                        }
+                        obj.currentPage = nowpage;
+                        obj.totalPage=Math.ceil((rsp.total/20));
+                        if(rsp.rows.length > 0){
+                            obj.listDatas.$reset(rsp.rows);
+                            $refresh.refresh();
+                        }else{
+                            obj.noimg=false;
+                            Toast.show('未查询到数据');
+                        }
+                    });
+                },
+                doPullUp:function(e, $refresh){
+                    console.log('pull down');
+                    if(obj.totalPage > obj.currentPage){
+                        obj.currentPage += 1;
+                        obj.func.searchData(function(rsp){
+                            obj.currentPage = nowpage;
+                            obj.totalPage = Math.ceil((rsp.total/20));
+                            if(rsp.rows.length > 0){
+                                $.each(rsp.rows, function(i,e) {
+                                    obj.listDatas.push(e);
+                                });  
+                                $refresh.refresh();
+                            }else{
+                                Toast.show('没有更多数据');
+                            }
+                        });
+                    }else{
+                        obj.hasData = false;
+                        return $refresh.end();
+                    }
+                },
+                 listclick:function(seriId){
+                    router.go('/evaldetail?seriId='+seriId);
+                }
+            }
+        }
+        this.$vm = $(this.$el).find('.search-refresher').render(obj);
+    }
+     detached(){
+        this.$vm && this.$vm.destroy();
+    }
+}
+
+</script>
+
+<style>
+    .content > aui-list:first-child, .content > .list:first-child{
+        margin-top:0px;
+    }
+    .md-phone-num .mbsc-np-dsp {
+        min-height: 25px;
+        -webkit-box-sizing: content-box;
+        -moz-box-sizing: content-box;
+        box-sizing: content-box;
+    }
+    .mbsc-ios .mbsc-control-w:after, .mbsc-ios .mbsc-control-w:before{
+        border:none;
+    }
+    .mbsc-form-group{
+        margin:0.5em 0;
+    }
+    .stylespan{
+        height:44px;
+        line-height:44px;
+        width:110px;
+        text-align: left;
+    }
+</style>

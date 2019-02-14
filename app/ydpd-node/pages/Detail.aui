@@ -1,0 +1,197 @@
+<ui>
+<div id="details">
+   <aui-header>
+        <aui-titlebar >
+            <left-area>
+                <aui-action type="back"><i style="color:white;" class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>任务明细</aui-text>
+            </caption-area>
+        </aui-titlebar>
+    </aui-header>
+
+
+    <aui-scroller id="addscroller"  class="content showlist" style="display:none;position: absolute; top: 45px; right: 0px; bottom: 45px;left: 0px;text-align: center; background-color:white;">
+      <aui-card>
+            <card-content >
+           
+                <aui-button v-on:click="func.add()" class="btn btn-primary btn-block" style="margin-top:10px;margin-left:5%;width:90%;background:#004ea2 !important;">无法扫描</aui-button>
+                 <aui-button v-on:click="func.scans()" id="progress" class="btn btn-primary btn-block btn-outlined" style="margin-top:10px;margin-left:5%;width:90%;">进度：{{pageData.progress}}点击进行扫描</aui-button>
+            </card-content>
+        </aui-card>
+        <aui-list style="text-align:left;" v-for="item in items">
+                <list-cell class="grid">
+                    <grid-cell class="flex-1 gridp">
+                        <p style="font-size:18px;font-weight:bold;">{{item.Category}}</p><br>
+                        <p >资产编码：{{item.AssetTag}}</p>
+                        <p >序列号：{{item.SerialNumber}} <a style="float:right;padding-right:5px;">{{item.Status}}</a></p>
+                    </grid-cell>
+                </list-cell>
+                <hr style="background-color:#ddd;height:1px;border:none;margin-top:3px;">
+        </aui-list>
+    </aui-scroller>
+
+    <aui-titlebar class="fbottom showlist" style="display:none;">
+        <left-area>
+            <i class="icon auicon icon-arrowleft" style="color:white;" v-on:click="func.prevs()"></i>
+        </left-area>
+        <caption-area style="line-height:45px;">
+            <aui-text id="pagess" style="color:white;" >{{pageData.pageno}}/{{pageData.pages}}</aui-text>
+        </caption-area>
+            <right-area>
+            <a>
+                <i class="icon auicon icon-arrowright" style="color:white;"   v-on:click="func.nexts()"></i>
+            </a>
+        </right-area>
+    </aui-titlebar>
+</div>
+</ui>
+
+
+<script>
+import fetch from '@comm/utils/nfetch';
+import { router } from '@auicomp/action/Action.aui';
+import './Frame.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+export default class Detail{
+    static get tag(){
+        return 'detail';
+    }
+    
+
+    created () {
+        var objthis=this;
+        const obj = this.$obj  ={
+            items:[],
+            pageno:1,
+            pageData:{},
+            func:{
+                prevs:function(){
+                    if(obj.pageno==1){
+                        Toast.show('已经是第一页');
+                        return false;
+                    }
+                    if(obj.pageno<obj.pageData.pages&&obj.pageno>1){
+                            obj.pageno-=1;
+                            obj.items.$reset([]);
+                            objthis.getlist();
+                    }
+                },
+                nexts:function(){
+                    if(obj.pageno==obj.pageData.pages){
+                        Toast.show('已经是最后一页');
+                        return false;
+                    }
+                    if(obj.pageno<obj.pageData.pages&&obj.pageno>0){
+                        obj.pageno+=1;
+                        obj.items.$reset([]);
+                        objthis.getlist();
+                    }
+                },
+                add:function(){
+                    router.go("/adds");
+                },
+                scans:function(){
+                    //扫码得出assetTag
+                    appnest.barcode.scan({
+                        success: function (res) {
+                            var ids = res.result.split("\n")[1];
+                            auiLoading.show();
+                            fetch({
+                                url : "/decode",
+                                data: {
+                                    username:window.userInfo.loginId,
+                                    assetTag:ids,
+                                    taskId:window.task
+                                },
+                                success: function(json){
+                                    if(!json.code){
+                                        auiLoading.hide();
+                                        Toast.show(json.message);
+                                    }
+                                    else{
+                                        obj.items.$reset([]);
+                                        objthis.getlist();
+                                    }
+                                    auiLoading.hide();
+                                },
+                                error: function(rs){
+                                    auiLoading.hide();
+                                    Toast.show(rs.errmsg, function(){});
+                                }
+                            }); 
+
+                        },
+                        fail: function (res) {
+                            Toast.show(res.errmsg, function(){});
+                        }
+                    });
+                    
+                }
+            }
+        };
+        this.getlist();
+    }
+    detached(){
+        this.$vm && this.$vm.destroy();
+    }
+    getlist(){
+        let getthis = this;
+         auiLoading.show();
+        fetch({
+            url : "/detail",
+            data: {
+                username:window.userInfo.loginId,
+                pageNumbe:getthis.$obj.pageno,
+                taskId:window.task
+            },
+            success: function(json){
+                if(!json.code){
+                     Toast.show('操作失败，请稍后再试');
+                }else{
+                    $.each(json.data,function(e,e1){
+                        getthis.$obj.items.push(e1);
+                    });
+                    getthis.$obj.pageData={progress:json.progress,pages:json.pages,pageno:getthis.$obj.pageno};
+                }
+                getthis.$vm = $(getthis.$el).render(getthis.$obj);
+                $(".showlist").css("display","block");
+                auiLoading.hide();
+            },
+            error: function(rs){
+                auiLoading.hide();
+                 Toast.show(rs.errmsg, function(){
+                });
+            }
+        });
+    }
+}
+
+</script>
+
+<style>
+    .auicon {
+        font-size: 25px;
+    }
+    .md-phone-num .mbsc-np-dsp {
+        min-height: 25px;
+        -webkit-box-sizing: content-box;
+        -moz-box-sizing: content-box;
+        box-sizing: content-box;
+    }
+    .mbsc-ios .mbsc-control-w:after, .mbsc-ios .mbsc-control-w:before{
+        border:none;
+    }
+    .mbsc-form-group{
+        margin:0.5em 0;
+    }
+    
+     a[class="button-selectimg"]{
+         padding:4px 6px;
+         border:1px dashed #00A2D4;
+         border-radius:2px;
+    }  
+    
+</style>

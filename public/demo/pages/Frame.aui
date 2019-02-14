@@ -1,0 +1,40 @@
+<ui>
+    <aui-page transition="slide"></aui-page>
+</ui>
+
+<script>
+
+const router = auicomponents.Page.router;
+
+function Frame(){
+	
+}
+
+Frame.prototype = {
+	created: function(){
+        const hash = (location.hash||'/').replace('#', '');
+        router.go(hash);
+	}
+}
+
+Frame.tag = 'frame';
+
+define(['routers/index'], function(x){
+	return Frame;
+});
+
+</script>
+
+<style type="less">
+aui-frame, #app{
+    display: block;
+    height: 100%;
+
+    .description {
+        color: #9e9e9e;
+        text-align: center;
+        line-height: 32px;
+    }
+}
+
+</style>

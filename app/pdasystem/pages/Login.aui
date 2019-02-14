@@ -1,0 +1,156 @@
+<ui>
+    <div class="Login">
+        <img src="./assets/imgs/login_logo.png" class="logo">
+        <div class="fd-row border-bt1 input-box">
+            <img  class="icon" src="./assets/imgs/admin.png">
+            <input type="text" placeholder="用户名" v-model="username">
+        </div>
+        <div class="fd-row border-bt1 input-box">
+            <img  src="./assets/imgs/password.png" class="icon">
+            <input type="password" placeholder="密码" v-model="password">
+        </div>
+         <div class="checkbox-box">
+            <input type="checkbox"   v-model="rember" id="rember" class="magic-checkbox"  />
+            <label for="rember">
+                记住登陆信息
+            </label>
+        </div>
+        <div class="login-bt" v-on:click="func.submit">登陆</div>
+        <div class="back-bt" v-on:click="func.back"></div>
+    </div>
+</ui>
+<script>
+    import commLang from '@lang/comm';
+    import common from '@libs/common';
+    import 'magic-check/css/magic-check.min.css';
+    import fetch from "@libs/xfetch";
+    import { router } from '@auicomp/action/Action.aui';
+    export default class Login {
+
+        static get tag() {
+            return 'Login';
+        }
+        
+        created() {
+            let self = this;
+             const obj = this.$obj = {
+                username:localStorage.getItem("pad_username"),
+                password:localStorage.getItem("pad_password"),
+                rember:localStorage.getItem("pad_rember")==null?false:true,
+                hidden:[],
+                formAction:"",
+                func:{
+                    back(){
+                        appnest.navigation.closeWindow();
+                    },
+                    submit(){
+                        if(obj.username==null||obj.username==''){
+                            common.alert("请输入用户名")
+                            return;
+                        }
+                        if(obj.password==null||obj.password==''){
+                            common.alert("请输入密码")
+                            return;
+                        }
+                        self.doSubmit();
+                    }
+                }
+            }
+            this.$vm = $(this.$el).render(this.$obj);
+           
+        }
+        detached(){
+            this.$vm && this.$vm.destroy();
+        }
+        doSubmit(){
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : common.oaUrl+"/isExituser.jsp",
+                data: {
+                    username:this.$obj.username,
+                    session_DB:localStorage.getItem("sel_DB"),
+                    password:this.$obj.password,
+                },
+                type: 'post',
+                success: function(infos){
+                    console.log(infos)
+                    if(infos.loginflag=="0"){
+						common.alert("登录失败");
+						return;
+					}
+                    localStorage.setItem('pad_username',self.$obj.username);
+                    localStorage.setItem('pad_department',infos.department);
+                    console.log(self.$obj.rember)
+                    if (self.$obj.rember) {
+                        localStorage.setItem('pad_username',self.$obj.username);
+                        localStorage.setItem('pad_password',self.$obj.password);
+                        localStorage.setItem('pad_rember',self.$obj.rember);
+						
+					} else {
+						localStorage.removeItem('pad_username');
+						localStorage.removeItem('pad_password');
+						localStorage.removeItem('pad_rember');
+                    }
+                    router.go('/MainPage',true)
+                }
+            });
+        }
+    }
+</script>
+<style type='less'>
+@import url('../assets/less/theme/default/common.less');
+.Login{
+    background: url(../assets/imgs/background.png) center center / 100% 100% no-repeat;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    .back-bt{
+        position: absolute;
+        top: 20px;
+        left:20px;
+        background: url(../assets/imgs/back.png) center center / 30px 30px no-repeat;
+        width: 30px;
+        height: 30px;
+    }
+    .logo{
+        margin-top: 15%;
+        width: 75%;
+    }
+    .icon{
+        width: 30px;
+        height: 30px;
+        margin: 5px;
+    }
+    input[type='text'],input[type='password']{
+        background: transparent;
+        padding: 8px 0;
+    }
+    .input-box{
+        width: 80%;
+        margin-top: 5%;
+    }
+    .checkbox-box{
+        margin-top: 5%;
+    }
+    .login-bt{
+        margin-top: 5%;
+        width: 80%;
+        background: #2371AF;
+        color: white;
+        text-align: center;
+        padding: 8px 0;
+    }
+    label:before,label:after{
+        box-sizing:border-box;
+    }
+}
+
+</style>

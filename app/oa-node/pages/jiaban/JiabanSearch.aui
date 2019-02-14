@@ -1,0 +1,263 @@
+<ui>
+    <div class="JiabanSearch">
+        <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>查询 Filter Setting</aui-text>
+                </caption-area>
+                <right-area>
+                    <a v-on:click="func.changeSearch">
+                        <i class="icon auicon icon-search"></i>
+                    </a>
+                </right-area>
+            </aui-titlebar>
+        </aui-header>
+        <div class="searchBox"  v-bind:class="{showSearch:isShowSearch}">
+            <div class="row">
+                <div class="text">主题 Subject</div>
+                <div class="select" v-on:click="func.openSelect">
+                    <div class="select-value" v-text="selectVal=='Like'?'包含 Contains':'不包含 Not Contains'"></div>
+                    <li class="icon auicon icon-arrowright"></li>
+                </div>
+            </div>
+            <div class="row">
+               <input  type="text" placeholder="请输入搜索内容" v-model="searchInfo">
+            </div>
+            <div class="row border0">
+                 <div class="bt" v-on:click="func.search">查询</div>
+            </div>
+        </div>
+         <aui-refresher delay class="scroll aui-refresher-JiabanSearch" v-on:pulldown="func.doPullDown" v-on:pullup="func.doPullUp"  v-bind:class="{refresherTop:isShowSearch}">
+            <aui-list class="list" v-if="isAjaxed&&hasData">
+                <list-cell  v-for="item in list" >
+                    <a v-on:click="func.doDetail(item.rs4)">
+                        <div class="caption">{{item.rs1}}</div>
+                        <div class="snd-title">创建时间: {{item.rs2}}</div>
+                        <div class="rcaption">{{item.rs3}}</div>
+                    </a>
+                </list-cell>
+            </aui-list>
+            <div v-if="isAjaxed&&!hasData" class="nodata">
+                    <img src="./assets/imgs/nodata.png">
+                </div>
+        </aui-refresher>
+    </div>
+</ui>
+<script>
+    import Refresher from '@auicomp/refresher/Refresher.aui';
+    import '@auicomp/list/List.aui';
+    import Actionsheet from '../../components/Actionsheet.aui';
+    import Alert from '@auicomp/alert/Alert.aui';
+    import fetch from "@libs/fetch";
+    import common from '@libs/common';
+    import { router } from '@auicomp/action/Action.aui';
+    import Selectsheet from '@comm/components/Selectsheet.aui';
+
+    export default class JiabanSearch {
+
+        static get tag() {
+            return 'JiabanSearch';
+        }
+        created() {
+            const self = this;
+            const obj = this.$obj = {
+                hasData: false,
+                list: [],
+                start:0,
+                count:"",
+                isAjaxed:false,
+                searchInfo:"",
+                selectArr:[{
+                    name:'包含 Contains',
+                    value:'Like'
+                    },{ 
+                    name:'不包含 Not Contains',
+                    value:'Not Like'
+                }],
+                selectVal:'Like',
+                isShowSearch:true,
+                func: {
+                    doPullDown: function(e, $refresh){
+                        self.$obj.start = 0;
+                        self.getList(function(data){
+                            obj.isAjaxed=true;
+                            if(data.dbList.length>0){
+                                obj.hasData=true;
+                            }else{
+                                obj.hasData=false;
+                            }
+                            obj.list.$reset(data.dbList);
+                           if(data.dbList.length<15){
+                                $refresh.end();
+                            }else{
+                                $refresh.refresh();
+                            }
+                        })
+                    },
+                    doPullUp: function(e, $refresh){
+                        if(!self.$obj.isAjaxed){
+                            return;
+                        }
+                        self.$obj.start++;
+                        self.getList(function(data){
+                            obj.list.push(...data.dbList);
+                            if(data.dbList.length<15){
+                                $refresh.end();
+                            }else{
+                                $refresh.refresh();
+                            }
+                        })
+                    },
+                    changeSearch:function(){
+                         obj.isShowSearch = !obj.isShowSearch;
+                    },
+                    doDetail:function(unid) {
+                        location.href = '#/JiabanYiban?unid='+unid;
+                    },
+                    search:function(){
+                        if($('.aui-refresher-JiabanSearch').hasAttr('delay')){
+                            Refresher.init('.aui-refresher-JiabanSearch');
+                        }else{
+                            document.querySelector('.aui-refresher-JiabanSearch').component.refresher.triggerDownScroll();
+                        }
+                       
+                    },
+                    openSelect(){
+                        Selectsheet.show({
+                            list: obj.selectArr.map(function(item){
+                                return item.name
+                            }),
+                            func:function(index){
+                                obj.selectVal = obj.selectArr[index].value;
+                            }
+                        });
+                    },
+                }
+            }
+            this.$vm = $(this.$el).render(obj);
+        }
+        
+        getList(cb){
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : common.hrUrl+'/jiabansearch',
+                data: {
+                    start:this.$obj.start,
+                    count:this.$obj.count,
+                    sel:this.$obj.selectVal,
+                    searchInfo:this.$obj.searchInfo,
+                },
+                hideLoading:this.$obj.isAjaxed,
+                type: 'post',
+                success: function(infos){
+                    self.$obj.isShowSearch = false;
+                    console.log(infos);
+                    if (infos.resit == "y") {
+                        common.alert("会话超时，请重新登录",function(){
+                             common.closeApp();
+                        });
+                        return;
+                    }
+                    cb(infos)
+                }
+            });
+            
+        
+        }
+        detached(){
+            this.$vm && this.$vm.destroy();
+        }
+    }
+</script>
+<style type='less'>
+@import url('../../assets/less/theme/default/common.less');
+.JiabanSearch{
+    width: 100%;
+    height: 100%;
+    position: relative;
+    .scroll { 
+        position: absolute;
+        top: 44px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        .list{
+            list-cell{
+                padding:0;
+                a{
+                    margin:0;
+                    padding:5px 10px;
+                }
+                .caption{
+                    font-size: 16px;
+                }
+                .rcaption{
+                    font-size: 14px;
+                    color: #8E8E93;
+                    margin-top: 3px;
+                }
+                .snd-title{
+                    font-size: 14px;
+                    color: #8E8E93;
+                    margin-top: 5px;
+                }
+            }
+           
+        }
+        
+    } 
+    .refresherTop{
+        top: 206px;
+    }
+    .searchBox{
+        display: none;
+        position: absolute;
+        top: 45px;
+        right: 0px;
+        left: 0px;
+        border: 1px solid #AAAAAA;
+        margin: 5px 10px;
+        .row{
+            display:flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #C7C7CC;
+            .text{
+                flex:3
+            }
+            .select{
+                display:flex;
+                flex-direction: row;
+                align-items: center;
+                flex:7;
+                .select-value{
+                    flex:1;
+                    text-align: right;
+                    margin-right: 5px;
+                }
+            }
+            .bt{
+                color: white;
+                background: #2371AF;
+                width: 100%;
+                text-align: center;
+                padding: 5px 0;
+            }
+            input{
+                border:1px solid #C7C7CC;
+                width: 100%;
+                border-radius: 4px;
+            }
+        }
+    }
+    .showSearch{
+         display: block;
+    }
+}
+
+</style>

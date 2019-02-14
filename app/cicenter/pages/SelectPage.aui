@@ -1,0 +1,254 @@
+<ui>
+<div id="jscroller">
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+            <!-- 我处理过的 -->
+                <aui-text>合理化查询</aui-text>
+            </caption-area>
+            <right-area>
+                <a >
+                    <i class="icon auicon icon-search" v-on:click="func.nlistclick()"></i>
+                </a>
+            </right-area>
+        </aui-titlebar>
+    </aui-header>
+
+
+    <aui-scroller class="content" style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;text-align: center; background-color:white;">
+        <form id="demo" style="display:none" mbsc-form>
+            <div class="mbsc-form-group">
+               
+                 <label >
+                    <span  class="stylespan">合理化名称 </span>
+                    <input name="propName" type="text" placeholder="" required v-model="selectData.propName">
+                </label>
+              
+            </div>
+            <div class="mbsc-form-group">
+               
+                 <label>
+                    <span class="stylespan" >处理日期(开始)</span>
+                    <input name="starttime" id="md-starttime" type="text" placeholder="开始" required v-model="selectData.propDateS">
+                </label>
+                <label>
+                <span class="stylespan" >处理日期(结束)</span>
+                     <input name="endtime" id="md-endtime" type="text" placeholder="结束" required  v-model="selectData.propDateE">  
+                </label>
+            </div>
+             <div class="mbsc-form-group">
+               
+                 <label >
+                    <span class="stylespan" >提出人 </span>
+                    <input name="postman" type="text" placeholder="" required v-model="selectData.pemp">
+                </label>
+              
+               
+                <label >
+                    <span class="stylespan" >提出部门/科室 </span>
+                    <input id="selectdept1" v-on:click="func.manclick(3)" type="text" placeholder="请选择" readonly="readonly" required>
+                    <!-- value  提出部门id -->
+                    <input id="tcbmid"  name="tcbmid" type="hidden" class="tcbmid" value='' v-model="selectData.pdept">
+                </label>
+              
+            </div>
+             <div class="mbsc-form-group">
+               
+                 <label >
+                    <span class="stylespan" >实施人员 </span>
+                    <input name="actionman" type="text" placeholder="" required v-model="selectData.aemp">
+                </label>
+
+                 <label >
+                    <span class="stylespan" >实施部门/科室 </span>
+                    <input type="text" id="selectdept2" v-on:click="func.manclick(4)" placeholder="请选择" readonly="readonly" required>
+                    <input id="ssbmid" name="ssbmid" type="hidden" v-model="selectData.adept">
+                </label>
+              
+            </div>
+             <div class="mbsc-form-group">
+               
+                 <label >
+                    <span class="stylespan" >处理步骤 </span>
+                    <select id="dealType" name="dealType"  class="input-right-text" v-model="selectData.dealType">
+					<option value="" selected="true"></option>
+					<option value="INPUT">录入</option>
+					<option value="CANCEL">撤销</option>
+					<option value="PCO_AUDIT">分配(提出部门)</option>
+					<option value="ACO_AUDIT">分配(实施部门)</option>
+					<option value="AEMP_AUDIT">可行性评估(实施人)</option>
+					<option value="ALEADER_AUDIT">可行性评估(科经理)</option>
+					<option value="REPORT_SUBMIT">实施报告提交</option>
+					<option value="REPORT_AUDIT">实施报告验证</option>
+					<option value="BONUS_AUDIT">评奖</option>
+				</select>
+                 </label>
+               
+                 <label >
+                    <span class="stylespan" >合理化分类 </span>
+                    <select id="ptId" name="ptId"  class="input-right-text" v-model="selectData.ptId">
+					<option value="" selected="true"></option>
+					<option value="PT01">材料成本/价值分析</option>
+					<option value="PT02">材料利用率</option>
+					<option value="PT03">生产力/效率</option>
+					<option value="PT04">质量</option>
+					<option value="PT05">安全</option>
+					<option value="PT06">供应链/交付</option>
+					<option value="PT07">能源节约/环保</option>
+					<option value="PT08">管理费用</option>
+				</select>
+                 </label>
+           
+               
+                 <label >
+                    <span class="stylespan" >状态 </span>
+                   <select id="nowStatusId" name="nowStatusId" class="input-right-text" v-model="selectData.nowStatusId">
+                        <option value="" selected="true"></option>
+                        <option value="7">待提出部门分配</option>
+                        <option value="8">被驳回提出人 </option>
+                        <option value="9">被撤销</option>
+                        <option value="1">关闭</option>
+                        <option value="2">实施报告待验证</option>
+                        <option value="3">实施中</option>
+                        <option value="4">待实施人直接经理可行性评估</option>
+                        <option value="5">待实施人可行性评估</option>
+                        <option value="6">待实施部门分配</option>
+				</select>
+            </div>
+        </form>
+    </aui-scroller>
+</div>
+
+</ui>
+
+
+<script>
+import '@auicomp/datetime/DateTime.aui';
+import '@auiutil/mobiscroll3/css/mobiscroll.javascript.min.css';
+import mobiscroll from '@auiutil/mobiscroll3/js/mobiscroll.javascript.min';
+import Toast from '@auicomp/toast/Toast.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import fetch from '@comm/utils/xfetch';
+import { router } from '@auicomp/action/Action.aui';
+import './Frame.aui';
+
+export default class SelectPage{
+    static get tag(){
+        return 'selectpage';
+    }
+
+    tcbumen3(data1,data2){
+        $('#selectdept1').val(data1)
+        this.$obj.selectData.pdept=data2
+    }
+
+    ssbumen4(data1,data2){
+        $('#selectdept2').val(data1)
+        this.$obj.selectData.adept=data2 
+    }
+
+
+    created () {
+        var self=this;
+        auiLoading.show();
+        fetch({
+            appId: 'ci',
+            url : 'http://ciurl/hlh_deal_init.jsp',
+            data: {
+            },
+            success: function(json){
+                self.$obj.selectData.propDateS=json.propDateS;
+                self.$obj.selectData.propDateE=json.propDateE;
+                self.$vm = $(self.$el).render(self.$obj);
+                auiLoading.hide();
+            },
+            error: function(rs){
+                auiLoading.hide();
+                Toast.show(rs.errmsg+'未请求成功');
+            }
+        });
+    
+       
+        const obj = this.$obj = {
+            selectData:{
+                propName:"",
+                propDateS:"",
+                propDateE:"",
+                pemp:"",
+                pdept:"",
+                aemp:"",
+                adept:"",
+                dealType:"",
+                ptId:"",
+                nowStatusId:"",
+                rows:20,
+                page:1,
+                noData:0,
+            },
+             func:{
+                manclick:function(num){
+                    router.go({path: '/department?flag='+num, isForce: true});
+                },
+
+                nlistclick:function(){
+                    //处理日期
+                    obj.selectData.propDateS=obj.selectData.propDateS.replace('/', "-").replace('/', "-");
+                    obj.selectData.propDateE=obj.selectData.propDateE.replace('/', "-").replace('/', "-");
+                    window.selectData=obj.selectData;
+                    router.go('/selectlist');
+                }
+            }
+         };
+          $('#jscroller').render(obj);
+
+        mobiscroll.settings = {
+            theme: 'ios',
+            lang: 'zh',
+        };
+
+        var date, select, widget,
+            now = new Date(),
+            form = document.getElementById("demo");
+
+        mobiscroll.form('#demo');
+
+         date = mobiscroll.date('#md-starttime', {
+           defaultValue: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
+            min: new Date(now.getFullYear() - 100, 0, 1),
+            max: new Date(now.getFullYear()+100 , 0, 1)
+        });
+
+        date = mobiscroll.date('#md-endtime', {
+           defaultValue: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
+            min: new Date(now.getFullYear() - 100, 0, 1),
+            max: new Date(now.getFullYear()+100 , 0, 1)
+        });
+        
+    }
+}
+
+</script>
+
+<style>
+
+    .md-phone-num .mbsc-np-dsp {
+        min-height: 25px;
+        -webkit-box-sizing: content-box;
+        -moz-box-sizing: content-box;
+        box-sizing: content-box;
+    }
+    .mbsc-ios .mbsc-control-w:after, .mbsc-ios .mbsc-control-w:before{
+        border:none;
+    }
+    .mbsc-form-group{
+        margin:0.5em 0;
+    }
+    .stylespan{
+        height:44px;
+        line-height:44px;
+        width:110px;
+    }
+</style>

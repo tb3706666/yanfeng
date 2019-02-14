@@ -1,0 +1,124 @@
+<script>
+// http://www.mescroll.com/api.html
+import MeScroll from 'mescroll.js'
+import 'mescroll.js/mescroll.min.css'
+import { setTimeout } from 'timers';
+let REFRESH_ID = 0;
+function setId($refresh){
+    const id = '__REFRESH_ID__' + REFRESH_ID++;
+    $refresh.attr('id', id);
+    return id;
+}
+
+export default class Refresher{
+    static get tag(){
+        return 'refresher';
+    }
+
+    static init(el, options){
+        const comp = ($(el)[0]||{}).component;
+        comp && comp.init(options);
+    }
+
+    init(options){
+        const $el = $(this.$el);
+        $el.removeAttr('delay');
+        this.create(options);
+    }
+
+    created(options){
+        if(this.refresher) return;
+        const $refresh = $(this.$el);
+        if($refresh.hasAttr('delay')){
+            return;
+        }
+        $refresh.addClass('mescroll');
+        const refreshId = setId($refresh), refreshIdSelector = `#${refreshId}`;
+        const _this = this;
+        const auto = $refresh.attr('auto') || 'auto';
+        let downFlag = auto==='auto'?true:false, upFlag = downFlag;
+        const refresher = this.refresher = new MeScroll(this.$el, Object.assign({
+            container: refreshIdSelector,
+            isScrollBar: false,
+            down: {
+                callback: function() {
+                    // if(!downFlag){
+                    //     downFlag = true;
+                    //     return;
+                    // }
+                    // 下拉事件
+                    $refresh.trigger('pulldown', [
+                        {
+                            refresh: function(){
+                                _this.refreshDown();
+                            },
+                            UpEnd: function(){
+                                _this.refreshUpEnd();
+                            }
+
+                        },
+                        refresher
+                    ]);
+                }
+            },
+            up: {
+                callback: function() {
+                    if(!upFlag){
+                        upFlag = true;
+                        return;
+                    }
+                    // 上拉事件
+                    $refresh.trigger('pullup', [
+                        {
+                            refresh: function(){
+                                _this.refreshUp();
+                            },
+                            end: function(){
+                                _this.refreshUpEnd();
+                            }
+                        },
+                        refresher
+                    ]);
+                }
+            }
+        }, options || {}));
+    }
+
+    detached(){
+        this.refresher && this.refresher.destroy();
+    }
+
+    refreshDown(){
+        this.refresher && this.refresher.endSuccess();
+        this.refresher && this.refresher.lockUpScroll(false);
+    }
+
+    refreshUp(){
+        this.refresher && this.refresher.endSuccess();
+    }
+
+    refreshUpEnd(){
+        this.refresher && this.refresher.endSuccess();
+        $(this.$el).children('.mescroll-upwarp').css({visibility: 'hidden'});
+        this.refresher && this.refresher.lockUpScroll(true);
+    }
+
+    scrollTo(y, duration){
+        this.refresher && this.refresher.scrollTo(y, duration);
+    }
+
+    getPosition(){
+        return this.refresher && this.refresher.getPosition();
+    }
+}
+
+</script>
+
+<style>
+.mescroll{
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+</style>

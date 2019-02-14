@@ -1,0 +1,706 @@
+<ui>
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>创新idea提交</aui-text>
+            </caption-area>
+
+        </aui-titlebar>
+    </aui-header>
+
+
+    <aui-scroller id="auiscr" class="content" style="position: absolute;
+    top: 45px;
+    right: 0px;
+    bottom: 0px;left: 0px;text-align: center;
+    background-color:white;">
+        <form id="demo" style="display:none" mbsc-form>
+            <div class="mgb5">
+
+                <label class="pleft1">
+                    <aui-text class="fl stylespan">标题</aui-text>
+                    <input name="title" v-model="bt" class="tcenter" type="text" placeholder="" sval errmsg="标题不能为空">
+                </label>
+            </div>
+
+            <div class="mgb5">
+                <label>
+                    <aui-text class="fl stylearea">概念背景</aui-text>
+                    <textarea name="info" v-model="gnbj" style="text-indent:2em;" sval errmsg="概念背景不能为空"></textarea>
+                </label>
+
+                <label>
+                    <aui-text class="fl stylearea">概念方案</aui-text>
+                    <textarea name="program" v-model="gnfa" style="text-indent:2em;" sval errmsg="概念方案不能为空"></textarea>
+                </label>
+
+                <label>
+                    <aui-text class="fl stylearea">优势</aui-text>
+                    <textarea name="youshi" v-model="ys" style="text-indent:2em;" sval errmsg="优势不能为空"></textarea>
+                </label>
+                <p style="height:10px;"></p>
+                <div class="bqfdiv">
+                    <aui-text class="bqsty">标签</aui-text>
+                    <div name="tags" class="bqtags bgcolor" >
+                    <span v-for="item in appitems" class='spsty' v-bind:value="item.tags_name">{{item.tags_name}}</span>
+                    <!-- 隐藏参数 -->
+                    <!-- <input type="text" v-bind:value="item.tags_name" sval> -->
+                    </div>
+                </div>
+
+                <div class="pleft1" style="padding-top:10px;margin-top:5px;">
+                    <input name="if_secret" v-model="ssbq" class="pd0 tcenter" type="text" placeholder="搜索标签"><span v-on:click="func.selbq()" style="display:inline-block;"><i class="size30 tab-icon icon auicon icon-search-fill" style="padding-top:5px"></i></span>
+                </div>
+                <div id="apendbq" class="apenbq">
+                <span v-for="item in selitems" class='spsty' v-on:click='func.appbq(selitems,$index)' v-bind:value="item.tags_name">{{item.tags_name}}</span>
+                </div>
+
+            </div>
+
+            <div class="mgb5 bgfff" id="upimg">
+                <aui-text class="fl filetext">图片上传</aui-text>
+                <img name='tpsc' v-model="tpsc" class="fileimg" src="./assets/imgs/xueli.jpg" v-on:click="func.fimg()">
+            </div>
+
+
+            <div class="mgb5">
+                <label class="tleft">
+                 <span class="stylearea">分类</span>
+                    <select name="fl" id="fenlei" sval>
+                        <option value="1">安全警示</option>
+                        <option value="2">便利性设计</option>
+                        <option value="3">个性化定制</option>
+                        <option value="4">工艺优化</option>
+                        <option value="5">降低成本</option>
+                        <option value="6">空间节省</option>
+                        <option value="7">模块化设计</option>
+                        <option value="8">轻量化</option>
+                    </select>
+                </label>
+            </div>
+
+           
+            <div class="mgb5">
+                <label class="tleft bm">
+                 <span class="stylearea">保密状态</span>
+                 <p class="zhuangtai ztcss">{{bmzt?'保密':'不保密'}}</p>
+                 <input data-role="switch" v-model="bmzt" class="baomi" v-bind:value="bmzt" type="checkbox">
+                <input type="text" name="bmzt" v-bind:value="bmzt" sval>
+                </label>
+            </div>
+
+            <div class="mgb5">
+                <label class="pleft1">
+                    <span  class="stylespan">作者</span>
+                    <input class="tcenter" type="text" v-bind:value="zuozhe" disabled required>
+                    <input name="authorName" type="hidden" v-bind:value="author" sval>
+                </label>
+                <label class="pleft1">
+                    <span  class="stylespan">贡献比(%)</span>
+                    <input name="ideaauthor" id="ideaauthor" v-model="gxb" class="tcenter" type="text" v-bind:value="gxb">
+                </label>
+
+                <label class="tleft">
+                    <span class="stylearea">后期开发</span>
+                    <p class="zhuangtai ztcss">{{hqkf?'参与':'不参与'}}</p>
+                    <input data-role="switch" v-model="hqkf" class="kaifa" v-bind:value="hqkf" type="checkbox">
+                    <input type="hidden" name="hqkf" v-bind:value="hqkf">
+                </label>
+
+                <div class="pleft1">
+                    <input name="bss" v-model="bss" class="tcenter" type="text" placeholder="请输入(姓名、拼音、GID、工号)" required><span v-on:click="func.selbad()" style="display:inline-block;"><i class="size30 tab-icon icon auicon icon-search-fill select"></i></span>
+                </div>
+            </div>
+<!-- <input type="button" v-on:click="check.get()" value='获取'/> -->
+            <aui-button class="btn btn-positive btn-block" v-on:click="func.subform()">提交</aui-button>
+        </form>
+    </aui-scroller>
+
+</ui>
+
+
+<script>
+    import '@auicomp/header/Header.aui';
+    import '@auicomp/button/Button.aui';
+    import '@auicomp/scroller/Scroller.aui';
+    import '@auicomp/titlebar/Titlebar.aui';
+    import '@auicomp/datetime/DateTime.aui';
+    import '@auiutil/mobiscroll3/css/mobiscroll.javascript.min.css';
+    import mobiscroll from '@auiutil/mobiscroll3/js/mobiscroll.javascript.min';
+    import Alert from '@auicomp/alert/Alert.aui';
+    import auiLoading from '@auicomp/loading/Loading.aui';
+    import Toast from '@auicomp/toast/Toast.aui';
+    import fetch from '@comm/utils/xfetch';
+    import { router } from '@auicomp/action/Action.aui';
+    import Actionsheet from '@auicomp/actionsheet/Actionsheet.aui';
+    import './Frame.aui';
+
+    export default class HLLRPage {
+        static get tag() {
+            return 'hllr';
+        }
+
+        created() {
+            // auiLoading.show();
+            fetch({
+            appId: 'iexpress',
+            url : 'http://IEXPRESS/newidea/new.jsp',
+            data: {
+            },
+            type:'get',
+            dataType:'text',
+            success: function(json){
+                console.log(json);
+
+               var obj1={
+                   "hiddeninput":[
+{"name":"id","value":""},
+{"name":"info_ufs","value":""},
+{"name":"net_url_name","value":""},
+{"name":"net_file_url","value":""}
+],
+"ajaxSubmit":"idea/save?is_submit=1&flag=1&pause_flag=",
+"idea_type_id":[
+
+{"text":"安全警示","value":"1"},
+
+{"text":"便利性设计","value":"2"},
+
+{"text":"个性化定制","value":"3"},
+
+{"text":"工艺优化","value":"4"},
+
+{"text":"降低成本","value":"5"},
+
+{"text":"空间节省","value":"6"},
+
+{"text":"模块化设计","value":"7"},
+
+{"text":"轻量化","value":"8"},
+
+{"text":"舒适性改进","value":"9"},
+
+{"text":"影音娱乐","value":"10"},
+
+{"text":"智能化","value":"11"},
+
+],
+//隐藏
+"firstauthorPartyId":"82324",
+"firstauthorName":"付周",
+//addinput
+"firstname":"付周",
+"firstgh":"82324",
+"firstbm":"信息技术部"
+         };
+              auiLoading.hide();
+            },
+            error: function(rs){
+                auiLoading.hide();
+               Toast.show(rs.errmsg);
+            }
+        });
+
+            // $('.baomi').attr('value','false');
+            // $('.kaifa').attr('value','false');
+
+            var formjson=[];
+            //自己实施复选框
+            // var actio=document.getElementById("action");
+            // action.onclick=visibled;
+            //     function visibled(){
+            //         var v=$('input[name="cat1"]:checked ').val();
+            //         if(v=="on"){
+            //             document.getElementById("cat").removeAttribute("style");
+            //         }else{
+            //             document.getElementById("cat").style.display="none";
+            //         }
+            //     }
+
+            // var names = router.getQueryObj(location.search).names||router.getQueryObj().names;
+            // if(names!=null&&names!=""){
+
+            //     $("#selectactor").val(names);
+            // }
+            // 某个逻辑发起ajax post请求
+//http://IEXPRESS/newidea/tags.jsp  tags=
+//http://IEXPRESS/newidea/new.jsp     content:
+                        // fetch({
+                        //     appId: 'iexpress',
+                        //     url : 'http://IEXPRESS/newidea/new.jsp',
+                        //     data: {
+                        //         content:''
+                        //     },
+                        //     success: function(json){
+                        //         alert(JSON.stringify(json))
+                        //     },
+                        //     error: function(rs){
+                        //         Toast.show(rs.errmsg);
+                        //     }
+                        // });
+
+            var obj = {
+                bt:'',
+                gnbj:'',
+                gnfa:'',
+                ys:'',
+                ssbq:'',
+                floption:[],
+                bmzt:false,
+                zuozhe:'',
+                author:'',
+                gxb:100,
+                hqkf:false,
+                bss:'',
+                selitems:[],
+                appitems:[],
+                func: {
+                    //查询标签
+                    selbq:function(){
+                        //非空搜索校验
+                        if(obj.ssbq==''){
+                            Toast.show('请输入内容后搜索');
+                            return;
+                        }
+                        fetch({
+                            appId: 'iexpress',
+                            url : 'http://IEXPRESS/newidea/tags.jsp',
+                            data:{
+                               tags: obj.ssbq
+                            },
+                            success: function(json){
+                                obj.selitems.splice(0,obj.selitems.length);
+                                $.each(json,function(e,e1){
+                                    obj.selitems.push(e1);
+                                });
+                               
+                            },
+                            error: function(rs){
+                                Toast.show(rsp.errmsg);
+                            }
+                        });
+                    },
+                    // 添加到标签
+                    appbq:function(items,index){
+                         if(obj.appitems.length>=5){
+                            Toast.show('最多可选择5条数据');
+                            return false;
+                        }
+
+                        $.each(items,function(e,e1){
+                            if(e==index){
+                                obj.appitems.push(e1);
+                            }
+                        });
+                        // alert(items)
+                        // obj.appitems.push(items[index]);
+
+                        // alert(JSON.stringify(items)+'--'+index);
+                        // $('#apendbq')
+                    },
+                    //图片上传
+                    fimg:function() {
+                        Actionsheet.show({
+                            list: [{
+                                    text: '拍照上传',
+                                    handler: function() {
+                                        appnest.photo.camera({
+                                            width: 1080, // 拍照后生成图片宽度
+                                            success: function(res) {
+                                                var img = res.imagePath;
+                                                var thumbnailPath = res.thumbnailPath;
+                                                // $("filediv").html('<input type="hidden" name="Filedata" subval value="'+img+'"/>');
+                                                appnest.photo.getBase64Image({
+                                                    imagePath: img, // 图片全路径
+                                                    success: function(res) {
+                                                        var base64Image = res.data;
+                                                        // 返回图片的base64编码数据
+                                                        $('.fileimg').attr('src', base64Image);
+                                                        // obj.func.sub(img);
+                                                    },
+                                                    fail: function(res) {
+                                                        Toast.show(res.errmsg);
+                                                    }
+                                                });
+                                            },
+                                            fail: function(res) {
+                                                Toast.show(res.errmsg);
+                                            }
+                                        });
+                                    }
+                                },
+                                {
+                                    text: '图库选择',
+                                    handler: function() {
+                                        appnest.photo.album({
+                                            crop: true,
+                                            cropWidth: 300,
+                                            success: function(res) {
+                                                var img = res.imagePath;
+                                                var thumbnailPath = res.thumbnailPath;
+                                                // $("filediv").html('<input type="hidden" name="Filedata" subval value="'+img+'"/>');
+                                                appnest.photo.getBase64Image({
+                                                    imagePath: img, // 图片全路径
+                                                    success: function(res) {
+                                                        var base64Image = res.data;
+                                                        // 返回图片的base64编码数据
+                                                        $('.fileimg').attr('src', base64Image);
+                                                        // obj.func.sub(img);
+                                                    },
+                                                    fail: function(res) {
+                                                        Toast.show(res.errmsg);
+                                                    }
+                                                });
+
+
+                                            },
+                                            fail: function(res) {
+                                                Toast.show(res.errmsg);
+                                            }
+                                        });
+                                    }
+                                }
+                            ],
+                            doCancel: function() {
+                                console.log('点了取消');
+                            }
+                        });
+                    },
+
+                    //查询工号
+                    selbad:function(){
+                        alert(obj.bss)
+                        fetch({
+                            appId: 'iexpress',
+                            url : 'http://IEXPRESS/newidea/getauthor.jsp',
+                            data: {
+                                q:obj.bss
+                            },
+                            // data: [
+                        // {
+                        //     type:0,
+                        //     name:'q',
+                        //     value:obj.bss
+                        // }
+                    // ],
+                            success: function(json){
+                                alert(JSON.stringify(json))
+                            },
+                            error: function(rs){
+                                Toast.show(rsp.errmsg);
+                            }
+                        });
+                    },
+                     subform:function(){
+                //非空校验--start
+                        let errmsg = '',
+                        validateResult=false;
+                        $("[errmsg]").each(function(){
+                             if($(this).val() == ''){
+                                errmsg = $(this).attr('errmsg');
+                                validateResult = true;
+                                return false;
+                             }
+                        })
+                        if(validateResult){
+                            Toast.show(errmsg);
+                            return false;
+                        }
+
+                        //       if($('input[name="ideaauthor"]').val()>'100'){
+                        //             Toast.show('贡献比请输入1-100的整数');
+                        //             return false;
+                        //   }else if($('#ideaauthor').val()<'100'){
+                        //       Toast.show('贡献比之和必须为100');
+                        //             return false;
+                        //   }
+                        //贡献比校验
+                        var ideaauthorArr = document.getElementsByName("ideaauthor");
+                        var ideanum = 0;
+                        for(var m=0;m<ideaauthorArr.length;m++){
+                            var reg = /^[1-9]\d*$/;
+                            var tempval = ideaauthorArr[m].value;
+                            if (reg.test(tempval)) {
+                                if (Number(tempval)==0 || Number(tempval)>100){
+                                    Toast.show('贡献比请输入1到100的整数');
+                                    return false;
+                                }
+                                ideanum+=Number(tempval);
+                            }else{
+                                Toast.show('贡献比请输入1到100的整数');
+                                return false;
+                            }
+                        }
+                        if(ideanum!=100){
+                            Toast.show('贡献比之和必须为100')
+		                    return false;
+                        }
+                        //贡献校验结束
+
+
+
+                //需提交表单信息为subform
+                 var subform = {};
+                        $("[sval]").each(function(i,e){//拼接提交参数为json
+                             subform[$(this).attr('name')] =  $(this).val();
+                        })
+                                        alert(1)
+                auiLoading.show();
+                //   无附件提交
+                fetch({
+                            appId: 'iexpress',
+                            url: 'http://IEXPRESS/wh',
+                            data:subform,
+                            success: function(data1) {
+                               alert(JSON.stringify(data1))
+                                    //  Toast.show('提交成功！');
+
+                                    auiLoading.hide();
+                                },
+                            error: function(rs) {
+                                auiLoading.hide();
+                                Toast.show(rs.errmsg);
+                            }
+                        });
+                //需提交表单信息为subform
+                //  var subform = {};
+                //         $("[sval]").each(function(i,e){//拼接提交参数为json
+                //              subform[$(this).attr('name')] =  $(this).val();
+                //         })
+                //         alert(JSON.stringify(subform));
+                //         //有附件提交
+                //         if(img!=''){
+                //         //图片名称
+                //         var imgname=img.substring(img.lastIndexOf("/") + 1);
+                //             fetch({
+                //             appId: 'iexpress',
+                //             url : 'http://IEXPRESS/newidea/uploadfile.jsp',
+                //             data:[
+                //             // {
+                //             //     type:1,
+                //             //     name:'Filedata',
+                //             //     value:filepath
+                //             // },
+                //             {
+                //                 type:0,
+                //                 name:'someKey',
+                //                 value:'someValue'
+                //             },
+                //             {
+                //                 type:0,
+                //                 name:'Upload',
+                //                 value:'Submit Query'
+                //             },
+                //             {
+                //                 type:0,
+                //                 name:'Filename',
+                //                 value:imgname
+                //             },
+                //             ],
+                //             success: function(json){
+                //                 alert(JSON.stringify(json))
+                //             },
+                //             error: function(rs){
+                //                 Toast.show(rsp.errmsg);
+                //             }
+                //         });
+
+                //         }else{
+                //             //无附件提交
+                //             fetch({
+                //             appId: 'iexpress',
+                //             url : 'http://IEXPRESS/wh',
+                //             data:subform,
+                //             success: function(json){
+                //                 alert(JSON.stringify(json))
+                //             },
+                //             error: function(rs){
+                //                 Toast.show(rsp.errmsg);
+                //             }
+                //         });
+                //         }
+
+
+                    },
+                    get:function(){
+                //    $.each(ljson, function(e,e1) {
+                //        //判断类型，若类型不对，则v-model绑定失效，注意。
+                //     if(e1.value=='true'){
+                //         this.value=true
+                //        }else if(e1.value=='false'){
+                //            this.value=false
+                //        }
+                //        formjson.push(e1.value);
+                //         obj[e1.name]=e1.value;
+                //         // console.log(e1.name+'--'+e1.value);
+                //         //select下拉框问题解决
+                //         if(obj.fl==e1.value){
+                //             $('select').next().addClass('aa').val(e1.value);
+                //         }
+                    
+                //     // console.log('e1:'+JSON.stringify(e1));
+                //     // console.log(e1.name+'--'+e1.value);
+                //     });
+                  
+                }
+                }
+                
+            }
+            $('#auiscr').render(obj);
+
+
+            //页面样式
+            mobiscroll.settings = {
+                theme: 'ios',
+                lang: 'zh',
+            };
+            mobiscroll.form('#demo');
+        }
+    }
+</script>
+
+<style>
+/* 复选框状态 */
+.ztcss{
+    float:right;
+    margin-top: 15px;
+    color: #615a5a;
+}
+
+    .stylespan {
+        height: 44px;
+        line-height: 44px;
+    }
+
+    .stylearea {
+        height: 44px;
+        line-height: 44px;
+        width: 100%;
+        text-align: left;
+        margin-left: 15px;
+    }
+
+    a[class="button-selectimg"] {
+        padding: 4px 6px;
+        border: 1px dashed #00A2D4 !important;
+        border-radius: 2px;
+    }
+
+    .pleft1 {
+        padding-left: 1em !important;
+    }
+
+    /* select{
+        height: 20px;
+        font-size: 15px;
+        border: 0;
+        -moz-appearance:none;
+        -webkit-appearance:none;
+        padding-right: 14px;
+        padding-left:10px;
+        background: url(../assets/imgs/arrow.png) no-repeat scroll right center transparent;
+    } */
+
+    .fileimg {
+        width: 100px;
+        height: 100px;
+    }
+
+    .fl {
+        float: left;
+    }
+
+    .mgt16 {
+        margin-top: 16px;
+    }
+    .btcss {
+        top: 10px !important;
+        right: 25% !important;
+        transform: none !important;
+    }
+
+    .mgb5 {
+        margin-bottom: .5em;
+    }
+
+    .size30 {
+        font-size: 30px;
+        padding-right: 1em;
+        color: #428bca;
+    }
+
+    .bgfff {
+        height: 100px;
+        line-height: 100px;
+        background: #fff;
+        padding-left: 1em;
+    }
+    .bqldiv{
+        display:inline-block;
+        width:100%;
+        margin-bottom:15px;
+        background: #fff;
+    }
+    .bqsty{
+        background: #fff;
+        padding-top: 10px;
+        padding-left:15px;
+        width: 100%;
+        text-align: left;
+        float: left;
+    }
+    .bqtags{
+        width:100%;
+        height:130px;
+        display:inline-block;
+        overflow:auto;
+        background: #fff;
+    }
+
+    .pd0 {
+        padding: 0 !important;
+    }
+    .bgcolor{
+        background-color: #ECF0F1 !important;
+    }
+
+    /*状态框*/
+
+    .tleft {
+        text-align: left;
+        padding-left: 0 !important;
+    }
+
+    /*去除:before 1px*/
+
+    .mbsc-ios .mbsc-control-w:after,
+    .mbsc-ios .mbsc-control-w:before {
+        border-top: 0 !important;
+    }
+
+    .tcenter {
+        text-align: center;
+    }
+
+/* append容器 */
+.apenbq{
+     padding-top: 10px;
+     width: 100%;
+     display: inline-block;
+     min-height: 30px;
+     background-color:#fff;
+     margin: 0 auto;
+}
+/* append内容 */
+    .spsty{
+        padding: 6px;
+        background-color: #57A7F4;
+        color: #fff;
+        border-radius: 5px;
+        margin:5px;
+        float: left;
+    }
+</style>

@@ -1,0 +1,711 @@
+<ui>
+<aui-header>
+    <aui-titlebar>
+        <left-area>
+            <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+        </left-area>
+        <caption-area>
+            <aui-text>故障报修</aui-text>
+        </caption-area>
+    </aui-titlebar>
+</aui-header>
+<aui-scroller class="content" style="position: absolute; top: 45px; right: 0px; bottom: 45px;left: 0px;">
+    <div class="yf-baseInfo">
+        <div class="baseLine">
+            <font class="label-left">工单</font>
+            <div style="flex:2;display: flex;">
+                <input type="text" readonly class="dj-text" v-model="editData.gongdan"/>
+            </div>
+            <font class="lbtext" style="width:70px;">工单类型</font>
+            <div style="flex:1;display: flex;">
+                <select style="width:100%;height: 30px;margin-right:5px" v-model="editData.gongdanleixing">
+                    <option value="EM">EM</option>
+                    <option value="CM">CM</option>
+                </select>
+            </div>
+            <font class="label-left">状态</font>
+            <div style="flex:1;display: flex;">
+                <input type="text" readonly class="dj-text" v-model="editData.zhuangtai"/>
+            </div>
+        </div>
+        <div class="baseLine">
+            <font class="label-left">描述</font>
+            <div style="flex:1;display: flex;">
+                <input type="text" class="edit" style="width:100%;padding-right:0;padding-left:5px;" v-model="editData.miaoshu"/>
+            </div>
+        </div>
+        <div class="baseLine">
+            <font class="label-left" style="color: #428bca;text-decoration: underline;" v-on:click="func.zichanSelect">资产</font>
+            <div style="flex:1;display: flex;">
+                <input type="text" readonly class="dj-text" v-model="editData.zichan1"/>
+            </div>
+            <div style="flex:2;display: flex;">
+                <input type="text" readonly class="dj-text" v-model="editData.zichan2"/>
+            </div>
+        </div>
+        <div class="baseLine">
+            <font class="label-left" style="color: #428bca;text-decoration: underline;" v-on:click="func.weizhiClick">位置</font>
+            <div style="flex:1;display: flex;">
+                <input type="text" readonly class="dj-text" v-model="editData.weizhi1"/>
+            </div>
+            <div style="flex:2;display: flex;">
+                <input type="text" readonly class="dj-text" v-model="editData.weizhi2"/>
+            </div>
+        </div>
+        <div class="baseLine">
+            <font class="label-left">停工开始</font>
+            <div class="datetime-area" style="flex:1" v-on:click="func.datetimeSelect('tgkaishishijian','tgStartTimestamp')">
+                <input type="text" readonly v-model="editData.tgkaishishijian"/>
+                <input type="hidden" v-model="editData.tgStartTimestamp" v-like="text" number/>
+                <i class="icon auicon icon-arrowleft icon-time"></i>
+            </div>
+        </div>
+        <div class="baseLine">
+            <font class="label-left">停工结束</font>
+            <div class="datetime-area" style="flex:1" v-on:click="func.datetimeSelect('tgjieshushijian','tgStopTimestamp')">
+                <input type="text" readonly v-model="editData.tgjieshushijian"//>
+                <input type="hidden" v-model="editData.tgStopTimestamp" v-like="text" number/>
+                <i class="icon auicon icon-arrowleft icon-timeend"></i>
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="addline" v-for="item in editData.line1Arr">
+            <div class="flex-vcenter">
+                <font class="lbtext" style="width:40px;">员工</font>
+                <div style="flex:1;display: flex;">
+                    <input type="text" class="edit" style="width:100%;padding-left:5px;" v-model="item.badge"/>
+                </div>
+                <div class="datetime-area" style="flex:2" v-on:click="func.dateSelect($index)">
+                    <input type="text" readonly  placeholder="实际开始日期" v-model="item.actStartDate"/>
+                    <i class="icon auicon icon-arrowleft icon-calendar"></i>
+                </div>
+            </div>
+            <div class="flex-vcenter">
+                <div class="datetime-area" style="flex:1;border-bottom:0" v-on:click="func.timeSelect($index,'actStartTime')">
+                    <input type="text" readonly  placeholder="实际开始时间" v-model="item.actStartTime"/>
+                    <i class="icon auicon icon-arrowleft icon-time"></i>
+                </div>
+                <div class="datetime-area" style="flex:1;border-bottom:0" v-on:click="func.timeSelect($index,'actEndTime')">
+                    <input type="text" readonly  placeholder="实际结束时间" v-model="item.actEndTime"/>
+                    <i class="icon auicon icon-arrowleft icon-timeend"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="btndiv">
+        <aui-button class="btn btn-outlined btn-primary" v-on:click="func.delLine1">删除行</aui-button>
+        <aui-button class="btn btn-outlined btn-primary" v-on:click="func.addLine1">新建行</aui-button>
+    </div>
+    <div style="border:1px solid #ddd;border-right:0;border-left:0">
+        <div style="padding:5px">任务项</div>
+        <div class="flex-vcenter" v-for="item in editData.line2Arr">
+            <div style="width:40px;display: flex;">
+                <input type="text" class="dj-text" readonly style="width:100%;padding-left:5px;" v-model="item.xiangid"/>
+            </div>
+            <div style="flex:1;display: flex;">
+                <input type="text" class="edit" style="width:100%;padding-right:0;padding-left:5px;" placeholder="任务描述" v-model="item.xiangmiaoshu"/>
+            </div>
+        </div>
+    </div>
+    <div class="btndiv">
+        <aui-button class="btn btn-outlined btn-primary" v-on:click="func.delLine2">删除行</aui-button>
+        <aui-button class="btn btn-outlined btn-primary" v-on:click="func.addLine2">新建行</aui-button>
+    </div>
+
+    <p style="font-size:14px;color:#428bca;padding:5px;">故障汇报</p>
+        <div class="yf-bottomInfo">
+            <div class="linkLine">
+                <a class="link-left" v-on:click="func.guzhangSelect('gz')">故障</a>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="editData.gzhb_gz"/>
+                </div>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="editData.gzhb_gzms"/>
+                </div>
+            </div>
+            <div class="linkLine" >
+                <a class="link-left" v-on:click="func.guzhangSelect('PROBLEM')">问题</a>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="editData.gzhb_wt"/>
+                </div>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="editData.gzhb_wtms"/>
+                </div>
+            </div>
+            <div class="linkLine" >
+                <a class="link-left" v-on:click="func.guzhangSelect('CAUSE')">原因</a>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="editData.gzhb_yy"/>
+                </div>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="editData.gzhb_yyms"/>
+                </div>
+            </div>
+            <div class="linkLine" >
+                <a class="link-left" v-on:click="func.guzhangSelect('REMEDY')">措施</a>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="editData.gzhb_cs"/>
+                </div>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="editData.gzhb_csms"/>
+                </div>
+            </div>
+
+            <input type="hidden" v-model="editData.gzhb_gzPid"/>
+			<input type="hidden" v-model="editData.gzhb_wtPid"/>
+			<input type="hidden" v-model="editData.gzhb_yyPid"/>
+			<input type="hidden" v-model="editData.gzhb_csPid"/>
+        </div>
+</aui-scroller>
+<aui-footer>
+    <div class="yf-footer">
+        <aui-button class="btn btn-outlined btn-primary" v-on:click="func.dosave">完成</aui-button>
+    </div>
+</aui-footer>
+</ui>
+<script>
+import Selectsheet from '@comm/components/Selectsheet.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import fetch from '@comm/utils/nfetch';
+import Alert from '@auicomp/alert/Alert.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+import Action,{ router } from '@auicomp/action/Action.aui';
+import moment from 'moment';
+
+export default class guzhangDetail {
+    static get tag() {
+        return 'guzhangdetail';
+    }
+
+    created() {
+        const $el = $(this.$el);
+
+        $el.on("zichanBackfill",function(e,assetnum,description,weizhilocation,weizhidescription,FAILURECODE){
+            obj.editData.zichan1 = assetnum;
+            obj.editData.zichan2 = description;
+            obj.editData.weizhi1 = weizhilocation;
+            obj.editData.weizhi2 = weizhidescription;
+            if(FAILURECODE != ""){//故障码不为空，则查询该故障码对应的故障描述
+                obj.editData.gzhb_gz = FAILURECODE;
+                fetch({
+                    url: '/guzhang/gzquery',
+                    data:{
+                        maxORGID:window.lgInfo.ORGID,
+                        bm:FAILURECODE,
+                        caozuo: 'gz'
+                    },
+                    dataType:'text',
+                    success:function(rsp){
+                        let rspJson = $.JSON.parse(rsp.trim());
+                        obj.editData.gzhb_gzms = rspJson.list[0].description;
+                        obj.editData.gzhb_gzPid = rspJson.list[0].FAILURELIST;
+                    },
+                    error:function(rsp){
+                       Toast.show(rsp.errmsg);
+                    }
+                })
+            }
+            obj.editData.gzhb_wt = "";
+            obj.editData.gzhb_wtms = "";
+            obj.editData.gzhb_yy = "";
+            obj.editData.gzhb_yyms = "";
+            obj.editData.gzhb_cs = "";
+            obj.editData.gzhb_csms = "";
+        });
+        $el.on("backfill",function(e,failurecode,description,FAILURELIST,caozuo){
+            if(caozuo == 'gz'){
+                obj.editData.gzhb_gz = failurecode;
+                obj.editData.gzhb_gzms = description;
+                obj.editData.gzhb_gzPid = FAILURELIST;
+
+                obj.editData.gzhb_wt = "";
+                obj.editData.gzhb_wtms = "";
+                obj.editData.gzhb_yy = "";
+                obj.editData.gzhb_yyms = "";
+                obj.editData.gzhb_cs = "";
+                obj.editData.gzhb_csms = "";
+            }else if(caozuo == 'PROBLEM'){
+                obj.editData.gzhb_wt = failurecode;
+                obj.editData.gzhb_wtms = description;
+                obj.editData.gzhb_wtPid = FAILURELIST;
+
+                obj.editData.gzhb_yy = "";
+                obj.editData.gzhb_yyms = "";
+                obj.editData.gzhb_cs = "";
+                obj.editData.gzhb_csms = "";
+            }else if(caozuo == 'CAUSE'){
+                obj.editData.gzhb_yy = failurecode;
+                obj.editData.gzhb_yyms = description;
+                obj.editData.gzhb_yyPid = FAILURELIST;
+
+                obj.editData.gzhb_cs = "";
+                obj.editData.gzhb_csms = "";
+            }else if(caozuo == 'REMEDY'){
+                obj.editData.gzhb_cs = failurecode;
+                obj.editData.gzhb_csms = description;
+                obj.editData.gzhb_csPid = FAILURELIST;
+            }
+        });
+
+        const obj = this.$obj = {
+            editData:{
+                gongdan:'',
+                gongdanleixing:'EM',
+                zhuangtai:'APPR',
+                miaoshu:'',
+                zichan1:'',
+                zichan2:'',
+                weizhi1:'',
+                weizhi2:'',
+                tgkaishishijian:'',
+                tgStartTimestamp:0,
+                tgjieshushijian:'',
+                tgStopTimestamp:0,
+                line1Arr:[{badge:window.userInfo.badge,actStartDate:'',actStartTime:'',actEndTime:''}],
+                line2Arr:[],
+                weizhiOptions:[],
+                gzhb_gz:'',
+                gzhb_gzPid:'',
+                gzhb_gzms:'',
+                gzhb_wt:'',
+                gzhb_wtPid:'',
+                gzhb_wtms:'',
+                gzhb_yy:'',
+                gzhb_yyPid:'',
+                gzhb_yyms:'',
+                gzhb_cs:'',
+                gzhb_csPid:'',
+                gzhb_csms:''
+            },
+            func:{
+                dosave:function(){
+                    if(obj.editData.miaoshu == ""){
+                        Toast.show("请填写描述");
+                        return;
+                    }
+                    if(obj.editData.zichan1 == ""){
+                        Toast.show("请选择资产");
+                        return;
+                    }
+                    if(obj.editData.zichan1 == ""){
+                        Toast.show("请选择资产");
+                        return;
+                    }
+                    if(!obj.func.timeValidate(obj.editData.tgStartTimestamp,obj.editData.tgStopTimestamp)){
+                        Toast.show("停工开始时间必须早于停工结束时间！");
+                        return;
+                    }
+                    var badgeArr=[],actStartDateArr=[],actStartTimeArr=[],actEndTimeArr=[],_line1Invalid = false;
+                    $.each(obj.editData.line1Arr,function(i,e){
+                        if(e.badge == ""){
+                            Toast.show("请填写所有行员工的工号");
+                            _line1Invalid = true;
+                            return false;
+                        }
+                        if(e.actStartDate == ""){
+                            Toast.show("请填写所有行实际开始日期");
+                             _line1Invalid = true;
+                            return false;
+                        }
+                        if(e.actStartTime == ""){
+                            Toast.show("请填写所有行实际开始时间");
+                             _line1Invalid = true;
+                            return false;
+                        }
+                        if(e.actEndTime == ""){
+                            Toast.show("请填写所有行实际结束时间");
+                             _line1Invalid = true;
+                            return false;
+                        }
+                        if(!obj.func.timeValidate(Number( e.actStartTime.replace(/:/g,"")),Number( e.actEndTime.replace(/:/g,"")))){
+                            Toast.show("请确保所有行结束时间大于开始时间");
+                            _line1Invalid = true;
+                            return false;
+                        }
+                        badgeArr.push(e.badge);
+                        actStartDateArr.push(e.actStartDate);
+                        actStartTimeArr.push(e.actStartTime);
+                        actEndTimeArr.push(e.actEndTime);
+                    });
+                    if(_line1Invalid) return;
+                    var xiangidArr=[],xiangmiaoshuArr=[],_line2Invalid=false;
+                    $.each(obj.editData.line2Arr,function(i,e){
+                        if(e.xiangid==""){
+                            Toast.show("请填写所有行任务项");
+                            _line2Invalid = true;
+                            return false;
+                        }
+                        if(e.xiangmiaoshu==""){
+                            Toast.show("请填写所有行任务描述");
+                            _line2Invalid = true;
+                            return false;
+                        }
+                        xiangidArr.push(e.xiangid);
+                        xiangmiaoshuArr.push(e.xiangmiaoshu);
+                    });
+                    if(_line2Invalid) return;
+                    auiLoading.show();
+                    var subJson={
+                        gongdan:obj.editData.gongdan,
+                        gongdanleixing:obj.editData.gongdanleixing,
+                        zhuangtai:obj.editData.zhuangtai,
+                        miaoshu:obj.editData.miaoshu,
+                        zichan1:obj.editData.zichan1,
+                        zichan2:obj.editData.zichan2,
+                        weizhi1:obj.editData.weizhi1,
+                        weizhi2:obj.editData.weizhi2,
+                        maxSITEID:window.lgInfo.maxSITEID,
+                        renyuanRE:badgeArr.join('vv'),
+                        rshijikaishiriqiaddRE:actStartDateArr.join('vv'),
+                        shijikaishishijianaddRE:actStartTimeArr.join('vv'),
+                        shijijieshushijianaddRE:actEndTimeArr.join('vv'),
+                        xiangidRE:xiangidArr.join('vv'),
+                        xiangmiaoshuRE:xiangmiaoshuArr.join('vv'),
+                        ops:'COMP',
+                        gzhb_gz:obj.editData.gzhb_gz,
+                        gzhb_wt:obj.editData.gzhb_wt,
+                        gzhb_yy:obj.editData.gzhb_yy,
+                        gzhb_cs:obj.editData.gzhb_cs
+                    };
+                    fetch({
+                        url: '/guzhang/gzsub',
+                        data:subJson,
+                        success:function(rsp){
+                            auiLoading.hide();
+                            console.log(JSON.stringify(rsp));
+                            if(rsp.result == "success"){
+                                if(obj.editData.tgStartTimestamp != 0 && obj.editData.tgStopTimestamp != 0){//填写了停工时间，必须请求汇报停工接口
+                                    fetch({
+                                        url: '/guzhang/gzsubstatus',
+                                        data:{
+                                            gongdan:obj.editData.gongdan,
+                                            zichan1:obj.editData.zichan1,
+                                            zichan2:obj.editData.zichan2,
+                                            weizhi1:obj.editData.weizhi1,
+                                            weizhi2:obj.editData.weizhi2,
+                                            tgkaishishijian:obj.editData.tgkaishishijian,
+                                            tgjieshushijian:obj.editData.tgjieshushijian,
+                                            maxSITEID:window.lgInfo.maxSITEID,
+                                            maxORGID:window.lgInfo.ORGID
+                                        },
+                                        success:function(tgrsp){
+                                            if(tgrsp.result == "success"){
+                                                Toast.show("操作成功");
+                                            }else{
+                                                Toast.show("停工操作失败");
+                                            }
+                                        },
+                                        error:function(tgrsp){
+                                            Toast.show(tgrsp.errmsg);
+                                        }
+                                    });
+                                }else{
+                                    Toast.show("操作成功");
+                                }
+                            }else{
+                                Toast.show("操作失败");
+                            }
+                            history.go(-1);
+                        },
+                        error:function(rsp){
+                            auiLoading.hide();
+                            Toast.show(rsp.errmsg);
+                        }
+                    });
+                },
+                zichanSelect:function(){
+                    router.go("/zichanquery?zcbackpage=aui-guzhangdetail");
+                },
+                guzhangSelect:function(caozuo){
+                    var gzPid="";
+                    if(caozuo=="PROBLEM"){
+                        if(obj.editData.gzhb_gz == ""){
+                            Toast.show("请先选择故障");
+                            return;
+                        }
+                        gzPid = obj.editData.gzhb_gzPid;
+                    }else if(caozuo=="CAUSE"){
+                        if(obj.editData.gzhb_wt == ""){
+                            Toast.show("请先选择问题");
+                            return;
+                        }
+                        gzPid = obj.editData.gzhb_wtPid;
+                    }else if(caozuo=="REMEDY"){
+                        if(obj.editData.gzhb_yy == ""){
+                            Toast.show("请先选择原因");
+                            return;
+                        }
+                        gzPid = obj.editData.gzhb_yyPid;
+                    }
+                    router.go("/guzhangquery?caozuo="+caozuo+"&backpage=aui-guzhangdetail&PARENT="+gzPid);
+                },
+                dateSelect:function(index){
+                    appnest.ui.selectDate({
+                        success:function(res){
+                            obj.editData.line1Arr[index].actStartDate = res.date;
+                        },
+                        fail:function(res){
+                            Toast.show(res.errMsg);
+                        }
+                    });
+                },
+                timeSelect:function(index,backfillKey){
+                    appnest.ui.selectTime({
+                        success:function(res){
+                            obj.editData.line1Arr[index][backfillKey] = res.time+":00";
+                            if(!obj.func.timeValidate(Number( obj.editData.line1Arr[index].actStartTime.replace(/:/g,"")),Number( obj.editData.line1Arr[index].actEndTime.replace(/:/g,"")))){
+                                Toast.show("实际开始时间必须早于实际结束时间！",function(){
+                                    obj.editData.line1Arr[index][backfillKey] ='';
+                                });
+                            }
+                        },
+                        fail:function(res){
+                            Toast.show(res.errMsg);
+                        }
+                    });
+                },
+                timeValidate:function(t1,t2){//时间比较
+                    if(t1 != 0 && t2 !=0){
+                        return t1 < t2 ;
+                    }else{
+                        return true;
+                    }
+                },
+                datetimeSelect:function(backfillKey,timestampKey){
+                    appnest.ui.selectDateTime({
+                        success:function(res){
+                            obj.editData[backfillKey] = res.dateTime+":00";
+                            obj.editData[timestampKey] = res.timestamp;
+                            if(!obj.func.timeValidate(obj.editData.tgStartTimestamp,obj.editData.tgStopTimestamp)){
+                                Toast.show("停工开始时间必须早于停工结束时间！",function(){
+                                    obj.editData[backfillKey] ='';
+                                    obj.editData[timestampKey] =0;
+                                });
+                            }
+                        },
+                        fail:function(res){
+                            Toast.show(res.errMsg);
+                        }
+                    });
+                },
+                weizhiSelect:function(){
+                    Selectsheet.show({
+                        list: obj.editData.weizhiOptions.map(function(item){
+                            return item.description;
+                        }),
+                        func:function(index){
+                            obj.editData.weizhi1 = obj.editData.weizhiOptions[index].location;
+                            obj.editData.weizhi2 = obj.editData.weizhiOptions[index].description.replace(/&amp;/g,"&");
+                        }
+                    });
+                },
+                weizhiClick:function(){
+                    if(obj.editData.weizhiOptions.length === 0){
+                        fetch({
+                            url: '/guzhang/weizhiquery',
+                            data:{
+                                badge:window.userInfo.badge,
+                                maxSITEID:window.lgInfo.maxSITEID,
+                                WORKTYPE: '',
+                                STATUS : ''
+                            },
+                            dataType: 'text',
+                            success:function(rsp){
+                                let rspJson = $.JSON.parse(rsp.trim());
+                                obj.editData.weizhiOptions.$reset(rspJson.list);
+                                obj.func.weizhiSelect();
+                            },
+                            error:function(rsp){
+                                Toast.show(rsp.errmsg);
+                            }
+                        });
+                    }else{
+                        obj.func.weizhiSelect();
+                    }
+                    
+                },
+                addLine1:function(){
+                    obj.editData.line1Arr.push({badge:window.userInfo.badge,actStartDate:'',actStartTime:'',actEndTime:''});
+                },
+                delLine1:function(){
+                    if(obj.editData.line1Arr.length > 1){
+                        obj.editData.line1Arr.pop();
+                    }
+                },
+                addLine2:function(){
+                    obj.editData.line2Arr.push({xiangid: (obj.editData.line2Arr.length+1)*10,xiangmiaoshu:''});
+                },
+                delLine2:function(){
+                    if(obj.editData.line2Arr.length > 0){
+                        obj.editData.line2Arr.pop();
+                    }
+                },
+                failureInit:function(){
+                    this.getFailureDesc({//故障请求
+                        bm: obj.editData.gzhb_gz,
+                        maxORGID : window.lgInfo.ORGID,
+                        caozuo : 'gz'
+                    }).then((r)=>{//故障请求成功回调
+                        obj.editData.gzhb_gzms = r.list[0].description;
+                        obj.editData.gzhb_gzPid = r.list[0].FAILURELIST;
+                        return obj.func.getFailureDesc({//问题请求
+                            bm: obj.editData.gzhb_wt,
+                            maxORGID : window.lgInfo.ORGID,
+                            caozuo : 'PROBLEM',
+                            PARENT : r.list[0].FAILURELIST
+                        });
+                    }).then((r)=>{//问题请求成功回调
+                        obj.editData.gzhb_wtms = r.list[0].description;
+                        obj.editData.gzhb_wtPid = r.list[0].FAILURELIST;
+                        return obj.func.getFailureDesc({//原因请求
+                            bm: obj.editData.gzhb_yy,
+                            maxORGID : window.lgInfo.ORGID,
+                            caozuo : 'CAUSE',
+                            PARENT : r.list[0].FAILURELIST
+                        });
+                    }).then((r)=>{//原因请求成功回调
+                        obj.editData.gzhb_yyms = r.list[0].description;
+                        obj.editData.gzhb_yyPid = r.list[0].FAILURELIST;
+                        return obj.func.getFailureDesc({//措施请求
+                            bm: obj.editData.gzhb_cs,
+                            maxORGID : window.lgInfo.ORGID,
+                            caozuo : 'REMEDY',
+                            PARENT : r.list[0].FAILURELIST
+                        });
+                    }).then((r)=>{//措施请求成功回调
+                        obj.editData.gzhb_csms = r.list[0].description;
+                        obj.editData.gzhb_csPid = r.list[0].FAILURELIST;
+                    }).catch((e)=>{
+                        if(!('nextFetch' in e)){
+                            Toast.show(e.errmsg, function(){});
+                        }
+                    })
+                },
+                getFailureDesc:function(paramsdata){//请求故障描述信息
+                    return new Promise((resolve,reject)=>{
+                        if(paramsdata.bm != ""){//判断是否要发起请求
+                            fetch({
+                                url: '/guzhang/gzquery',
+                                data:paramsdata,
+                                dataType:'text',
+                                success:function(rsp){
+                                    let rspJson = $.JSON.parse(rsp.trim());
+                                    resolve(rspJson);
+                                },
+                                error:function(rsp){
+                                    reject(rsp);
+                                }
+                            })
+                        }else{//不发起请求直接reject
+                            reject({nextFetch:false});
+                        }
+                    });
+                }
+            }
+        }
+        obj.editData.gongdan = window.guzhangDetail.wonum;
+        obj.editData.gongdanleixing = window.guzhangDetail.worktype;
+        obj.editData.zhuangtai = window.guzhangDetail.status;
+        obj.editData.miaoshu = window.guzhangDetail.description;
+        obj.editData.zichan1 = window.guzhangDetail.asset_assetnum;
+        obj.editData.zichan2 = window.guzhangDetail.asset_description;
+        obj.editData.weizhi1 = window.guzhangDetail.locations_location;
+        obj.editData.weizhi2 = window.guzhangDetail.locations_description;
+
+        obj.editData.line1Arr[0].actStartDate = window.guzhangDetail.shijikaishiriqi;
+        obj.editData.line1Arr[0].actStartTime = window.guzhangDetail.shijikaishishijian;
+        obj.editData.line1Arr[0].actEndTime = window.guzhangDetail.shijijieshushijian;
+
+        obj.editData.gzhb_gz = window.guzhangDetail.failurecode;
+        obj.editData.gzhb_wt = window.guzhangDetail.PROBLEM;
+        obj.editData.gzhb_yy = window.guzhangDetail.CAUSE;
+        obj.editData.gzhb_cs = window.guzhangDetail.REMEDY;
+        obj.func.failureInit();
+        this.$vm = $el.render(obj);
+    }
+    detached(){
+        this.$vm && this.$vm.destroy();
+    }
+}
+</script>
+<style type="less">
+aui-guzhangdetail{
+@defaultborder:1px solid #ddd;
+@blueborder:1px solid #428bca;
+.edit{
+    border:0;
+    border-bottom:@defaultborder;
+    height: 30px;
+    margin-right: 5px;
+    font-size: 14px;
+}
+.btndiv{
+    display: flex;
+    padding: 5px 10px;
+    justify-content: flex-end;
+    aui-button {
+        &:first-child{
+            margin-right: 5px;
+        }
+    }
+}
+.addline{
+    border-top: @defaultborder;
+    &:last-child{
+        border-bottom:@defaultborder;
+    }
+}
+input[type='text']{
+    margin-right: 5px;
+}
+.flex-vcenter{
+    display: flex;
+    align-items: center;
+    padding: 5px;
+}
+.datetime-area{
+    box-sizing: border-box;
+    .edit;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    input[type='text']{
+        width: 90%;
+        border: 0;
+        padding-left:5px; 
+        font-size: 14px;
+    }
+}
+
+.lbtext{
+    text-align: left;
+    color: #8E8E93;
+}
+
+.yf-baseInfo{
+    padding: 5px 0;
+    .baseLine{
+        .flex-vcenter;
+        .label-left{
+            width: 40px;
+            .lbtext;
+        }       
+    }
+}
+.yf-bottomInfo{
+    padding: 5px 0;
+    border-top: @blueborder;
+    .linkLine{
+        .flex-vcenter;
+        .link-left{
+            width: 40px;
+            text-align: left;
+            color: #428bca;
+            text-decoration: underline;
+        }
+    }
+}
+
+}
+</style>

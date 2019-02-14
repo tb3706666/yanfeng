@@ -1,0 +1,71 @@
+<ui>
+<aui-header>
+    <aui-titlebar>
+        <left-area>
+            <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+        </left-area>
+        <caption-area>
+            <aui-text>故障查询</aui-text>
+        </caption-area>
+    </aui-titlebar>
+    <div class="searchArea">
+        <div style="display:flex;flex:1;padding:5px;">
+            <input type="text" class="searchItem" placeholder="编码"/>
+        </div>
+        <div style="display:flex;flex:2;padding:5px 0;">
+            <input type="text" class="searchItem" placeholder="描述"/>
+        </div>
+    </div>
+</aui-header>
+<aui-scroller class="content" style="position: absolute; top: 90px; right: 0px; bottom: 45px;left: 0px;">
+    <aui-list>
+        <list-cell>
+            <a>ATJIF0018-无法启动，增压不足</a>
+        </list-cell>
+        <list-cell>
+            <a>ATJIF0019-铆接机</a>
+        </list-cell>
+        <list-cell>
+            <a>ATJITF0001-蒸汽发生器故障</a>
+        </list-cell>
+    </aui-list>
+</aui-scroller>
+</ui>
+<style type="less">
+aui-guzhangquery{
+@defaultborder:1px solid #ddd;
+    .searchArea{
+        display: flex;
+        .searchItem{
+            width:100%;
+            border:@defaultborder;
+            height: 30px;
+            margin-right: 5px;
+            font-size: 14px;
+            padding-left:5px;
+        }
+    }
+}
+</style>
+<script>
+
+import auiLoading from '@auicomp/loading/Loading.aui';
+import fetch from '@comm/utils/xfetch';
+import Toast from '@auicomp/toast/Toast.aui';
+
+export default class guzhangQuery {
+    static get tag() {
+        return 'guzhangquery';
+    }
+    created() {
+        const $el = $(this.$el);
+        const obj = this.$obj = {
+
+        }
+    }
+
+    detached(){
+        this.$vm && this.$vm.destroy();
+    }
+}
+</script>

@@ -1,0 +1,229 @@
+<ui>
+    <div class="mainpage">
+        <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <div v-on:click="method.closeWindow()"><i class="icon auicon icon-arrowleft"></i></div>
+                </left-area>
+                <caption-area>
+                    <aui-text>{{data.zhuye[lan]}}</aui-text>
+                </caption-area>
+                <right-area>
+                    <a v-on:click="method.changLan">
+                        <i v-bind:class="{icon_ch:lan=='ch', icon_en:lan=='en'}"></i>
+                    </a>
+                </right-area>
+            </aui-titlebar>
+        </aui-header>
+
+        <aui-scroller class="content">
+            <aui-swiper pagination style="max-height: 170px;">
+                <div class="swiper-slide">
+                    <img class="full" src="./assets/imgs/banner01.jpg"/>
+                </div>
+                <div class="swiper-slide">
+                    <img class="full" src="./assets/imgs/banner03.jpg"/>
+                </div>
+            </aui-swiper>
+            <div class="grid-row">
+                <div class="grid-item" v-on:click="method.golist(0,'/QingjiaList')">
+                    <img src="./assets/imgs/qingjia.png">
+                    <aui-text>{{data.qjsq[lan]}}</aui-text>
+                </div>
+                 <div class="grid-item" v-on:click="method.golist(0,'/JiabanList')">
+                    <img src="./assets/imgs/jbsq.png">
+                    <aui-text>{{data.jbsq[lan]}}</aui-text>
+                </div>
+                <div class="grid-item" v-on:click="method.golist(0,'/Personal')">
+                    <img src="./assets/imgs/grxx.png" style="height:35px;">
+                    <aui-text style="margin-top:12px;">{{data.query[lan]}}</aui-text>
+                </div>
+            </div>
+            <div class="grid-row">
+                <div class="grid-item"  v-on:click="method.golist(1,'/ChuchaiList')">
+                    <img src="./assets/imgs/ccsq.png" style="height:24px;">
+                    <aui-text style="margin-top:17px;">{{data.ccsq[lan]}}</aui-text>
+                </div>
+                 <div class="grid-item"  v-on:click="method.golist(1,'/TongyongList')">
+                    <img src="./assets/imgs/tysplc.png">
+                    <aui-text>{{data.tyspl[lan]}}</aui-text>
+                </div>
+                <div class="grid-item"   v-on:click="method.golist(0,'/LizhiList')">
+                    <img src="./assets/imgs/lzsp.png">
+                    <aui-text>{{data.lzsp[lan]}}</aui-text>
+                </div>
+            </div>
+            <div class="grid-row">
+                <div class="grid-item"  v-on:click="method.golist(1,'/ShlcList')">
+                    <img src="./assets/imgs/shlc.png">
+                    <aui-text>{{data.cgshd[lan]}}</aui-text>
+                </div>
+                <div class="grid-item" v-on:click="method.golist(1,'/EwyfList')">
+                    <img src="./assets/imgs/ewyf.png" style="height:33px">
+                    <aui-text style="margin-top:12px;">{{data.ewyf[lan]}}</aui-text>
+                </div>
+                <div class="grid-item"  v-on:click="method.golist(0,'/PljbList')">
+                    <img src="./assets/imgs/bzjqb.png" style="height:38px">
+                    <aui-text style="margin-top:7px;">{{data.bzjqb[lan]}}</aui-text>
+                </div>
+            </div>
+        </aui-scroller>
+    </div>
+</ui>
+
+
+<script>
+    import commLang from '@lang/comm';
+    import { router } from '@auicomp/action/Action.aui';
+    import common from '@libs/common';
+    import fetch from "@libs/fetch";
+    import '@auicomp/swiper/Swiper.aui';
+    export default class MainPage {
+
+        static get tag() {
+            return 'mainpage';
+        }
+        created() {
+            $(this.$el).on('enter',common.removeCacheListPage);//删除缓存的列表页面
+            let self = this;
+            const obj = this.$obj = {
+                lan:localStorage.getItem("lan"),
+                data:commLang.main,
+                method:{
+                    golist(sysid, path){
+                        console.log(path)
+                        if (sysid == 0) {//hr
+                            if (localStorage.getItem("haveLoginHR") != null && localStorage.getItem("haveLoginHR") == "true") {
+                               router.go({path: path, isForce: true}); 
+                            } else {
+                                router.go('/loginHR?path='+path);
+                            }
+                        } 
+                        if (sysid == 1) {//oa
+                            if (localStorage.getItem("haveLoginOA") != null && localStorage.getItem("haveLoginOA") == "true") {
+                                router.go({path: path, isForce: true}); 
+                            } else {
+                                router.go('/loginOA?path='+path);
+                            }
+                        } 
+                    },
+                    closeWindow(){
+                        appnest.navigation.closeWindow();
+                    },
+                    changLan(){
+                        common.confirm("<div class='confirm-msg'>请选择语言<br/>Please choose language</div>",'中文','English',function(){
+                            self.doLan('ch')
+                        },function(){
+                            self.doLan('en')
+                        });
+                    }
+                }
+            }
+            console.log(this.$obj)
+            this.$vm = $(this.$el).render(this.$obj);
+        }
+        doLan(lan){
+            if(this.$obj.lan != lan){
+                this.$obj.lan = lan;
+                localStorage.setItem("lan",lan);
+                localStorage.removeItem('haveLoginHR');
+                localStorage.removeItem('haveLoginOA');
+                this.autologin();
+            }
+        }
+        autologin(){
+             let self= this;
+             window.hasLogin = false;//添加登陆成功标志
+            fetch({
+                appId: common.appId,
+                url :  common.oaUrl+'/ek',
+                data: {
+                    username:  localStorage.getItem("username"),
+                    password: localStorage.getItem("password"),
+                    lan: localStorage.getItem("lan"),
+                },
+                type: 'post',
+                success: function(Data){
+                    if (Data.hr_status == "fail") {
+                        common.toast('hr登录失败！');
+                        localStorage.setItem("haveLoginHR", "false");
+                    }else{
+                        localStorage.setItem("haveLoginHR", "true");
+                    }
+                    if (Data.oa_status == "fail") {
+                        common.toast('oa登录失败！');
+                        localStorage.setItem("haveLoginOA", "false");
+                    }else{
+                        localStorage.setItem("haveLoginOA", "true");
+                    }
+                     window.hasLogin = true;//添加登陆成功标志
+                     self.getCookie();
+                }
+            });
+        }
+        detached(){
+            this.$vm && this.$vm.destroy();
+        }
+        getCookie(){
+            
+        }
+    }
+</script>
+<style type='less'>
+@import url('../assets/less/theme/default/common.less');
+.mainpage{
+    width: 100%;
+    height: 100%;
+    .icon_ch { 
+        background: url(../assets/imgs/ch.png) center center / 19px 18px no-repeat;
+        width: 20px;
+        height: 18px;
+    } 
+    .icon_en { 
+        background: url(../assets/imgs/en.png) center center / 19px 18px no-repeat;
+        width: 20px;
+        height: 18px;
+    } 
+    .content { 
+        position: absolute;
+        top: 44px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+    } 
+    .banner { 
+        width: 100%;
+    }
+    .grid-row{
+        display: flex;
+        flex-direction: row;
+        border-bottom: 1px solid #EEEEEE;
+        .grid-item{
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            align-items: center;
+            height: 125px;
+            justify-content: center;
+            border-right: 1px solid #EEEEEE;
+            img{
+                width: 40px;
+                height: 38px;
+            }
+            aui-text{
+                margin: 10px 3px 0px 3px;
+                font-size: 15px;
+                color: #444444;
+            }
+            &:last-child{
+                 border-right: 0;
+            }
+        }
+
+    }
+}
+.confirm-msg{
+    text-align: left;
+    padding: 0 25px;
+}
+</style>

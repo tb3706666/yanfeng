@@ -1,0 +1,293 @@
+<ui>
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <a id="backIcon"><i class="icon auicon icon-arrowleft"></i></a>
+            </left-area>
+            <caption-area>
+                <aui-text>maximo</aui-text>
+            </caption-area>
+        </aui-titlebar>
+    </aui-header>
+    <aui-scroller class="content" style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;background-color:#efeff4">
+        <aui-list>
+            <list-cell  class="grid">
+                <grid-cell>
+                    <img class="media-object pull-left" style="width:50px;height:50px" src="./assets/imgs/usericon.png">
+                </grid-cell>
+                <grid-cell class="flex-1 padded grid-stretch">
+                    <p class="pline1">
+                        <font style="font-size:15px;">欢迎您：{{userInfo.userName}}</font>
+                        <font style="color:#8E8E93">工号：{{userInfo.badge}}</font>
+                    </p>
+                    <p class="pline2">{{userInfo.userDep}}/{{userInfo.userTitle}}</p>
+                </grid-cell>
+            </list-cell>
+        </aui-list>
+        
+        <aui-list>
+            <list-cell class="menulist" v-on:click="func.goDianjian()">
+                <div class="iconcell">
+                    <img  src="./assets/imgs/dianjian.png">
+                </div>
+                <div class="textcell">
+                    <font style="font-size:15px;">点检</font>
+                </div>
+                <div class="riconcell">
+                    <i class="icon auicon icon-arrowright"></i>
+                </div>
+            </list-cell>
+        </aui-list>
+
+        <aui-list>
+            <list-cell class="menulist"  v-on:click="func.goYufang()">
+                <div class="iconcell">
+                    <img  src="./assets/imgs/weihu.png">
+                </div>
+                <div class="textcell">
+                    <font style="font-size:15px;">预防性维护</font>
+                </div>
+                <div class="riconcell">
+                    <i class="icon auicon icon-arrowright"></i>
+                </div>
+            </list-cell>
+            <list-cell class="menulist" v-on:click="func.goGuzhang">
+                <div class="iconcell">
+                    <img  src="./assets/imgs/guzhang.png">
+                </div>
+                <div class="textcell">
+                    <font style="font-size:15px;">故障报修</font>
+                </div>
+                <div class="riconcell">
+                    <i class="icon auicon icon-arrowright"></i>
+                </div>
+            </list-cell>
+        </aui-list>
+    </aui-scroller>
+</ui>
+<script>
+import '@auicomp/header/Header.aui';
+import '@auicomp/scroller/Scroller.aui';
+import '@auicomp/text/Text.aui';
+import '@auicomp/grid/Grid.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auicomp/list/List.aui';
+import tool from '@comm/utils/tool';
+
+import auiLoading from '@auicomp/loading/Loading.aui';
+import fetch from '@comm/utils/xfetch';
+import Alert from '@auicomp/alert/Alert.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+import Action,{ router } from '@auicomp/action/Action.aui';
+
+export default class MaximoIndex {
+
+    static get tag() {
+        return 'maximoindex';
+    }
+
+    created() {
+
+        $("#backIcon").click(function(){
+            appnest.navigation.closeWindow();
+        });
+        fetch.plusready(function(){
+            tool.closeModal();//监听Android返回键，强制关闭所有模态窗口
+            
+            //test-start
+            // window.userInfo = {
+            //     badge:'83324',
+            //     loginId:'atian16',
+            //     userName:'田青',
+            //     userDep:'信息技术部',
+            //     userTitle:'应用系统工程师'
+            // }
+            // auiLoading.show();
+            // $.extend(true,obj.userInfo,window.userInfo);
+            // fetch({
+            //     appId: 'maximo',
+            //     url : 'http://baseurl/isExituser.jsp',
+            //     data: {
+            //         badge:window.userInfo.badge
+            //     },
+            //     success:function(rsp){
+            //         auiLoading.hide();
+            //         if(rsp.res != ""){
+            //             Alert.show({
+            //                 content: rsp.res,
+            //                 doOk: function(){
+            //                     appnest.navigation.closeWindow();
+            //                 }
+            //             });
+            //         }else{
+            //             // Toast.show('登录成功', function(){});
+            //             window.lgInfo = rsp;
+            //         }
+            //     },
+            //     error: function(rs){
+            //         auiLoading.hide();
+            //         Alert.show({
+            //             content: rs.errmsg,
+            //             doOk: function(){
+            //                 appnest.navigation.closeWindow();
+            //             }
+            //         });
+            //     }
+            // });
+            //test-end
+
+            appnest.config.getUserInfo({
+                success:function(r){
+                    // r.loginId = "atian16";
+                    window.userInfo = r;
+                    auiLoading.show();
+                    appnest.contact.getMemberInfo({//从通讯录里查询员工工号
+                        loginId:window.userInfo.loginId,
+                        success:function(mi){
+                            auiLoading.hide();
+                            window.userInfo.userName = mi.userName;
+                            window.userInfo.userDep = mi.departments[0].name;
+                            $.each(mi.userParams,function(i,e){
+                                if(e.key == "employee_id"){
+                                    window.userInfo.badge = e.value;
+                                }
+                                if(e.key == "title"){
+                                    window.userInfo.userTitle = e.value;
+                                }
+
+                            });
+                            $.extend(true,obj.userInfo,window.userInfo)
+                            fetch({
+                                appId: 'maximo',
+                                url : 'http://baseurl/isExituser.jsp',
+                                data: {
+                                    badge:window.userInfo.badge
+                                },
+                                success:function(rsp){
+                                    auiLoading.hide();
+                                    if(rsp.res != ""){
+                                        Alert.show({
+                                            content: rsp.res,
+                                            doOk: function(){
+                                                appnest.navigation.closeWindow();
+                                            }
+                                        });
+                                    }else{
+                                        // Toast.show('登录成功', function(){});
+                                        window.lgInfo = rsp;
+                                    }
+                                },
+                                error: function(rs){
+                                    auiLoading.hide();
+                                    Alert.show({
+                                        content: rs.errmsg,
+                                        doOk: function(){
+                                            appnest.navigation.closeWindow();
+                                        }
+                                    });
+                                }
+                            });
+                        },
+                        fail:function(mi){
+                            auiLoading.hide();
+                            Alert.show({
+                                content: mi.errMsg,
+                                doOk: function(){
+                                    appnest.navigation.closeWindow();
+                                }
+                            });
+                        }
+                    });
+
+                },
+                fail:function(res){
+                    Alert.show({
+                        content: res.errMsg,
+                        doOk: function(){
+                            appnest.navigation.closeWindow();
+                        }
+                    });
+                }
+            });
+        });
+
+        const $el = $(this.$el);
+        const obj = this.$obj = {
+            userInfo:{
+                userName:'',
+                badge:'',
+                userDep:'',
+                userTitle:''
+            },
+            func:{
+                goDianjian:function(){
+                    router.go("/dianjian");
+                },
+                goYufang:function(){
+                    router.go("/yufang");
+                },
+                goGuzhang:function(){
+                    router.go("/guzhanglist");
+                }
+            }
+        }
+        $el.find("aui-scroller").render(obj);
+    }
+}
+</script>
+<style type="less">
+aui-titlebar{
+    background:#004ea2 !important;
+    left-area{
+        i{color: #ffffff !important;}
+    }
+    right-area{
+        i{color: #ffffff !important;}
+    }
+    aui-text{
+        color: #ffffff !important;
+    }
+}
+aui-maximoindex{
+    aui-list{
+        background-color: #ffffff;
+        border-top: 0 !important;
+        border-bottom: 0 !important;
+        list-cell{
+            &:active{
+                background: rgb(236, 234, 234);
+            }
+        }
+    }
+    .pline1{
+        display: flex;
+        justify-content: space-between;
+    }
+    .pline2{
+        margin-top: 8px;
+    }
+
+    .menulist{
+        display: flex;
+        align-items: center;
+        padding: 12px ;
+        .iconcell{
+            height: 30px;
+            display: flex;
+            align-items: center;
+            img{
+                width: 24px;
+                height: 24px;
+            }
+        }
+        .textcell{
+            flex: 9;
+            padding-left: 12px;
+        }
+        .riconcell{
+            flex: 1;
+            text-align: center;
+        }
+    }
+}
+</style>

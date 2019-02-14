@@ -1,0 +1,105 @@
+<ui>
+    <div id="jifenlist">
+        <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>积分排行</aui-text>
+                </caption-area>
+            </aui-titlebar>
+        </aui-header>
+
+        <aui-scroller class="content" id="stascroll" style="position: absolute; top: 55px; right: 0px; bottom: 0px;left: 0px;text-align: center;border-top:0;">
+
+            <aui-list id="contentlist" class="mtop0 bt0" v-for="item in items">
+                    <list-cell class="grid staf-grid" >
+                        <grid-cell>
+                            <img class="media-object pull-left" src="./assets/imgs/group.png" style="width:24px;height:24px">
+                        </grid-cell>
+                        <grid-cell class="flex-1 padded staf">
+                            <p style="color:#000">{{item.name}}<span style="float:right;">{{item.credit}}</span></p >
+                        </grid-cell>
+                    </list-cell>
+            </aui-list>
+
+        </aui-scroller>
+    </div>
+</ui>
+
+<script>
+import fetch from '@comm/utils/xfetch';
+import { router } from '@auicomp/action/Action.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+export default class Jifen{
+    static get tag(){
+        return 'jifen';
+    }
+
+created(){
+        var stacout=[];
+        auiLoading.show();
+        fetch({
+            appId: 'iexpress',
+            url : 'http://IEXPRESS/credit_list.jsp',
+            success: function(data){
+                if(data.creditInfo.length>0){
+                    $.each(data.creditInfo, function(e,e1) {
+                        stacout.push(e1);
+                    });
+                }else{
+                    $("#stascroll").append("<img src='./assets/imgs/nodata.png'>")
+                    Toast.show("查无数据", function(){
+                    });
+                }
+                auiLoading.hide();
+            },
+            error: function(rs){
+                Toast.show(rs.errmsg, function(){
+                });
+                auiLoading.hide();
+            }
+        });
+
+
+        var obj = {
+            items : stacout,
+        };
+        $('#jifenlist').render(obj);
+
+}
+}
+
+
+</script>
+
+<style type="less">
+    .md-phone-num .mbsc-np-dsp {
+        min-height: 25px;
+        -webkit-box-sizing: content-box;
+        -moz-box-sizing: content-box;
+        box-sizing: content-box;
+    }
+    .mbsc-form-group{
+        margin: 0;
+    }
+.flex-1{
+    text-align: left;
+}
+.staf p{
+    height: 30px;
+    color: #000;
+    font-size:15px;
+}
+.staf-grid{
+    padding: 8px !important;
+}
+.mtop0{
+    margin-top:0 !important;
+}
+.bt0{
+    border-top: 0 !important;
+}
+</style>

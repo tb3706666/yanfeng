@@ -1,0 +1,227 @@
+<ui>
+    <div class="Main" style="display:none">
+        <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <div v-on:click="func.closeWindow"><i class="icon auicon icon-arrowleft"></i></div>
+                </left-area>
+                <caption-area>
+                    <aui-text>{{username}}</aui-text>
+                </caption-area>
+                <right-area>
+                   
+                </right-area>
+            </aui-titlebar>
+        </aui-header>
+        <aui-scroller class="content">
+            <div class="row">
+                <div class="text">薪资期间</div>
+                <div class="select" v-on:click="func.openSelect">
+                    <div class="select-value" >{{date}}</div>
+                    <li class="icon auicon icon-arrowright"></li>
+                </div>
+            </div>
+            <div v-for="item in list" v-filter="func.filter">
+                <div class="row" v-if="item.name=='应发工资'||item.name=='实得工资'" style="color:#15ACEB;font-weight:bold">
+                    <div class="left">{{item.name}}:</div>
+                    <div class="right">{{item.value}}</div>
+                </div>
+                <div class="row" v-elseif="item.name=='备注'">
+                   {{item.name}}:{{item.value}}
+                </div>
+                <div class="row" v-else >
+                    <div class="left">{{item.name}}:</div>
+                    <div class="right">{{item.value}}</div>
+                </div>
+            </div>
+            <div class="footer">
+               最多可查询近12个月的工资
+            </d>
+        </aui-scroller>
+    </div>
+</ui>
+
+
+<script>
+    import '@auicomp/scroller/Scroller.aui';
+    import '@auicomp/header/Header.aui';
+    import '@auicomp/text/Text.aui';
+    import '@auicomp/grid/Grid.aui';
+    import '@auicomp/titlebar/Titlebar.aui';
+    import common from "@libs/common";
+    import Selectsheet from '@comm/components/Selectsheet.aui';
+
+    import fetch from '@libs/fetch';
+    import {
+        router
+    } from '@auicomp/action/Action.aui';
+
+
+    var curHash;
+
+    export default class MyLoading {
+        static get tag() {
+            return 'MyLoading';
+        }
+
+        created() {
+            let self = this;
+            // let gonghao = "85304";
+            // self.init(gonghao);
+            fetch.plusready(function() {
+                appnest.config.getUserInfo({
+                    success: function(r) {
+                        appnest.contact.getMemberInfo({//从通讯录里查询员工工号
+                            loginId:r.loginId ,
+                            success:function(mi){
+                                let gonghao = '';
+                                console.log(mi.userParams)
+                                $.each(mi.userParams,function(i,e){
+                                    if(e.key == "employee_id"){
+                                      gonghao = e.value;
+                                    }
+                                });
+                                // gonghao ="85304";
+                                self.init(gonghao);
+                            },
+                            fail:function(mi){
+                                Alert.show({
+                                    content: mi.errMsg,
+                                    doOk: function(){
+                                        appnest.navigation.closeWindow();
+                                    }
+                                });
+                            }
+                        });
+                        
+                    },
+                    fail: function(r) {
+                        Alert.show({
+                            content: '获取用户信息失败',
+                            doOk: function(){
+                                appnest.navigation.closeWindow();
+                            }
+                        })
+                    }
+                });
+            });
+        }
+        init(gonghao){
+            let self = this;
+            const obj = this.$obj = {
+                gonghao:gonghao,
+                date:"",
+                list: [],
+                date_arr:[],
+                username:"",
+                isAjaxed:false,
+                func: {
+                    closeWindow(){
+                        appnest.navigation.closeWindow();
+                    },
+                    openSelect(){
+                        Selectsheet.show({
+                            list: obj.date_arr,
+                            func:function(index){
+                                if(obj.date != obj.date_arr[index]){
+                                    obj.date = obj.date_arr[index];
+                                    self.doQuery();
+                                }
+                            }
+                        });
+                    },
+                    filter(index,item){
+                        if(!isNaN(item.value)){
+                            item.value = Number(item.value).toFixed(2);
+                        }
+                    }
+                }
+            }
+            this.$vm = $(this.$el).render(obj);
+            
+            this.doQuery();
+        }
+
+        doQuery() {
+            let self = this;
+            fetch({
+                url: common.oaUrl+'/interface/recordQuery.jsp',
+                data: {
+                    gonghao: this.$obj.gonghao,
+                    date: this.$obj.date,
+                },
+                success: function(infos) {
+                   var list = infos.list;
+                   if(list.length==0){
+                       common.alert('该薪资期间您无薪资数据或您所在群组尚未开通此项功能，请至HRIS系统查询您的工资信息，如有不便，敬请谅解！',function(){
+                            appnest.navigation.closeWindow();
+                       })
+                       return;
+                   }
+                   $('.Main').css("display","block");
+                   self.$obj.list = infos.list.filter(item=>{
+                       return item.value != '0.0000' && item.value != '' && item.value != null
+                   })
+                   self.$obj.username = infos.username;
+                   if(self.$obj.date == ''){
+                        self.$obj.date_arr = infos.date_arr;
+                   }
+                   self.$obj.date = infos.currDate;
+                }
+            })
+        }
+    }
+</script>
+
+<style type='less'>
+    .Main {
+        width: 100%;
+        height: 100%;
+        .content{
+            position: absolute;
+            top: 45px;
+            right: 0px;
+            bottom: 30px;
+            left: 0px;
+            background: white;
+            .row{
+                display: flex;
+                flex-direction: row;
+                border-bottom: 1px solid #C7C7CC;
+                padding: 10px;
+                .text{
+                    flex: 4;
+                }
+                .select{
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    flex: 6; 
+                    .select-value{
+                        flex: 1;
+                        text-align: right;
+                        margin-right: 5px;
+                    }
+                }
+                .left{
+                    flex: 5
+                }
+                .right{
+                    flex: 5;
+                    text-align: right;
+                }
+            }
+        }
+        .footer{
+            position: fixed;
+            height: 30px;
+            line-height: 30px;
+            right: 0px;
+            bottom: 0px;
+            left: 0px;
+            background: #F7F7F7;
+            color: red;
+            padding-left: 10px;
+        }
+    }
+</style>

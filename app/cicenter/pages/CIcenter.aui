@@ -1,0 +1,214 @@
+﻿<ui>
+<div id="tittle">
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back" id="backIcon"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>首页</aui-text>
+            </caption-area>
+        </aui-titlebar>
+    </aui-header>
+    <aui-scroller class="content" style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;text-align: center; background-color: #fff;">
+        <div id="title_image">
+                <img class="full" src="./assets/imgs/user.png" />
+                <p >欢迎您回来！</p>
+                <p style="font-size:16px">{{items.name}}</p>
+        </div>
+        <aui-tabbar class="tabbar tabbar-footer tabbar-tiled mtop15">
+
+            <tabbar-cell class="pd30" v-on:click="func.hlhlr()">
+            <img class="media-object pull-left icon36" src="./assets/imgs/ci01.png">
+                <label class="tab-label mtop10">合理化录入</label>
+            </tabbar-cell>
+
+            <tabbar-cell class="pd30" v-on:click="func.dwcld()">
+            <span class="badge badge-negative ptr" id="daibanNum" v-if="items.daibanNum!=0">{{items.daibanNum}}</span>
+            <img class="media-object pull-left icon36" src="./assets/imgs/ci02.png">
+                <label class="tab-label mtop10">待我处理的</label>
+            </tabbar-cell>
+            
+            <tabbar-cell class="pd30" v-on:click="func.dtrcl()">
+            <span class="badge badge-negative ptr" id="otherNum" v-if="items.otherNum!=0">{{items.otherNum}}</span>
+            <img class="media-object pull-left icon36" src="./assets/imgs/ci03.png">
+                <label class="tab-label mtop10">代他人处理</label>
+            </tabbar-cell>
+
+            <tabbar-cell class="pd30" v-on:click="func.hlhcx()">
+            <img class="media-object pull-left icon36" src="./assets/imgs/ci04.png">
+                <label class="tab-label mtop10">合理化查询</label>
+            </tabbar-cell>
+
+            <tabbar-cell class="pd30" v-on:click="func.wclgd()">
+            <img class="media-object pull-left icon36" src="./assets/imgs/ci05.png">
+                <label class="tab-label mtop10">我处理过的</label>
+            </tabbar-cell>
+
+            <tabbar-cell class="pd30" v-on:click="func.jfcx()">
+            <img class="media-object pull-left icon36" src="./assets/imgs/ci06.png">
+                <label class="tab-label mtop10">积分查询</label>
+            </tabbar-cell>
+
+            <tabbar-cell class="pd30" v-on:click="func.pjwh()" v-if="items.pingjiangFlag=='1'">
+            <img class="media-object pull-left icon36" src="./assets/imgs/ci06.png">
+                <label class="tab-label mtop10">评奖维护</label>
+            </tabbar-cell>
+
+        </aui-tabbar>
+    </aui-scroller>
+    </div>
+</ui>
+
+
+<script>
+
+import '@auicomp/tabbar/Tabbar.aui';
+import '@auicomp/swiper/Swiper.aui';
+import '@auicomp/header/Header.aui';
+import '@auicomp/scroller/Scroller.aui';
+import '@auicomp/grid/Grid.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import Action from '@auicomp/action/Action.aui';
+import fetch from '@comm/utils/xfetch';
+import { router } from '@auicomp/action/Action.aui';
+import './Frame.aui';
+// import $ from 'agile-ce';
+
+export default class CIcenter{
+    
+    static get tag(){
+        return 'cicenter';
+    }
+
+    created(){
+        //模块缓存的页面
+        $(this.$el).on('enter',function(){
+            $("aui-hls").remove();
+            $("aui-selectpage").remove();
+            $("aui-jifenpage").remove();
+            $("aui-eval").remove();
+            $("aui-hlhadd").remove();
+        });
+
+        $("#backIcon").click(function(){
+            appnest.navigation.closeWindow();
+        });
+       
+        const obj = this.$obj = {
+            items : window.logininfo,
+            func:{
+                hlhlr:function(){
+                    router.go('/hlhadd');
+                },
+                dwcld:function(){
+                    router.go('/hllist');
+                },
+                dtrcl:function(){
+                    router.go('/other');
+                },
+                hlhcx:function(){
+                    router.go('/hls');
+                },
+                wclgd:function(){
+                    router.go('/select');
+                },
+                jfcx:function(){
+                    router.go('/jifen');
+                },
+                pjwh:function(){
+                    router.go('/eval');
+                }
+            }
+        };
+        $('#tittle').render(obj);
+
+
+
+    }
+}
+
+</script>
+
+<style type="less">
+aui-titlebar{
+    background:#004ea2 !important;
+    i{
+        color: #ffffff !important;
+    }
+    aui-text{
+        color: #ffffff !important;
+    }
+}
+    #title_image{
+        margin: 25px 0px;
+        img{
+            width:100px;
+            height:100px
+        }
+        p{
+            font-size: 18px;
+        }
+    }
+    .pd30{
+        padding:30px 0 !important;
+        width: 33.33%;
+        float: left;
+        border-top:1px solid #f3f3f3;
+        border-right:1px solid #f3f3f3;
+        border-bottom:1px solid #f3f3f3;
+    }
+    .pd30 .auicon{
+        font-size: 50px !important;
+    }
+    .pd30 .tab-label{
+        height: auto !important;
+        line-height: normal;
+        font-size: 16px !important;
+    }
+    .mtop10{
+        margin-top: 10px;
+    }
+    .mtop15{
+        margin-top: 0;
+    }
+    .banner{
+        width:100%;
+        height:100%;
+    }
+.icon36{
+    width:36px;
+    height:36px;
+}
+    .ptr{
+    position:absolute;
+    top:15px;
+    right:10px;
+    }
+aui-tabbarpage{
+    .description {
+        color: #9e9e9e;
+        text-align: center;
+        height: 32px;
+        line-height: 32px;
+    }
+
+    tabbar-cell.active{
+        .icon-home:before{
+        content: '\E6E5';
+        }
+        .icon-chat:before{
+            content: '\E6B8';
+        }
+        .icon-contact:before{
+            content: '\E6C4';
+        }
+        .icon-grid:before{
+            content: '\E6E1';
+        }
+        .icon-rdomore:before{
+            content: '\E745';
+        }
+    }
+}
+</style>

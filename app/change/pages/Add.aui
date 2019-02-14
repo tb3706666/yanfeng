@@ -1,0 +1,276 @@
+<ui>
+   <aui-header>
+        <aui-titlebar class="titlebar">
+            <left-area>
+                <aui-action type="back" id="backIcon"><i class="icon auicon icon-arrowleft" ></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>烟台备料更换校验系统</aui-text>
+            </caption-area>
+        </aui-titlebar>
+    </aui-header>
+
+    <aui-scroller id="addscroller"  class="content " style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;text-align: center; background-color:#FFFFFF;">
+        <p class="type-p">整椅信息</p>
+        <div class="edit-area">
+            <div class="line-div" id="busno">
+                <font>车号:</font>
+                <input type="text" v-model="busno" placeholder="请输入车号" />
+                <a v-on:click="func.okclick()">
+                    <i class="icon auicon icon-cbook"></i>
+                </a>
+            </div>
+            <div class="line-div" id="busconfig">
+                <font>车型配置:</font>
+                <input type="text" v-model="busconfig" placeholder="请扫描整椅条码" readonly/>
+                <a v-on:click="func.saoma('saoma1')">
+                    <i class="icon auicon icon-qrcode"></i>
+                </a>
+            </div>
+        </div>
+        <p class="type-p">备料信息</p>
+        <div class="edit-area">
+            <div class="line-div" style="margin-bottom:0" id="busconfig2">
+                <font>车型配置:</font>
+                <input type="text" v-model="busconfig2" placeholder="请扫描备料条码" readonly/>
+                <a v-on:click="func.saoma('saoma2')">
+                    <i class="icon auicon icon-qrcode"></i>
+                </a>
+            </div>
+        </div>
+        <aui-button  class="btn btn-primary sub-btn" v-on:click="func.sures()">确认更换</aui-button>
+    </aui-scroller>
+</ui>
+
+
+<script>
+import '@auicomp/header/Header.aui';
+import '@auicomp/button/Button.aui';
+import '@auicomp/scroller/Scroller.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auicomp/datetime/DateTime.aui';
+import '@auiutil/mobiscroll3/css/mobiscroll.javascript.min.css';
+import mobiscroll from '@auiutil/mobiscroll3/js/mobiscroll.javascript.min';
+import Alert from '@auicomp/alert/Alert.aui';
+import Confirm from '@auicomp/confirm/Confirm.aui';
+import fetch from '@comm/utils/xfetch';
+// import { router } from '@auicomp/action/Action.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import './Frame.aui';
+import router from '../routers';
+import Toast from '@auicomp/toast/Toast.aui';
+
+export default class Add{
+    static get tag(){
+        return 'add';
+    }
+
+    created () {
+        $("#backIcon").click(function(){
+            appnest.navigation.closeWindow();
+        });
+        var self=this;
+        fetch.plusready(function(){
+            appnest.config.getUserInfo({
+                success:function(r){
+                    window.userInfo = r;
+                    var maflg1="";
+                    var maflg2="";
+                   const obj = self.$obj = {
+                        busno:"",
+                        busconfig:"",
+                        busconfig2:"",
+                        func:{
+                            okclick:function(){
+                                if(obj.busno==""||obj.busno==null){
+                                    Toast.show('请输入车号');
+                                }else{
+                                    auiLoading.show();
+                                    fetch({
+                                        appId: 'yantaibus',
+                                        url : "http://baseurl/carNo.jsp",
+                                        data: {
+                                            carNo:obj.busno
+                                        },
+                                        dataType:"text",
+                                        success: function(data){
+                                            if(data==""||data==null||data=="null"){
+                                                Toast.show('车号输入有误');
+                                                obj.busno="";
+                                            }else{
+                                                maflg1="";
+                                                obj.busconfig=data;
+                                            }
+                                            auiLoading.hide();
+                                        
+                                        },
+                                        error: function(rs){
+                                            auiLoading.hide();
+                                            Toast.show(rs.errmsg, function(){
+                                            });
+                                            
+                                        }
+                                    });
+                                }
+                            },
+                            saoma:function(flg){
+                                //通过扫码获得text，
+                                appnest.barcode.scan({
+                                    success: function (res) {
+                                        var result= res.result; 
+                                        auiLoading.show();
+                                        fetch({
+                                            appId: 'yantaibus',
+                                            url : "http://baseurl/query.jsp",
+                                            data: {
+                                                texts:result
+                                            },
+                                            dataType:'text',
+                                            success: function(data){
+                                                if(data==null||data==""||data=="null"){
+                                                    Toast.show('查询结果为空');
+                                                }else{
+                                                    if(flg=='saoma1'){
+                                                        maflg1=result;
+                                                        obj.busconfig=data;
+                                                    }else if(flg=='saoma2'){
+                                                        maflg2=result;
+                                                        obj.busconfig2=data;
+                                                    }
+                                                }
+                                                auiLoading.hide();
+                                            },
+                                            error: function(rs){
+                                                auiLoading.hide();
+                                                Toast.show(rs.errmsg, function(){
+                                                });
+                                            }
+                                        });
+                                    },
+                                    fail: function (res) {
+                                        Toast.show(res.errmsg, function(){
+                                        });
+                                    }
+                                });
+                                
+                            },
+                            sures:function(){
+                                if(obj.busconfig==obj.busconfig2&&obj.busconfig!=""&&busconfig2!=""){
+                                    Confirm.show({
+                                        content: '匹配成功，可以更换',
+                                        doOk: function(){
+                                            auiLoading.show();
+                                            fetch({
+                                                appId: 'yantaibus',
+                                                url : "http://baseurl/inserts.jsp",
+                                                data: {
+                                                    ma1flag:maflg1,
+                                                    ma2flag:maflg2,
+                                                    username:window.userInfo.loginId,
+                                                },
+                                                success: function(data){
+                                                    auiLoading.hide();
+                                                    if(data==1){
+                                                        Toast.show('操作成功');
+                                                    }else{
+                                                        Toast.show('插入数据失败，请稍后再试');
+                                                    }
+                                                },
+                                                error: function(rs){
+                                                    auiLoading.hide();
+                                                    Toast.show(rs.errmsg, function(){
+                                                    });
+                                                }
+                                            });
+                                        },
+                                });
+                                }else{
+                                    if(obj.busconfig==""||obj.busconfig2==""){
+                                        Toast.show('车型配置不能为空');
+                                    }else{
+                                        Toast.show('匹配失败，请确认更换备料的车型配置是否一致');
+                                    }
+                                    
+                                }
+                            }
+                        }
+                    };
+                    self.$vm = $(self.$el).render(self.$obj);
+                },
+                fail:function(r){
+                    Alert.show({
+                        content: '获取平台用户信息失败，请联系管理员',
+                        doOk: function(){
+                            appnest.navigation.closeWindow();
+                        }
+                    });
+                }
+            });
+        }); 
+    }
+}
+
+</script>
+
+<style type="less">
+aui-titlebar{
+    background:#004ea2 !important;
+    left-area{
+        i{color: #ffffff !important;}
+    }
+    aui-text{
+        color: #ffffff !important;
+    }
+}
+
+@defaultborder:1px solid #ddd;
+.sub-btn{
+    width:85%;
+    margin: 10px 0;
+    font-size: 16px;
+    background:#4E93F7 !important;
+}
+.type-p{
+    text-align: left;
+    color: #4E93F7;
+    font-size: 16px;
+    margin: 10px;
+}
+.edit-area{
+    border-top: @defaultborder;
+    border-bottom: @defaultborder;
+    padding: 10px;
+    font-size: 16px;
+}
+.line-div{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    &:first-child{
+        margin-bottom: 10px;
+    }
+    font{
+        flex: 3;
+        text-align: left;
+    }
+    input[type='text']{
+        border:0;
+        height: 26px;
+        flex: 8;
+        text-align: right;
+        padding: 0 10px;
+        font-size: 16px;
+    }
+    a{
+        flex: 1;
+        i{
+            font-size: 20px;
+        }
+        &:active{
+            i{
+                color: #4E93F7;
+            }
+        }
+    }
+}
+</style>

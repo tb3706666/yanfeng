@@ -1,0 +1,911 @@
+<ui>
+    <div class="ChuchaiDetail">
+       <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>详情Detail</aui-text>
+                </caption-area>
+                <right-area>
+                    <a v-on:click="func.submit">
+                        <i class="icon auicon icon-rdook"></i>
+                    </a>
+                </right-area>
+            </aui-titlebar>
+        </aui-header>
+        <aui-tabbar class="tabbar tabbar-line tabbar-line-width70 animated" style="display:none">
+            <tabbar-cell v-bind:class="{active:tabIndex==0}" v-on:click="func.tabChange(0)">
+                <label class="tab-label">流程表单Form</label>
+            </tabbar-cell>
+            <tabbar-cell v-bind:class="{active:tabIndex==1}" v-on:click="func.tabChange(1)">
+                <label class="tab-label">审批Comments</label>
+            </tabbar-cell>
+        </aui-tabbar>
+        <aui-scroller class="content">
+            <div class="page1 " v-bind:class="{curr:tabIndex==0}">
+                <aui-action class="list-cell active" href="#toggle1" type="toggle">
+                    <a class="toogle-title">
+                        出差申请审批表  Travel Approval Form<i class="icon auicon icon-arrowright"></i>
+                    </a>
+                </aui-action>
+                <div class="toggle1-line"></div>
+                <div id="toggle1" action-target class="active toggle-box">
+                    <div class="box1">
+                        <div class="label-top">主题 Subject</div>
+                        <div class="label-content">{{data.zt}}</div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">申请人  Apply Name</div>
+                        <div class="label-content">{{data.sqr}}</div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">申请人部门  Dept</div>
+                        <div class="label-content">{{data.sqrbm}}</div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">出差类别  Travel Type</div>
+                        <div class="label-content">{{data.cclb}}</div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">开始时间  Time from</div>
+                        <div class="label-content">{{data.cckssj}}</div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">结束时间  Time to</div>
+                        <div class="label-content">{{data.ccjssj}}</div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">出差目的  Reason for Travel</div>
+                        <div class="label-content">{{data.ccmd}}</div>
+                    </div>
+                </div>
+                <aui-action class="list-cell " href="#toggle2" type="toggle">
+                    <a class="toogle-title">
+                        出差行程 Travelers Schedule<i class="icon auicon icon-arrowright"></i>
+                    </a>
+                </aui-action>
+                <div class="toggle1-line"></div>
+                <div id="toggle2" action-target class=" toggle-box">
+                    <div v-if="data.cclb=='市内 Local'">
+                        <div class="model-box" v-for="item in data.xincheng">
+                            <div class="box1">
+                                <div class="label-top">出差人  Traveler</div>
+                                <div class="label-content">{{item.ccr}}</div>
+                            </div>
+                            <div class="box1">
+                                <div class="label-top">出发时间  Date Time From</div>
+                                <div class="label-content">{{item.cfsj}}</div>
+                            </div>
+                            <div class="box1">
+                                <div class="label-top">到达时间 Date Time To</div>
+                                <div class="label-content">{{item.ddsj}}</div>
+                            </div>
+                            <div class="box1">
+                                <div class="label-top">出发地 Route From</div>
+                                <div class="label-content">{{item.cfd}}</div>
+                            </div>
+                            <div class="box1">
+                                <div class="label-top">目的地 Route To</div>
+                                <div class="label-content">{{item.mdd}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else>
+                        <div class="model-box" v-for="item in data.xincheng">
+                            <div class="box1">
+                                <div class="label-top">出差人  Traveler</div>
+                                <div class="label-content">{{item.ccr}}</div>
+                            </div>
+                            <div class="box1">
+                                <div class="label-top">出发时间  Date Time From</div>
+                                <div class="label-content">{{item.cfsj}}</div>
+                            </div>
+                            <div class="box1">
+                                <div class="label-top">到达时间 Date Time To</div>
+                                <div class="label-content">{{item.ddsj}}</div>
+                            </div>
+                            <div class="box1">
+                                <div class="label-top">出发地 Route From</div>
+                                <div class="label-content">{{item.cfd}}</div>
+                            </div>
+                            <div class="box1">
+                                <div class="label-top">目的地 Route To</div>
+                                <div class="label-content">{{item.mdd}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-if="data.cclb=='国内 Domestic'">
+                        <div class="checkbox-box"  v-if="fpflag1&&fpflag2">
+                            <input class="magic-checkbox" type="checkbox" checked  name="layout" id="3" disabled="disabled">
+                            <label for="3">需要预定机票</label>
+                        </div>
+                        <div class="model-box" v-for="item in data.listsjipiao">
+                            <div class="box1">
+                                <div class="label-top">姓名</div>
+                                <div class="label-content">{{item.td2}}</div>
+                            </div>
+                            <div class="box1">
+                                <div class="label-top">姓</div>
+                                <div class="label-content">{{item.td3}}</div>
+                            </div>
+                            <div class="box1">
+                                <div class="label-top">名</div>
+                                <div class="label-content">{{item.td4}}</div>
+                            </div>
+                            <div class="box1">
+                                <div class="label-top">乘机人工号</div>
+                                <div class="label-content">{{item.td5}}</div>
+                            </div>
+                            <div class="box1">
+                                <div class="label-top">费用成本中心</div>
+                                <div class="label-content">{{item.td6}}</div>
+                            </div>
+                            <div class="box1">
+                                <div class="label-top">日期</div>
+                                <div class="label-content">{{item.td7}}</div>
+                            </div>
+                            <div class="box1">
+                                <div class="label-top">出发城市-机场</div>
+                                <div class="label-content">{{item.td9}}</div>
+                            </div>
+                            <div class="box1">
+                                <div class="label-top">到达城市-机场</div>
+                                <div class="label-content">{{item.td10}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box1 model-box" v-if="data.fileInfo.length>0">
+                        <div class="label-top">附件 Attachment</div>
+                        <div class="label-content">
+                            <ul class="attach-list">
+                                <li v-for="item in data.fileInfo" v-filter="func.addAttachIcon" v-on:click="func.openAttach(item.fileId1,item.fileName)">
+                                    <img v-bind:src="item.icon" class="attach-icon"></img>
+                                    <div class="attach-text">{{item.fileName}}</div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="page2"  v-bind:class="{curr:tabIndex==1}">
+                <aui-action class="list-cell " href="#toggle3" type="toggle">
+                    <a class="toogle-title">
+                        审批记录 Display circulation log<i class="icon auicon icon-arrowright"></i>
+                    </a>
+                </aui-action>
+                <div class="toggle1-line"></div>
+                <div id="toggle3" action-target class=" toggle-box">
+                    <div v-if="data.shenPiInfo.length==0">暂无数据!</div>
+                    <div v-else>
+                        <div v-for="item in data.shenPiInfo" class="model-box">
+                            <div class="sp-top">
+                                <div >{{item.czz}}</div>
+                                <div class="info1">于{{item.sj}} 在 {{item.jdmc}}环节 {{item.cz}}</div>
+                            </div>
+                            <div class="sp-btm">
+                                <div>处理意见 Process opinion</div>
+                                <div v-for="clyj_t in item.clyj" class="sp-opinion">
+                                    {{clyj_t.text}}
+                                </div>
+                                <div v-for="file_t in item.file" class="sp-file">
+                                    <span v-on:click="func.openAttach(file_t.fileId1,file_t.fileName)">{{file_t.fileName}}</span>
+                                </div>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+                <aui-action class="list-cell active" href="#toggle4" type="toggle">
+                    <a class="toogle-title">
+                        流程办理 Procedure handling<i class="icon auicon icon-arrowright"></i>
+                    </a>
+                </aui-action>
+                <div class="toggle1-line"></div>
+                <div id="toggle4" action-target class="active toggle-box">
+                    <div class="bt-box" v-if="data.buttonInfo.length > 0">
+                        <div class="bt-operation">操作 Next operation</div>
+                        <div class="bt-item" >
+                            <div v-for="item in data.buttonInfo" class="padding5">
+                                <input type="radio"  v-bind:value="item.buttonValue" v-model="oprGroup"  v-bind:id="'oprGroup'+item.buttonValue" class="magic-radio"   name="oprGroup" v-on:change="func.radioChange"/><label v-bind:for="'oprGroup'+item.buttonValue">{{item.buttonName}}</label>
+                            </div>
+                        </div>
+                        <div class="box1" v-if="data.isPass=='1'&&oprGroup=='handler_pass'">
+                            <div class="label-top">即将流向</div>
+                            <div class="label-content" v-for="item in data.pass" v-filter="func.passFilter"> {{item.nodeid}}.{{item.nodename}} {{item.nodeusername}}</div>
+                        </div>
+                        <div class="box1" v-if="data.isRefuse=='1'&&oprGroup=='handler_refuse'">
+                            <div class="row">
+                                <div class="text">驳回到</div>
+                                <div class="select" v-on:click="func.openRefuseSelect">
+                                    <div class="select-value">{{refuseName}}</div>
+                                    <li class="icon auicon icon-arrowright"></li>
+                                </div>
+                            </div>
+                            <div class="padding10">
+                                <input class="magic-checkbox" type="checkbox"  id="refusePassedToThisNode" v-model="refusePassedToThisNode">
+                                <label for="refusePassedToThisNode">驳回的节点通过后直接返回本人</label>
+                            </div>
+                        </div>
+                        <div class="box1" v-if="data.isForward=='1'&&oprGroup=='handler_commission'">
+                            <div class="label-top">转办Forward人员</div>
+                            <div class="forward-row" v-on:click="func.getForwardPeople">
+                                <div class="forward-name" v-bind:class={gray:forwardName==''} v-text="forwardName==''?'选择人员':forwardName"></div>
+                                <li class="icon auicon icon-arrowright"></li>
+                            </div>
+                        </div>
+                        <div class="box1" v-if="data.isCommunicate=='1'&&oprGroup=='handler_communicate'">
+                            <div class="label-top">沟通 Communicate人员</div>
+                            <div v-if="data.isCancelCommunicate=='1'"  class="label-content">
+                                <div v-for="item in data.communicate">{{item.userName}}</div>
+                            </div>
+                            <div class="forward-row" v-on:click="func.getCommunicatePeople">
+                                <div class="forward-name" v-bind:class={gray:communicateName==''} v-text="communicateName==''?'选择人员':communicateName"></div>
+                                <li class="icon auicon icon-arrowright"></li>
+                            </div>
+                        </div>
+                        <div class="box1" v-if="data.isCancelCommunicate=='1'&&oprGroup=='handler_cancelCommunicate'">
+                            <div class="label-top">取消沟通 Communicate人员</div>
+                            <div>
+                                <div class="padding5" v-for="item in data.communicate" v-filter="func.communicateFilter">
+                                    <input type="checkbox"   v-model="item.checked" v-bind:id="'communicate'+$index" class="magic-checkbox"   name="oprGroup"/>
+                                    <label v-bind:for="'communicate'+$index">
+                                        <div>{{item.userName}}</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box1">
+                            <div class="label-top">处理意见 Process opinion</div>
+                            <div class="forward-row" v-on:click="func.openOpinionSelect">
+                                <div class="forward-name">{{commonUsages}}</div>
+                                <li class="icon auicon icon-arrowright"></li>
+                            </div>
+                        </div>
+                        <div class="box1">
+                            <div class="textarea-box">
+                                <textarea rows="5" v-model="fdUsageContent" ></textarea>
+                            </div>
+                        </div>
+                        <div class="box1 border0">
+                            <div class="fd-row">
+                                <div class="flex1">附件</div>
+                                <li class="icon auicon icon-rdoadd fts20" v-on:click="func.uploadFile"></li>
+                            </div>
+                            <div v-for="item in fileNames">{{item}}</div>
+                        </div>
+                    </div>
+                    <div v-else>没有操作选项</div>
+                </div>
+            </div>
+        </aui-scroller>
+    </div>
+</ui>
+<script>
+    import '@auicomp/list/List.aui';
+
+    import fetch from "@libs/fetch";
+    import common from '@libs/common';
+    import { router } from '@auicomp/action/Action.aui';
+    import Selectsheet from '@comm/components/Selectsheet.aui';
+    import Action from '@auicomp/action/Action.aui';
+    import '@auicomp/tabbar/Tabbar.aui';
+    import 'magic-check/css/magic-check.min.css';
+    import { Base64 } from "js-base64";
+
+    export default class ChuchaiDetail {
+
+        static get tag() {
+            return 'ChuchaiDetail';
+        }
+        created() {
+            var self = this;
+            const obj = this.$obj = {
+                tabIndex:0,
+                oprGroup:"",
+                refuseValue:"",
+                refuseName:"",
+                refusePassedToThisNode:false,
+                forwardValue:"",
+                forwardName:"",
+                communicateValue:"",
+                communicateName:"",
+                commonUsages:"常用意见Common approval comment",
+                fdUsageContent:"",
+                fileNames:[],
+                fpflag1:false,//预定机票 checkBox显示相关
+                fpflag2:false,//预定机票 checkBox显示相关
+                data:{},             
+                func:{
+                    tabChange(index){
+                        obj.tabIndex = index;
+                    },
+                    openOpinionSelect(){
+                        Selectsheet.show({
+                            list: obj.data.select.map(function(item){
+                                return item.selectVale
+                            }),
+                            func:function(index){
+                                obj.commonUsages = obj.data.select[index].selectVale;
+                                if(index!=0){
+                                    if(obj.fdUsageContent == "同意"){
+                                        obj.fdUsageContent = obj.data.select[index].selectVale;
+                                    }else{
+                                        obj.fdUsageContent = obj.fdUsageContent + "\n" + obj.data.select[index].selectVale;
+                                    }
+                                }
+                            }
+                        });
+                    },
+                    submit(){
+                        self.doSubmit();
+                    },
+                    addAttachIcon(index,item){
+                        let name = item.fileName;
+                        let houzui = name.substring(name.lastIndexOf(".") + 1, name.length).toLowerCase();;
+                        let imgType = "jpg,bmp,pcx,tiff,gif,jpeg,tga,exif,fpx,svg,psd,cdr,pcd,dxf,ufo,eps,al,png,hdri,raw,wmf,lic,emf,";
+                        let imgstr;
+                        if (houzui == "pdf") {
+                            imgstr = './assets/imgs/filetype/pdf.png';
+                        } else if (houzui == "doc" || houzui == "docx") {
+                            imgstr = './assets/imgs/filetype/word.png';
+                        } else if (houzui == "txt") {
+                            imgstr = './assets/imgs/filetype/txt.png';
+                        } else if (houzui == "xls" || houzui == "xlsx") {
+                            imgstr = './assets/imgs/filetype/excel.png';
+                        } else if (imgType.indexOf(houzui + ",") > -1) {
+                            imgstr = './assets/imgs/filetype/picture.png';
+                        } else if (houzui == "rar" || houzui == "zip") {
+                            imgstr = './assets/imgs/filetype/zip.png';
+                        } else {
+                            imgstr = './assets/imgs/filetype/unknow.png';
+                        }
+                        item.icon = imgstr;
+                    },
+                    openAttach(fileId1,name){
+                        let url = common.oaUrl+"/OaAttachDownload?fdId="+fileId1;
+                        common.openAttach(url,name);
+                    },
+                    //添加pass的nodename默认值
+                    passFilter(index,item){
+                        if(!item.nodename){
+                            item.nodename = '';
+                        }
+                    },
+                    //添加communicate的checked默认值
+                    communicateFilter(index,item){
+                        item.checked = false;
+                    },
+                    //驳回select选择
+                    openRefuseSelect(){
+                        Selectsheet.show({
+                            list: obj.data.refuse.map(function(item){
+                                return item.text
+                            }),
+                            func:function(index){
+                                obj.refuseValue =  obj.data.refuse[index].value;
+                                obj.refuseName =  obj.data.refuse[index].text;
+                            }
+                        });
+                    },
+                    //转办选人
+                    getForwardPeople(){
+                        let cur_user = self.getHiddenValue('sysWfBusinessForm.fdCurHanderId');
+                        console.log(cur_user)
+                        location="#/ForwardPeople?cur_user="+cur_user+"&handle_id="+obj.forwardValue+"&page=aui-ChuchaiDetail";
+                    },
+                    //沟通人员
+                    getCommunicatePeople(){
+                         let cur_user = self.getHiddenValue('sysWfBusinessForm.fdCurHanderId');
+                         location="#/CommunicatePeople?cur_user="+cur_user+"&handle_id="+obj.communicateValue+"&page=aui-ChuchaiDetail";
+                    },
+                    //上传附件
+                    uploadFile(){
+                        common.selectFile(function(path){
+                           self.uploadFile(path);
+                        });
+                    },
+                    //radio切换，意见默认设为 同意
+                    radioChange(){
+                        if(obj.fdUsageContent == ""){
+                            obj.fdUsageContent="同意";
+                        }
+                    }
+                }
+            }
+            this.onload();
+        }
+        detached(){
+            this.$vm && this.$vm.destroy();
+        }
+        doNext(flag, flag1){
+            switch(flag) {
+				case "同意":
+					this.$obj.buttonSav = "approve";
+					this.$obj.buttonFow = "ACCEPT";
+					break;
+				case "Approve":
+					this.$obj.buttonSav = "approve";
+					this.$obj.buttonFow = "ACCEPT";
+					break;
+				case "拒绝":
+					this.$obj.buttonSav = "approve";
+					this.$obj.buttonFow = "REJECT";
+					break;
+				case "Reject":
+					this.$obj.buttonSav = "approve";
+					this.$obj.buttonFow = "REJECT";
+					break;
+				case "回退上一步":
+					this.$obj.buttonSav = "backTrace";
+					this.$obj.buttonFow = "";
+					break;
+				case "Back to previous step":
+					this.$obj.buttonSav = "backTrace";
+					this.$obj.buttonFow = "";
+					break;
+				case "退回开端":
+					this.$obj.buttonSav = "returnStart";
+					this.$obj.buttonFow = "";
+					break;
+				case "Back to Initiator":
+					this.$obj.buttonSav = "returnStart";
+					this.$obj.buttonFow = "";
+					break;
+				case "回退历史审批人":
+					this.$obj.buttonSav = "showHistoryList";
+					this.$obj.buttonFow = flag1;
+					break;
+				case "征询意见":
+					this.$obj.buttonSav = "inquire";
+					this.$obj.buttonFow = "";
+					break;
+				case "consultation":
+					this.$obj.buttonSav = "inquire";
+					this.$obj.buttonFow = "";
+					break;
+				case "提交":
+					this.$obj.buttonSav = "FinishInquire";
+					this.$obj.buttonFow = "";
+					break;
+				case "Submit":
+					this.$obj.buttonSav = "FinishInquire";
+					this.$obj.buttonFow = "";
+					break;
+				case "转办":
+					this.$obj.buttonSav = "forward";
+					this.$obj.buttonFow = "";
+					break;
+				case "transfer to others":
+					this.$obj.buttonSav = "forward";
+					this.$obj.buttonFow = "";
+					break;
+				default:
+					alert("该操作暂不支持,请联系管理员!This operation hasn't done yet,Please contact the IT department!");
+					break;
+				}
+				this.doSubmit();
+        }
+        doSubmit() {
+            if(this.$obj.oprGroup == ''){
+                common.alert("请选择流程下一步操作!Please select the next opertaion of the flow!");
+				return;
+            }
+
+            let operate_name = "";
+            let operate_handle = this.$obj.oprGroup;
+            let buttonInfo = this.$obj.data.buttonInfo;
+            for(let i =0;i<buttonInfo.length;i++){
+                if(buttonInfo[i].buttonValue==this.$obj.oprGroup){
+                    operate_name = buttonInfo[i].buttonName;
+                    break;
+                }
+            }
+
+            var json = {};
+            var json_param = {};
+            json.taskId = this.$obj.data.submitjson[0].sj_taskId;
+            json.processId = this.$obj.data.submitjson[0].sj_processId;
+            json.activityType =this.$obj.data.submitjson[0].sj_activityType;
+            json.operationType = this.$obj.oprGroup;
+            
+            json_param.operationName = operate_name;
+            json_param.notifyType = "";
+            json_param.notifyLevel = this.$obj.data.submitjson[0].sj_notifyLevel;
+            json_param.notifyOnFinish = false;
+            json_param.auditNote = this.$obj.fdUsageContent;
+            json_param.auditNoteFdId = this.getHiddenValue("sysWfBusinessForm.fdAuditNoteFdId");
+            if(operate_handle == "handler_commission"){
+                json_param.toOtherHandlerIds = this.$obj.forwardValue;
+                json_param.toOtherHandlerNames = this.$obj.forwardName;
+            }else if( operate_handle == "handler_communicate"){
+                json_param.toOtherHandlerIds = this.$obj.communicateValue;
+                json_param.toOtherHandlerNames = this.$obj.communicateName;
+            }else if(operate_handle == "handler_cancelCommunicate"){
+                let canelStr = this.$obj.data.communicate.filter(item => item.checked).map(item => item.itemId).join(';')
+                if(canelStr == ""){
+                    common.alert("请选择取消沟通人员!");
+                    return;
+                }
+                json_param.cancelHandlerIds = canelStr;
+            }else if(operate_handle == "handler_refuse"){
+                json_param.jumpToNodeId = this.$obj.refuseValue;
+                json_param.jumpToNodeInstanceId = "";
+                if(this.$obj.refusePassedToThisNode){
+                    json_param.refusePassedToThisNode = true;
+                }else{
+                    json_param.refusePassedToThisNode = false;
+                }
+            }
+            json.param = json_param;
+            console.log(json)
+            this.setHiddenValue("sysWfBusinessForm.fdParameterJson",JSON.stringify(json))
+
+            let postData = [];
+            for(let i = 0;i<this.$obj.data.hidden.length;i++){
+                console.log(this.$obj.data.hidden[i].hiddenName)
+                postData.push({
+                    type:0,
+                    // name:this.$obj.data.hidden[i].hiddenName,
+                    name:this.$obj.data.hidden[i].hiddenName?this.$obj.data.hidden[i].hiddenName.replace(/\./g,'#'):'',
+                    value:this.$obj.data.hidden[i].hiddenValue
+                })
+            }
+            postData.push({
+                type:0,
+                name:"taskId",
+                value:this.$obj.data.submitjson[0].sj_taskId
+            })
+            console.log(postData)
+            console.log( this.$obj.data.action.replace(/&amp;/g,'&'))
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : common.oaUrl+"/oaSubmit?url="+Base64.encode(this.$obj.data.action.replace(/&amp;/g,'&')),
+                data:postData,
+                type: 'post',
+                reqCharset:'UTF-8',
+                success: function(dataInfo){
+                    console.log(dataInfo)
+                    common.alert(dataInfo.info,function(){
+                        if(dataInfo.flag == "success"){
+                            document.querySelector('.aui-refresher-ChuchaiList').component.refresher.triggerDownScroll();
+                            history.go(-1);
+                        }
+                    });
+                }
+            });
+
+        }
+        onload(){
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : common.oaUrl+'/chuchaidetail.jsp',
+                data: {
+                    fdId:router.getQueryObj().fdId,
+                },
+                type: 'post',
+                success: function(dataInfo){
+                    console.log(JSON.stringify(dataInfo))
+                    if(dataInfo.cclb == '国外 International'){
+                        common.alert("暂不支持国外出差类型!",function(){
+                           history.go(-1)
+                        });
+                        return;
+                    }
+                    //添加操作默认选中
+                    for(let i =0;i<dataInfo.buttonInfo.length;i++){
+                        if(dataInfo.buttonInfo[i].buttonValue.indexOf('pass') > 0){
+                            self.$obj.oprGroup = dataInfo.buttonInfo[i].buttonValue;
+                            break;
+                        }
+                    }
+                     //添加驳回默认选中
+                    if(dataInfo.refuse&&dataInfo.refuse.length>0){
+                        self.$obj.refuseValue = dataInfo.refuse[0].value;
+                        self.$obj.refuseName = dataInfo.refuse[0].text;
+                    }
+                    //添加常用意见默认选项
+                    dataInfo.select.unshift({selectVale:"常用意见Common approval comment"});
+                    self.$obj.data = dataInfo;
+                    self.$vm = $(self.$el).render(self.$obj);
+
+                    //机票相关参数处理
+                    if(self.hasHiddenName('fdNumber')){
+                        var fdNumber = self.getHiddenValue('fdNumber');
+                        fdNumber = fdNumber.substring(5,fdNumber.length);
+                        let listsjipiao2 = dataInfo.listsjipiao;
+                        for(let i = 0;i < listsjipiao2.length;i++){
+                            if(i < 10){
+                                self.setHiddenValue("extendDataFormInfo.value(fd_ticket_itinerary."+i+".fd_itinerary_no)",fdNumber+0+(i+1));
+                            }else{
+                                self.setHiddenValue("extendDataFormInfo.value(fd_ticket_itinerary."+i+".fd_itinerary_no)",fdNumber+(i+1));
+                            }
+                        }
+                    }
+                    //需要预定机票 checkBox显示相关
+                    self.$obj.fpflag1 = self.getHiddenValue('extendDataFormInfo.value(fd_is_bt)')!="N";
+                    self.$obj.fpflag2 = self.getHiddenValue('extendDataFormInfo.value(fd_sql_hris_cc)')!="";
+
+                    $(".tabbar").css("display","block");
+                }
+            });
+        }
+        //判断hidde数组中是否含有对应的name
+        hasHiddenName(name){
+            let hiddens = this.$obj.data.hidden;
+            let value = false;
+            for(let i =0;i<hiddens.length;i++){
+                if(hiddens[i].hiddenName==name){
+                    value = true;
+                    break;
+                }
+            }
+            return value;
+        }
+        //获取hidden数组中对应name的值
+        getHiddenValue(name){
+            let hiddens = this.$obj.data.hidden;
+            let value = '';
+            for(let i =0;i<hiddens.length;i++){
+                if(hiddens[i].hiddenName==name){
+                    value = hiddens[i].hiddenValue;
+                    break;
+                }
+            }
+            return value;
+        }
+        //设置hidden数组中对应name的值
+        setHiddenValue(name,value){
+             let hiddens = this.$obj.data.hidden;
+             for(let i =0;i<hiddens.length;i++){
+                if(hiddens[i].hiddenName==name){
+                    hiddens[i].hiddenValue = value;
+                    break;
+                }
+            }
+        }
+        //上传附件
+        uploadFile(file_path){
+            var file_name = file_path.substring(file_path.lastIndexOf("/")+1);
+            //过滤不可上传文件类型
+            if(file_name.indexOf(".js")>-1 || file_name.indexOf(".bat")>-1 || file_name.indexOf(".exe")>-1 ||file_name.indexOf(".sh")>-1){
+                common.alert("基于安全考虑,系统不允许上传'.js .bat .exe .sh'类型的文件");
+                return;
+            }
+            var userkey = this.$obj.data.userkey;
+            var getFileKey =  common.oaUrl+"/uploaderFile?userkey=" + userkey;
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : getFileKey,
+                data: [
+                    {
+                        type:1,
+                        name:'Filedata',
+                        value:file_path
+                    },
+                    {
+                        type:0,
+                        name:'Upload',
+                        value:'Submit Query'
+                    },
+                     {
+                        type:0,
+                        name:'Filename',
+                        value:file_name
+                    },
+                ],
+                success: function(dataInfo){
+                   common.alert(dataInfo.info,function(){
+                       if(dataInfo.flag == "success"){
+                        self.$obj.fileNames.push(dataInfo.attname);
+                        let hiddenname = "attachmentForms."+dataInfo.fdAuditNoteFdId+".attachmentIds";
+
+                        let hiddenvalue = self.getHiddenValue(hiddenname);
+                        if(hiddenvalue!=''){
+                            self.setHiddenValue(hiddenname,hiddenvalue+';'+dataInfo.attid)
+                        }else{
+                                self.setHiddenValue(hiddenname,dataInfo.attid)
+                        }
+                       }
+                   });
+                }
+            });
+        }
+    }
+</script>
+<style type='less'>
+@import url('../../assets/less/theme/default/common.less');
+.ChuchaiDetail{
+    .tabbar{
+         position: absolute;
+        top: 45px;
+    }
+    .content{
+        position: absolute;
+        top: 85px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        background: white;
+        .page1,.page2{
+            display: none;
+            width: 100%;
+            margin-bottom: 15px;
+            .list-cell{
+                border-top: 0;
+                .toogle-title{
+                    color:#428bca !important;
+                }
+            }
+            .toggle1-line{
+                height: 1px;
+                background: #A0C8E8;
+                margin: 0px 15px 0px 15px;
+            }
+            .toggle-box{
+                border: 1px solid #AAAAAA;
+                margin: 0px 15px 0px 15px;
+                margin-top: 5px;
+                // display: flex;
+                // flex-direction: column;
+                .box1{
+                    padding: 8px 10px 8px 10px;
+                    border-bottom: 1px solid @border-color;
+                    .label-content{
+                        margin-top:5px;
+                        text-align: right;
+                        color: #2E9BF2;
+                        .attach-list{
+                            li{
+                                display: flex;
+                                flex-direction: row;
+                                align-items: center;
+                                border-bottom: 1px solid @border-color;
+                                padding: 5px 0;
+                                .attach-icon{
+                                    width: 35px;
+                                    margin-right: 5px;
+                                }
+                                &:last-child{
+                                    border:0;
+                                }
+                                &:active{
+                                    background: #eee;
+                                }
+                            }
+                        }
+                    }
+                    .sp-text{
+                         border-top: 1px solid @border-color;
+                         margin-top: 8px;
+                        padding-top: 8px;
+                    }
+                    .sp-info{
+                        text-align:right;
+                        color:red;
+                    }
+                    .row{
+                        display:flex;
+                        flex-direction: row;
+                        align-items: center;
+                        padding: 10px;
+                        border-bottom: 1px solid #C7C7CC;
+                        .text{
+                            flex:3
+                        }
+                        .select{
+                            display:flex;
+                            flex-direction: row;
+                            align-items: center;
+                            flex:7;
+                            .select-value{
+                                flex:1;
+                                text-align: right;
+                                margin-right: 5px;
+                            }
+                        }
+                    }
+                    .forward-row{
+                        display:flex;
+                        flex-direction: row;
+                        align-items: center;
+                        padding: 10px 0px;
+                        .forward-name{
+                            flex: 1;
+                        }
+                        .gray{
+                            color:@ftc-gray;
+                        }
+                    }
+                    .textarea-box{
+                        width: 100%;
+                        border: 1px solid @border-color;
+                        border-radius: 4px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: stretch;
+                        textarea{
+                            border:0;
+                            padding: 0;
+                            margin: 5px;
+                        }
+                    }
+                }
+                .opinions-title{
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    padding:5px 3px;
+                    border-bottom: 1px solid @border-color;
+                    .opinions-text{
+                        flex:1;
+                    }
+                    .auicon{
+                        font-size:24px;
+                    }
+                }
+                .opinions-textarea{
+                    width: 100%;
+                    padding: 5px;
+                    .opinions{
+                        width: 100%
+                    }
+                }
+                .model-box{
+                    border: 1px solid #AAAAAA;
+                    margin: 5px 2px;
+                    border-radius: 4px;
+                    .sp-top{
+                        border-bottom: 1px solid @border-color;
+                        padding: 5px;
+                        .info1{
+                            font-size: @fts-small;
+                            color:@ftc-gray;
+                            margin-top: 5px;
+                        }
+                    }
+                    .sp-btm{
+                        padding: 5px;
+                        .sp-opinion{
+                            margin-top: 5px;
+                            text-align: right;
+                        }
+                        .sp-file{
+                            margin-top: 5px;
+                            text-align: right;
+                            span{
+                                color:#2471C5
+                            }
+                        }
+                    }
+                    
+                }
+                .checkbox-box{
+                    padding-left: 10px;
+                }
+                .bt-box{
+                    .bt-operation{
+                        border-bottom: 1px solid @border-color;
+                        padding: 5px;
+                        text-align: center;
+                    }
+                    .bt-item{
+                       border-bottom: 1px solid @border-color;
+                    }
+                }
+            }   
+        }
+        .curr{
+            display: block;
+        }
+    }
+    label:before,label:after{
+        box-sizing:border-box;
+    }
+}
+
+
+</style>

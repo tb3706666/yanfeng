@@ -1,0 +1,171 @@
+<ui>
+    <div class="Choose">
+       <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>快速搜索</aui-text>
+                </caption-area>
+                <right-area>
+                    <a v-on:click="func.choosePeople" v-if="isAjaxed&&hasData">
+                        <i class="icon auicon icon-rdook"></i>
+                    </a>
+                </right-area>
+            </aui-titlebar>
+            <div class="search-box">
+                <form class="subjectarea" action="" v-on:submit="func.submit">
+                    <input class="subject"  type="search" v-like="text" v-model="searchInfo" placeholder="请输入查询工号或姓名" autocomplete="off" >
+                </form>
+            </div>
+        </aui-header>
+        <aui-scroller  class="scroll aui-refresher-Choose">
+            <aui-list class="list" v-if="isAjaxed&&hasData">
+                <div class="list-item" v-for="item in list" >
+                     <input type="radio" v-model="choosePeople" v-bind:value="item.peoKey" v-bind:id="'oprGroup'+item.peoKey" class="magic-radio"   name="oprGroup"/><label v-bind:for="'oprGroup'+item.peoKey">{{item.peoName}}</label>
+                </div>
+            </aui-list>
+            <div v-if="isAjaxed&&!hasData" class="nodata">
+                    <img src="./assets/imgs/nodata.png">
+                </div>
+        </aui-refresher>
+    </div>
+</ui>
+<script>
+    import '@auicomp/refresher/Refresher.aui';
+    import '@auicomp/list/List.aui';
+    import fetch from "@libs/xfetch";
+    import common from '@libs/common';
+    import { router } from '@auicomp/action/Action.aui';
+    import 'magic-check/css/magic-check.min.css';
+
+    export default class Choose {
+
+        static get tag() {
+            return 'Choose';
+        }
+        created() {
+            var self = this;
+            const obj = this.$obj = {
+                searchInfo:"",
+                isAjaxed:false,
+                hasData:false,
+                choosePeople:"",
+                list:[],
+                func:{
+                    submit(e){
+                        self.doSearch();
+                        $('.subject').blur();
+                        e.preventDefault();
+                    },
+                   choosePeople(){
+                        self.doSubmit();
+                   }
+                }
+            }
+            this.$vm = $(this.$el).render(this.$obj);
+            this.onload();
+        }
+        detached(){
+            this.$vm && this.$vm.destroy();
+        }
+        onload(){
+            // alert(router.getQueryObj().caoZuo);
+        }
+        doSearch(){
+            let self = this;
+            var prePageData = document.querySelector(router.getQueryObj().page).component.$obj.data;
+            var jData = "{\"TEXT\":\""+ this.$obj.searchInfo +"\",\"HRID\":1,\"FILTER\":\"emp\",\"SubId\":\""+ prePageData.flowid +"\",\"InstanceId\":\""+ prePageData.instanceId +"\",\"Param\":\"?sourceid=&amp;multichoice=false&amp;HRID=1&amp;filter=emp\",\"FuncName\":\"wf.SearchFinder.DoSearch\"}{:ky->f" + prePageData.jPack;
+            fetch({
+                appId: common.appId,
+                url : common.hrUrl+'/qingjiachoose.jsp',
+                data: [{
+                    type:0,
+                    name:'jsonData',
+                    value:jData
+                    }
+                ],
+                type: 'post',
+                success: function(data){
+                    self.$obj.isAjaxed = true;
+                    self.$obj.hasData = data.peoInfo.length>0;
+                    self.$obj.list.$reset(data.peoInfo);
+                }
+            });
+        }
+        doSubmit(){
+            let self = this;
+            var prePageData = document.querySelector(router.getQueryObj().page).component.$obj;
+            if(this.$obj.choosePeople == ""){
+                common.alert("还未选择指定人员!Please choose someone!");
+            } else {
+                var jData = "{\"TaskId\":\""+ prePageData.data.taskId +"\",\"Receiver\":\""+ this.$obj.choosePeople +"\",\"Remark\":\""+ prePageData.content +"\",\"StartTime\":\""+ prePageData.data.startTime +"\",\"FlowId\":\""+ prePageData.data.flowid +"\",\"FuncName\":\"wf.RuntimeHandler."+ router.getQueryObj().caoZuo +"\"}";
+                fetch({
+                    appId: common.appId,
+                    url : common.hrUrl+'/qingjiasubmit.jsp',
+                    data: [{
+                        type:0,
+                        name:'jsonData',
+                        value:jData
+                        }
+                    ],
+                    type: 'post',
+                    success: function(dataInfo){
+                        if(dataInfo.flag == "success"){
+                            common.alert("操作成功!Successful Done!",function(){
+                                document.querySelector('aui-refresher').component.refresher.triggerDownScroll();
+                                history.go(-2);
+                            });
+                        } else {
+                             common.alert("操作失败!Fail Done!");
+                        }
+                    }
+                });
+            }
+        }
+    }
+</script>
+<style type='less'>
+@import url('../../assets/less/theme/default/common.less');
+.Choose{
+    .search-box{
+        width: 100%;
+        padding: 5px;
+        .subjectarea{
+                width:100%;
+                border: 1px solid @border-color;
+                border-radius: 4px;
+                .subject{
+                    border: 0;
+                    width:100%;
+                    padding:10px;
+                    font-size: fts-normal;
+                    -webkit-appearance: textfield;    
+                }
+            }
+            input::-webkit-search-decoration,
+            input::-webkit-search-cancel-button {
+            display: none;
+            }
+    }
+    
+    .aui-refresher-Choose{
+        position:absolute;
+        top:95px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        .list{
+            .list-item{
+                padding: 8px;
+            }
+        }
+    }
+    label:before,label:after{
+        box-sizing:border-box;
+    }
+
+}
+
+</style>

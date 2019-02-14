@@ -1,0 +1,147 @@
+<ui>
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft-fill"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>maximo</aui-text>
+            </caption-area>
+        </aui-titlebar>
+    </aui-header>
+    <aui-scroller class="content" style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;background-color:#efeff4">
+        <aui-list>
+            <list-cell  class="grid">
+                <grid-cell>
+                    <img class="media-object pull-left" style="width:50px;height:50px" src="./assets/imgs/usericon.png">
+                </grid-cell>
+                <grid-cell class="flex-1 padded grid-stretch">
+                    <p class="pline1">
+                        <font style="font-size:15px;">欢迎您：田青</font>
+                        <font style="color:#8E8E93">工号：83324</font>
+                    </p>
+                    <p class="pline2">IT(工厂应用)/应用系统工程师</p>
+                </grid-cell>
+            </list-cell>
+        </aui-list>
+        
+        <aui-list>
+            <list-cell class="menulist" v-on:click="func.dianjian()">
+                <div class="iconcell">
+                    <img  src="./assets/imgs/dianjian.png">
+                </div>
+                <div class="textcell">
+                    <font style="font-size:15px;">点检</font>
+                </div>
+                <div class="riconcell">
+                    <i class="icon auicon icon-arrowright"></i>
+                </div>
+            </list-cell>
+        </aui-list>
+
+        <aui-list>
+            <list-cell class="menulist" v-on:click="func.yufang()">
+                <div class="iconcell">
+                    <img  src="./assets/imgs/weihu.png">
+                </div>
+                <div class="textcell">
+                    <font style="font-size:15px;">预防性维护</font>
+                </div>
+                <div class="riconcell">
+                    <i class="icon auicon icon-arrowright"></i>
+                </div>
+            </list-cell>
+            <list-cell class="menulist"  v-on:click="func.guzhangAdd()">
+                <div class="iconcell">
+                    <img  src="./assets/imgs/guzhang.png">
+                </div>
+                <div class="textcell">
+                    <font style="font-size:15px;">故障报修</font>
+                </div>
+                <div class="riconcell">
+                    <i class="icon auicon icon-arrowright"></i>
+                </div>
+            </list-cell>
+        </aui-list>
+    </aui-scroller>
+</ui>
+<script>
+import '@auicomp/header/Header.aui';
+import '@auicomp/scroller/Scroller.aui';
+import '@auicomp/text/Text.aui';
+import '@auicomp/grid/Grid.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auicomp/list/List.aui';
+import '@auicomp/button/Button.aui';
+
+import Action,{ router } from '@auicomp/action/Action.aui';
+
+export default class MaximoIndex {
+
+    static get tag() {
+        return 'maximoindex';
+    }
+
+    created() {
+        const $el = $(this.$el);
+        const obj = this.$obj = {
+            func:{
+                dianjian:function(){
+                    router.go("/dianjian");
+                },
+                yufang:function(){
+                    router.go("/yufang");
+                },
+                guzhangAdd:function(){
+                    router.go("/guzhangadd");
+                }
+            }
+        }
+        $el.find("aui-scroller").render(obj);
+    }
+}
+</script>
+<style type="less">
+aui-maximoindex{
+    aui-list{
+        background-color: #ffffff;
+        border-top: 0 !important;
+        border-bottom: 0 !important;
+        list-cell{
+            &:active{
+                background: rgb(236, 234, 234);
+            }
+        }
+    }
+    .pline1{
+        display: flex;
+        justify-content: space-between;
+    }
+    .pline2{
+        margin-top: 8px;
+    }
+
+    .menulist{
+        display: flex;
+        align-items: center;
+        padding: 12px ;
+        .iconcell{
+            height: 30px;
+            display: flex;
+            align-items: center;
+            img{
+                width: 24px;
+                height: 24px;
+            }
+        }
+        .textcell{
+            flex: 9;
+            padding-left: 12px;
+        }
+        .riconcell{
+            flex: 1;
+            text-align: center;
+        }
+    }
+}
+</style>

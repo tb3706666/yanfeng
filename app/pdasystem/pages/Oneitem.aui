@@ -1,0 +1,203 @@
+<ui>
+    <div class="Oneitem">
+        <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>巡检内容</aui-text>
+                </caption-area>
+                <right-area>
+                    <a v-on:click="func.goList">
+                        <i class="icon auicon icon-rdomenu"></i>
+                    </a>
+                    <a v-on:click="func.ok">
+                        <i class="icon auicon icon-rdook"></i>
+                    </a>
+                </right-area>
+            </aui-titlebar>
+            <div class="mytitle">{{sheetname}}</div>
+        </aui-header>
+        
+        <aui-scroller class="content">
+            <div class="fd-row align-c border-bt1 padding10">
+                <div class="point"></div>
+                <div class="flex1">{{content}}</div>
+            </div>
+            <div class="padding10 clearfix" v-if="method=='0'">
+                <div class="radiobox">
+                    <input type="radio" id="radio1" value="OK" v-model="radiosname"  class="magic-radio" name="radiosname"/>
+                    <label for="radio1">OK</label>
+                </div>
+                <div class="radiobox">
+                    <input type="radio" id="radio2" value="NG" v-model="radiosname"  class="magic-radio" name="radiosname"/>
+                    <label for="radio2">NG</label>
+                </div>
+                <div class="radiobox">
+                    <input type="radio" id="radio3" value="Stop" v-model="radiosname"  class="magic-radio" name="radiosname"/>
+                    <label for="radio3">Stop</label>
+                </div>
+                <div class="radiobox">
+                    <input type="radio" id="radio4"  value="Action" v-model="radiosname"  class="magic-radio" name="radiosname"/>
+                    <label for="radio4">Action</label>
+                </div>
+                <div class="radiobox">
+                    <input type="radio" id="radio5"  value="Rest" v-model="radiosname"  class="magic-radio" name="radiosname"/>
+                    <label for="radio5">Rest</label>
+                </div>
+            </div>
+            <div class="padding10 " v-if="method=='1'">
+                <div>
+                    <input class="magic-checkbox" type="checkbox"  id="stopradio" v-model="stopradio">
+                    <label for="stopradio">Stop</label>
+                </div>
+            </div>
+            <div class="textarea-box" style="margin-bottom:10px"  v-if="method=='1'">
+                <input type="number" v-model="wenduinput" v-like="text" placeholder="请填写数值">
+            </div>
+            <div class="textarea-box">
+                <textarea rows="5" v-model="ngreasion" placeholder="NG内容"></textarea>
+            </div>
+        </aui-scroller>
+    </div>
+</ui>
+
+
+<script>
+import '@auicomp/scroller/Scroller.aui';
+    import '@auicomp/header/Header.aui';
+    import '@auicomp/text/Text.aui';
+    import '@auicomp/grid/Grid.aui';
+    import '@auicomp/titlebar/Titlebar.aui';
+    import '@auiutil/mobiscroll3/css/mobiscroll.javascript.min.css';
+    import Actionsheet from '../components/Actionsheet.aui';
+    import {
+        router
+    } from '@auicomp/action/Action.aui';
+    import common from '@libs/common';
+    import fetch from "@libs/xfetch";
+    import { Base64 } from "js-base64";
+    import Popup from '@auicomp/popup/Popup.aui';
+    import Selectsheet from '@comm/components/Selectsheet.aui';
+    import Loading from "@auicomp/loading/Loading.aui";
+    import 'magic-check/css/magic-check.min.css';
+    export default class Oneitem {
+
+        static get tag() {
+            return 'Oneitem';
+        }
+        created() {
+            let self = this;
+            const obj = this.$obj = {
+                radiosname:'OK',
+                ngreasion:'',
+                wenduinput:'',
+                stopradio:false,
+                index:router.getQueryObj().index,
+                id:router.getQueryObj().id,
+                position:router.getQueryObj().position,
+                sqldataname:router.getQueryObj().sqldataname,
+                content:router.getQueryObj().content,
+                method:router.getQueryObj().method,
+                sheetname:router.getQueryObj().sheetname,
+                func:{
+                    goList(){
+                        history.go(-3);
+                    },
+                    getDetail(sheetname,sqlname,sqldataname,position,bluetooth){
+                        obj.sheetname = sheetname;
+                        obj.sqlname = sqlname;
+                        obj.sqldataname = sqldataname;
+                        obj.position = position;
+                        obj.bluetooth = bluetooth;
+                        if(bluetooth==""){
+
+                        }else{
+                            self.isOpenBlueTooth();
+                        }
+                    },
+                    ok(){
+                        if(obj.radiosname == 'NG'&&obj.ngreasion==''){
+                            common.toast('请填写NG内容');
+                            return;
+                        }
+                        if(obj.method=='1'&&!obj.stopradio&&obj.wenduinput==''){
+                            common.toast('请填写温度值');
+                            return;
+                        }
+                        var prePageList = document.querySelector('aui-templates').component.$obj.list;
+                        if(obj.method == '0'){
+                            prePageList[obj.index].contentvalue = obj.radiosname;
+                            prePageList[obj.index].sndcaption = "巡检结果:"+obj.radiosname;
+                        }else if(obj.method=="1"){
+                            if(obj.stopradio){
+                                prePageList[obj.index].contentvalue = 'Stop';
+                                prePageList[obj.index].sndcaption = "巡检结果:Stop";
+                            }else{
+                                prePageList[obj.index].contentvalue = obj.wenduinput;
+                                prePageList[obj.index].sndcaption = "巡检温度:"+obj.wenduinput;
+                            }
+                        }
+                        //给ng内容赋值
+                        prePageList[obj.index].hidng = obj.ngreasion;
+                        if(obj.ngreasion!=''){
+                            prePageList[obj.index].sndcaption += " | NG内容:"+obj.ngreasion;
+                        }
+                        prePageList[obj.index].showIcon = true;
+                        history.go(-1);
+                    }
+                }
+            }
+            this.$vm = $(this.$el).render(this.$obj);
+        }
+        detached() {
+            this.$vm && this.$vm.destroy();
+        }
+    }
+</script>
+<style type="less">
+    @import url('../assets/less/theme/default/common.less');
+    .Oneitem {
+        width: 100%;
+        height: 100%;
+        .mytitle{
+            background: #C4E1E2;
+            padding:10px;
+            color: #008BE8;
+        }
+        .content {
+            position: absolute;
+            top: 85px;
+            right: 0px;
+            bottom: 0px;
+            left: 0px;
+            padding: 5px;
+           .point{
+                background: url(../assets/imgs/iconPencil.png) center center / 20px 20px no-repeat;
+                width: 20px;
+                height: 20px;
+                margin-right: 10px;
+           }
+           .radiobox{
+                padding:5px 0;
+                width: 50%;
+                float: left;
+            }
+            .textarea-box{
+                width: 100%;
+                border: 1px solid @border-color;
+                border-radius: 4px;
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                textarea{
+                    border:0;
+                    padding: 0;
+                    margin: 5px;
+                }
+            }
+           
+        }
+    }
+</style>

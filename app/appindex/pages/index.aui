@@ -1,0 +1,428 @@
+<ui>
+    <aui-header>
+        <aui-titlebar style="background-color:#ffffff">
+            <left-area><a v-on:click="func.closeWin"><i class="icon auicon icon-arrowleft"></i></a></left-area>
+            <caption-area>
+                <aui-text>首页</aui-text>
+            </caption-area>
+            <right-area>
+                <a v-on:click="func.openappstore"><i class="icon auicon icon-appshop"></i> </a>
+            </right-area>
+        </aui-titlebar>
+    </aui-header>
+    <aui-scroller class="content" v-on:click="func.hideDelIcon" style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;">
+        
+        <!-- 轮播图 -->
+        <div class="swiper-container" id="indexSwiper" style="height: 140px;">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide" >
+                    <img style="width:100%;height:100%" src="./assets/imgs/banner1.png"/>
+                </div>
+                <div class="swiper-slide" >
+                    <img style="width:100%;height:100%" src="./assets/imgs/banner2.png"/>
+                </div>
+                <div class="swiper-slide" >
+                    <img style="width:100%;height:100%" src="./assets/imgs/banner3.png"/>
+                </div>
+            </div>
+            <div class="swiper-pagination"></div>
+        </div>
+        <p class="tipfont">我的关注</p>
+        <div class="divgrid">
+            <div class="divcell" v-for="item in checkedModules" v-filter="func.addEachIndex">
+                <img v-bind:src="item.icon" class="logo" v-on:touchstart="func.tStart" v-on:touchmove="func.tMove" v-on:touchend="func.tEnd(item)"/>
+                <font v-text='item.text'></font>
+                <a v-show="showDelIcon" v-on:click="func.deleteModule($event,item,item.index)"><i class="icon auicon icon-rdoclose-fill deleteIcon" ></i></a>
+            </div>
+            <div class="divcell" v-on:click="func.goAddModule">
+                <div class="appendEnter">
+                    <i class="icon auicon icon-plus" style="color:#c8c8c8;font-size:20px"></i>
+                </div>
+                <font>添加关注</font>
+            </div>
+        </div>
+         
+        <p class="tipfont">我的应用</p>
+        <div class="divgrid">
+            <div class="divcell" v-for="item in appInfos" >
+                <img class="logo" v-bind:src="item.appLogo" v-on:touchstart="func.tStart" v-on:touchmove="func.tMove" v-on:touchend="func.tEnd(item)"/>
+                <div class="menu-shadow" v-if="item.showProgress" v-bind:id="'shadow_'+item.appId">
+                    <div class="circle-bar" v-bind:id="'cb_'+item.appId">
+                        <div class="circle-bar-left" v-bind:id="'cbl_'+item.appId"></div>
+                        <div class="circle-bar-right" v-bind:id="'cbr_'+item.appId"></div>
+                    </div>
+                </div>
+                <font v-text="item.appName"></font>
+                <a v-show="showDelIcon" v-on:click="func.deleteApp($event,item)"><i class="icon auicon icon-rdoclose-fill deleteIcon" ></i></a>
+            
+            </div>
+        </div>
+
+    </aui-scroller>
+</ui>
+<script>
+import '@auicomp/header/Header.aui';
+import '@auicomp/scroller/Scroller.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auicomp/tabbar/Tabbar.aui';
+import '@auicomp/text/Text.aui';
+import '@auicomp/button/Button.aui';
+import '@auicomp/action/Action.aui';
+
+import tool from '@comm/utils/tool';
+import Swiper from 'swiper';
+import 'swiper/dist/css/swiper.css';
+import Toast from '@auicomp/toast/Toast.aui';
+import Action,{ router } from '@auicomp/action/Action.aui';
+import { clearTimeout, setTimeout } from 'timers';
+
+export default class Index{
+    static get tag(){
+        return 'index';
+    }
+    
+    created(){
+        window.addEventListener('contextmenu', function(e){
+            e.preventDefault();
+        });
+        document.addEventListener('biz_appready', function(res){
+            obj.appInfos.forEach((e,i)=>{
+                if(e.appId == res.returnObj.appId){
+                    e.showProgress = false;
+                }
+            });
+            Toast.show(res.returnObj.appId+'更新完成');
+        });
+        document.addEventListener('biz_apperror', function(res){
+            obj.appInfos.forEach((e,i)=>{
+                if(e.appId == res.returnObj.appId){
+                    e.showProgress = false;
+                }
+            });
+            Toast.show(res.returnObj.appId+'更新失败');
+        });
+        document.addEventListener('biz_appstart', function(res){
+            obj.appInfos.forEach((e,i)=>{
+                if(e.appId == res.returnObj.appId){
+                    e.showProgress = true;
+                }
+            });
+            Toast.show(res.returnObj.appId+'开始更新');
+        });
+        document.addEventListener('biz_appprogress', function(res){
+            console.log(res.returnObj.percent);
+            obj.appInfos.forEach((e,i)=>{
+                if(e.appId == res.returnObj.appId){
+                    var percent = parseInt(res.returnObj.percent);//更新进度百分比
+                    // if(!e.showProgress){
+                    //     e.showProgress = true;
+                    // }
+                    if(e.showProgress){
+                        var appId = res.returnObj.appId;
+                        var baseColor = $('#cb_'+appId).css('background-color');
+                        if(percent <= 50){
+                            $('#cbr_'+appId).css('transform','rotate('+(percent*3.6)+'deg)');
+                        }else{
+                            $('#cbr_'+appId).css({
+                                'transform':'rotate(0deg)',
+                                'background-color':baseColor,
+                            });
+                            $('#cbl_'+appId).css('transform','rotate('+parseInt((percent-50)*3.6)+'deg)');
+                        }
+                    }
+                }
+            });
+        });
+
+        const $el = $(this.$el);
+        const _self = this;
+
+        if(window.appnest){
+            tool.closeModal();//监听Android返回键，强制关闭所有模态窗口
+            appnest.worktable.getInstalledApps({
+                success:function(res){
+                    res.appInfos.forEach((e,i)=>{
+                        e.showProgress = false;
+                    })
+                    obj.appInfos = res.appInfos;
+                    _self.$vm = $el.render(obj);
+                },
+                fail:function(res){
+                    Toast.show(res.errMsg);
+                }
+            });
+        }else{
+            $(document).on('plusready',function(){
+                tool.closeModal();//监听Android返回键，强制关闭所有模态窗口
+                appnest.worktable.getInstalledApps({
+                    success:function(res){
+                        res.appInfos.forEach((e,i)=>{
+                            e.showProgress = false;
+                        })
+                        obj.appInfos = res.appInfos;
+                        _self.$vm = $el.render(obj);
+                    },
+                    fail:function(res){
+                        Toast.show(res.errMsg);
+                    }
+                });
+            });
+        }
+        const indexSwiper = new Swiper('#indexSwiper', {
+            autoplay: true,//可选选项，自动滑动
+            loop:true,
+            pagination: {
+                el: '.swiper-pagination',
+            }
+        })
+        
+        var timeOutEvent = 0;
+        const obj = this.$obj = {
+            showDelIcon:false,
+            checkedModules:[],
+            appInfos:[],
+            func:{
+                addProgressFlag:function(index,item){
+                    item.showProgress = false;
+                },
+                openappstore:function(){
+                    appnest.worktable.openAppCenterUI();
+                },
+                addEachIndex:function(index,item){
+                    item.index = index;
+                },
+                goAddModule:function(){
+                    router.go("/addmodule");
+                },
+                deleteModule:function(e,moduleInfo,i){
+                    e.stopPropagation();
+                    appnest.ui.confirm({
+                        content:'确定删除此模块吗？',
+                        title:moduleInfo.text,
+                        confirmButton:'确定',
+                        cancelButton:'取消',
+                        success:function(res){
+                            if(res.buttonType == 'confirm'){
+                                let cacheModules = localStorage.getItem('h5AppModules');
+                                let _cmArr = cacheModules.split(',');
+                                let _cmArrNew = _cmArr.filter(str=>{
+                                    return !(str.indexOf(moduleInfo.appId) > -1 && str.indexOf(moduleInfo.text) >-1);
+                                });
+                                localStorage.setItem('h5AppModules',_cmArrNew.join(','));
+                                obj.checkedModules.splice(i,1);
+                            }else{return false;}
+                        }
+                    });
+                },
+                deleteApp:function(e,appInfo){      
+                    e.stopPropagation();             
+                    appnest.ui.confirm({
+                        content:'确定删除该应用吗？',
+                        title:'提示',
+                        confirmButton:'确定',
+                        cancelButton:'取消',
+                        success:function(res){
+                            if(res.buttonType == 'confirm'){
+                                appnest.worktable.deleteApp({
+                                    appId:appInfo.appId
+                                });
+                                for(var i=0;i<obj.appInfos.length;i++){
+                                    if(obj.appInfos[i].appId == appInfo.appId){
+                                        console.log(i);
+                                        obj.appInfos.splice(i,1);
+                                        break;
+                                    }
+                                }
+                                console.log(JSON.stringify(obj.appInfos));
+                            }else{return false;}
+                        }
+                    })
+
+                },
+                hideDelIcon:function(){
+                    console.log("hideDelIcon=====");
+                    if(obj.showDelIcon){
+                        obj.showDelIcon=false;
+                    }
+                },
+                closeWin:function(){
+                    appnest.navigation.closeWindow();
+                },
+                tStart:function(){
+                    console.log("touchstart=====");
+                    timeOutEvent=setTimeout(function(){
+                        timeOutEvent = 0;
+                        obj.showDelIcon = true;
+                    },600);
+                },
+                tMove:function(e){
+                    clearTimeout(timeOutEvent);
+                    timeOutEvent = 0;
+                    e.preventDefault();
+
+                },
+                tEnd:function(appInfo){
+                    clearTimeout(timeOutEvent);
+                    if(timeOutEvent!=0 && !obj.showDelIcon){
+                        let mdparams = '';
+                        if(appInfo.hasOwnProperty('scheme') && appInfo.hasOwnProperty('icon')){
+                            mdparams = appInfo.scheme;
+                        }
+                        appnest.worktable.openApp({
+                            appId:appInfo.appId,
+                            appType:appInfo.appType,
+                            appVersion:appInfo.appVersion,
+                            scheme:mdparams
+                        })
+                    }
+                    return false;
+                }
+            }
+        };
+        var cacheModules = localStorage.getItem('h5AppModules');
+        if(cacheModules && cacheModules!=''){
+            cacheModules.split(',').forEach(ecm=>{
+                let _md = ecm.split('|');
+                obj.checkedModules.push({
+                    appId:_md[0],
+                    text:_md[1],
+                    scheme:_md[2],
+                    icon:_md[3]
+                });
+            });
+        }
+    }
+
+
+    detached(){
+        this.$vm && this.$vm.destroy();
+    }
+}
+</script>
+<style type="less">
+*{
+    -moz-user-select: none;
+    -o-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    -webkit-tap-highlight-color:rgba(0,0,0,0); 
+    user-select: none;
+}
+
+@defaultborder:1px solid #dedede;
+.tipfont{
+    color:#aaa;
+    background-color:#f6f6f6;
+    padding:4px 15px;
+}
+.divgrid{
+    background-color:#fff;
+    display:flex;
+    flex-wrap: wrap;
+    .divcell{
+        position: relative;
+        width:25%;
+        // border-right:@defaultborder;
+        // border-bottom:@defaultborder;
+        // -webkit-box-sizing: border-box;
+        // box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 15px 0;
+        .deleteIcon{
+            position: absolute;
+            top: 10px;
+            right: 18px;
+            font-size: 16px;
+            color:red;
+        }
+        .appendEnter{
+            width: 42px;
+            height: 42px;
+            border-radius: 21px;
+            background-color: #e4e4e4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .logo{
+            width: 45px;
+            height: 45px;
+            -webkit-touch-callout:none;/*系统默认菜单被禁用*/
+        }
+
+        .menu-shadow{
+            z-index:1;
+            position: absolute;
+            width: 45px;
+            height: 45px;
+            border-radius: 6px;
+            background-color: #333;
+            opacity:0.6;
+            .circle-bar {
+                font-size: 39px;
+                width: 1em;
+                height: 1em;
+                left: .1em;
+                top: .1em;
+                right: .1em;
+                bottom: .1em;
+                position: relative;
+                background-color: #fff;
+                opacity: 0.8;
+                * {
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    left: 0;
+                    margin: auto;
+                }
+                }
+                .circle-bar-left,
+                        .circle-bar-right {
+                    width: 1em;
+                    height: 1em;
+                    background-color: #333;
+                }
+                .circle-bar-right {
+                    clip: rect(0, auto, auto, .5em);
+                }
+                .circle-bar-left {
+                    clip: rect(0, .5em, auto, 0);
+                }
+                .circle-bar,
+                        .circle-bar>* {
+                        border-radius: 50%;
+                }
+
+        }
+        font{
+            margin-top: 5px;
+            color: #333333;
+        }
+        &:nth-child(4){
+            border-right: 0;
+        }
+        &:after{
+            content: '';
+            position: absolute;
+            pointer-events:none;
+            top: 0;
+            left: 0;
+            border-right:@defaultborder;
+            border-bottom:@defaultborder;
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+            width: 200%;
+            height: 200%;
+            -webkit-transform: scale(0.5);
+            transform: scale(0.5);
+            -webkit-transform-origin: left top;
+            transform-origin: left top;
+        }
+    }
+}
+</style>

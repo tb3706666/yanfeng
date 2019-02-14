@@ -1,0 +1,595 @@
+<ui>
+    <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>预防性维护</aui-text>
+            </caption-area>
+        </aui-titlebar>
+    </aui-header>
+    <aui-scroller class="content" style="position: absolute; top: 45px; right: 0px; bottom: 45px;left: 0px;">
+        <div class="yf-baseInfo">
+            <div class="baseLine">
+                <font class="label-left">工单</font>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="yfDetailData.wonum"/>
+                </div>
+                <font class="lbtext" style="width:70px;">工单类型</font>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="yfDetailData.worktype"/>
+                </div>
+                <font class="label-left">状态</font>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="yfDetailData.status"/>
+                </div>
+            </div>
+            <div class="baseLine">
+                <font class="label-left">描述</font>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="yfDetailData.description"/>
+                </div>
+            </div>
+            <div class="baseLine">
+                <font class="label-left">资产</font>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="yfDetailData.asset_assetnum"/>
+                </div>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="yfDetailData.asset_description"/>
+                </div>
+            </div>
+            <div class="baseLine">
+                <font class="label-left">位置</font>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="yfDetailData.locations_location"/>
+                </div>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="yfDetailData.locations_description"/>
+                </div>
+            </div>
+            <div class="baseLine">
+                <font class="label-left">PM</font>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="yfDetailData.pm_pmnum"/>
+                </div>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="yfDetailData.pm_description"/>
+                </div>
+            </div>
+            <div class="baseLine">
+                <font class="label-left">作业计划</font>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="yfDetailData.jpnum_jpnumnum"/>
+                </div>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="yfDetailData.jpnum_description"/>
+                </div>
+            </div>
+            <div class="baseLine">
+                <font class="label-left" style="width:100px">目标开始时间</font>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="yfDetailData.targstartdate"/>
+                </div>
+            </div>
+            <div class="baseLine">
+                <font class="label-left" style="width:100px">目标结束时间</font>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="yfDetailData.targcompdate"/>
+                </div>
+            </div>
+        </div>
+        <div class="flex-vcenter">
+            <font class="lbtext" style="width:40px;">员工</font>
+            <div style="flex:1;display: flex;">
+                <input type="text" readonly class="dj-text" v-model="yfDetailData.laborcode"/>
+            </div>
+            <div class="datetime-area" style="flex:2" v-on:click="func.selectActDate">
+                <input type="text" readonly  placeholder="实际开始日期" id="shijikaishiriqi" v-model="yfDetailData.shijikaishiriqi"/>
+                <i class="icon auicon icon-arrowleft icon-calendar" ></i>
+            </div>
+        </div>
+        <div class="flex-vcenter">
+            <div class="datetime-area" style="flex:1"  v-on:click="func.selectActTime('shijikaishishijian')">
+                <input type="text" readonly  placeholder="实际开始时间" v-model="yfDetailData.shijikaishishijian"/>
+                <i class="icon auicon icon-arrowleft icon-time"></i>
+            </div>
+            <div class="datetime-area" style="flex:1"  v-on:click="func.selectActTime('shijijieshushijian')">
+                <input type="text" readonly  placeholder="实际结束时间" v-model="yfDetailData.shijijieshushijian"/>
+                <i class="icon auicon icon-arrowleft icon-timeend"></i>
+            </div>
+            <input type="hidden"  v-model="yfDetailData.labtransid" v-like="text" ></input>
+        </div>
+
+        <div class="check-area" v-for="item in yfDetailData.woactivity" v-filter="func.addEachIndex">
+            <div class="check-item-title">
+                <font style="flex:1" v-text="item.taskid"></font>
+                <font style="flex:9" v-text="item.description"></font>
+            </div>
+            <div class="check-detail">
+                <img v-bind:src="item.description_longdescription" />
+            </div>
+            <div class="check-edit">
+                <div style="flex:1;display: flex;">
+                    <input type="number" v-like="text" v-on:keyup="func.numlimit" v-on:afterpaste="func.numlimit" class="measure-edit" placeholder="测量值" v-model="item.measurementvalue"/>
+                </div>
+                <div class="mesure-choose" style="flex:1"  v-on:click="func.selectObserv(item.index)">
+                    <input type="text" readonly placeholder="观测"  v-model="item.observation"/>
+                    <i class="icon auicon icon-arrowdown"></i>
+                </div>
+            </div>
+        </div>
+
+        <p style="font-size:14px;color:#428bca;padding:5px;">故障汇报</p>
+        <div class="yf-bottomInfo">
+            <div class="linkLine">
+                <a class="link-left" v-on:click="func.guzhangSelect('gz')">故障</a>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" id="failurecode" v-model="yfDetailData.failurecode"/>
+                </div>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" id="failureDesc" v-model="yfDetailData.failureDesc"/>
+                </div>
+            </div>
+            <div class="linkLine">
+                <a class="link-left" v-on:click="func.guzhangSelect('PROBLEM')">问题</a>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="yfDetailData.PROBLEM"/>
+                </div>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="yfDetailData.problemDesc"/>
+                </div>
+            </div>
+            <div class="linkLine">
+                <a class="link-left" v-on:click="func.guzhangSelect('CAUSE')">原因</a>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="yfDetailData.CAUSE"/>
+                </div>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="yfDetailData.causeDesc"/>
+                </div>
+            </div>
+            <div class="linkLine">
+                <a class="link-left" v-on:click="func.guzhangSelect('REMEDY')">措施</a>
+                <div style="flex:1;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="yfDetailData.REMEDY"/>
+                </div>
+                <div style="flex:2;display: flex;">
+                    <input type="text" readonly class="dj-text" v-model="yfDetailData.remedyDesc"/>
+                </div>
+            </div>
+
+        </div>
+    </aui-scroller>
+    <aui-footer>
+        <div class="yf-footer">
+            <aui-button class="btn btn-outlined btn-primary" v-on:click="func.dosave">保存</aui-button>
+        </div>
+    </aui-footer>
+</ui>
+<script>
+import '@auicomp/footer/Footer.aui';
+import '@auicomp/button/Button.aui';
+
+// 定义config应用配置
+import config from '@libs/config';
+
+import tool from '@comm/utils/tool';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import fetch from '@comm/utils/nfetch';
+import Alert from '@auicomp/alert/Alert.aui';
+import Confirm from '@auicomp/confirm/Confirm.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+import Action,{ router } from '@auicomp/action/Action.aui';
+import Selectsheet from '@comm/components/Selectsheet.aui';
+import moment from 'moment';
+
+export default class yufangDetail {
+
+    static get tag() {
+        return 'yufangdetail';
+    }
+
+
+
+    created() {
+        const $el = $(this.$el);
+
+        $el.on("backfill",function(e,failurecode,description,FAILURELIST,caozuo){
+            if(caozuo == 'gz'){
+                obj.yfDetailData.failurecode = failurecode;
+                obj.yfDetailData.failureDesc = description;
+                obj.yfDetailData.failurePid = FAILURELIST;
+
+                obj.yfDetailData.PROBLEM = "";
+                obj.yfDetailData.problemDesc = "";
+                obj.yfDetailData.CAUSE = "";
+                obj.yfDetailData.causeDesc = "";
+                obj.yfDetailData.REMEDY = "";
+                obj.yfDetailData.remedyDesc = "";
+            }else if(caozuo == 'PROBLEM'){
+                obj.yfDetailData.PROBLEM = failurecode;
+                obj.yfDetailData.problemDesc = description;
+                obj.yfDetailData.problemPid = FAILURELIST;
+
+                obj.yfDetailData.CAUSE = "";
+                obj.yfDetailData.causeDesc = "";
+                obj.yfDetailData.REMEDY = "";
+                obj.yfDetailData.remedyDesc = "";
+            }else if(caozuo == 'CAUSE'){
+                obj.yfDetailData.CAUSE = failurecode;
+                obj.yfDetailData.causeDesc = description;
+                obj.yfDetailData.causePid = FAILURELIST;
+
+                obj.yfDetailData.REMEDY = "";
+                obj.yfDetailData.remedyDesc = "";
+            }else if(caozuo == 'REMEDY'){
+                obj.yfDetailData.REMEDY = failurecode;
+                obj.yfDetailData.remedyDesc = description;
+                obj.yfDetailData.remedyPid = FAILURELIST;
+            }
+        });
+
+        const obj = this.$obj = {
+            observOptions:[
+                {text:'OK(状态良好√)',value:'OK'},
+                {text:'Error(状态不好或损坏X)',value:'Error'},
+                {text:'Action(正在处理○)',value:'Action'},
+                {text:'Stop(停机状态△)',value:'Stop'}
+            ],
+            yfDetailData:{},
+            func:{
+                addEachIndex:function(index,item){
+                    item.index = index;
+                },
+                numlimit:function(e){
+                    this.value = this.value.replace(/[^\d.]/g,'');
+                },
+                dosave:function(){
+                    if(obj.yfDetailData.shijikaishiriqi == ""){
+                        Toast.show('实际开始日期不能为空！');
+                        return;
+                    }
+                    if(obj.yfDetailData.shijikaishishijian == ""){
+                        Toast.show('实际开始时间不能为空！');
+                        return;
+                    }
+                    if(obj.yfDetailData.shijijieshushijian == ""){
+                        Toast.show('实际结束时间不能为空！');
+                        return;
+                    }
+                    if(!obj.func.timeValidate()){
+                        Toast.show('实际开始时间必须早于实际结束时间！');
+                        return;
+                    }
+                    var REceliangArr=[],REguanceArr=[];
+                    $.each(obj.yfDetailData.woactivity,function(i,e){
+                        REceliangArr.push(e.wonum+"--"+"9090-"+e.measurementvalue);
+                        REguanceArr.push(e.wonum+"--"+"9090-"+e.observation);
+                    })
+                    var subJson = {
+                        REceliang:REceliangArr.join("vv"),
+                        REguance:REguanceArr.join("vv"),
+                        shijikaishiriqi:obj.yfDetailData.shijikaishiriqi,
+                        shijikaishishijian:obj.yfDetailData.shijikaishishijian,
+                        shijijieshushijian:obj.yfDetailData.shijijieshushijian,
+                        xianglength: obj.yfDetailData.woactivity.length,
+                        ops: 'COMP',
+                        maxSITEID :window.lgInfo.maxSITEID,
+                        wonum : obj.yfDetailData.wonum,
+                        badge : window.userInfo.badge,
+                        labtransid: obj.yfDetailData.labtransid,
+                        gzhb_gz : obj.yfDetailData.failurecode,
+                        gzhb_wt : obj.yfDetailData.PROBLEM,
+                        gzhb_yy : obj.yfDetailData.CAUSE,
+                        gzhb_cs : obj.yfDetailData.REMEDY
+                    }
+                    auiLoading.show();
+                    fetch({
+                        url: '/yufang/yfsub',
+                        data:subJson,
+                        dataType: 'text',
+                        success:function(rsp){
+                            auiLoading.hide();
+                            let rspJson = $.JSON.parse(rsp.trim());
+                            let RspMessage = '';
+                            if(rspJson.result == "success"){
+                                RspMessage='操作成功';
+                            }else{
+                                RspMessage = '操作失败';
+                            }
+                            Toast.show(RspMessage, function(){
+                                history.go(-1);
+                            });
+                        },
+                        error:function(rsp){
+                            auiLoading.hide();
+                            Toast.show(rsp.errmsg, function(){});
+                        }
+                    })
+                },
+                guzhangSelect:function(caozuo){
+                    var gzPid="";
+                    if(caozuo=="PROBLEM"){
+                        if(obj.yfDetailData.failurecode == ""){
+                            Toast.show("请先选择故障");
+                            return;
+                        }
+                        gzPid = obj.yfDetailData.failurePid;
+                    }else if(caozuo=="CAUSE"){
+                        if(obj.yfDetailData.PROBLEM == ""){
+                            Toast.show("请先选择问题");
+                            return;
+                        }
+                        gzPid = obj.yfDetailData.problemPid;
+                    }else if(caozuo=="REMEDY"){
+                        if(obj.yfDetailData.CAUSE == ""){
+                            Toast.show("请先选择原因");
+                            return;
+                        }
+                        gzPid = obj.yfDetailData.causePid;
+                    }
+                    router.go("/guzhangquery?caozuo="+caozuo+"&backpage=aui-yufangdetail&PARENT="+gzPid);
+                },
+                timeValidate:function(){
+                    let startTime = obj.yfDetailData.shijikaishishijian,endTime = obj.yfDetailData.shijijieshushijian;
+                    if(startTime.trim() != "" && endTime.trim() !=""){
+                        return Number(startTime.replace(/:/g,"")) < Number(endTime.replace(/:/g,""));
+                    }else{
+                        return true;
+                    }
+
+                },
+                selectObserv:function(woIndex){
+                    Selectsheet.show({
+                        list: obj.observOptions.map(function(item){
+                            return item.text
+                        }),
+                        func:function(index){
+                            obj.yfDetailData.woactivity[woIndex].observation = obj.observOptions[index].value;
+                        }
+                    });
+                },
+                selectActDate:function(){
+                    appnest.ui.selectDate({
+                        success:function(res){
+                            obj.yfDetailData.shijikaishiriqi = res.date;
+                        },
+                        fail:function(res){
+                            Toast.show(res.errMsg);
+                        }
+                    });
+                },
+                selectActTime:function(key){
+                    appnest.ui.selectTime({
+                        success:function(res){
+                            obj.yfDetailData[key] = res.time+":00";
+                            if(!obj.func.timeValidate()){
+                                Toast.show("实际开始时间必须早于实际结束时间！",function(){
+                                    obj.yfDetailData[key] ='';
+                                });
+                            }
+                        },
+                        fail:function(res){
+                            Toast.show(res.errMsg);
+                        }
+                    });
+                },
+                failureInit:function(){
+                    this.getFailureDesc({//故障请求
+                        bm: window.yufangDetail.failurecode,
+                        maxORGID : window.lgInfo.ORGID,
+                        caozuo : 'gz'
+                    }).then((r)=>{//故障请求成功回调
+                        window.yufangDetail.failureDesc = r.list[0].description;
+                        window.yufangDetail.failurePid = r.list[0].FAILURELIST;
+                        return obj.func.getFailureDesc({//问题请求
+                            bm: window.yufangDetail.PROBLEM,
+                            maxORGID : window.lgInfo.ORGID,
+                            caozuo : 'PROBLEM',
+                            PARENT : r.list[0].FAILURELIST
+                        });
+                    }).then((r)=>{//问题请求成功回调
+                        window.yufangDetail.problemDesc = r.list[0].description;
+                        window.yufangDetail.problemPid = r.list[0].FAILURELIST;
+                        return obj.func.getFailureDesc({//原因请求
+                            bm: window.yufangDetail.CAUSE,
+                            maxORGID : window.lgInfo.ORGID,
+                            caozuo : 'CAUSE',
+                            PARENT : r.list[0].FAILURELIST
+                        });
+                    }).then((r)=>{//原因请求成功回调
+                        window.yufangDetail.causeDesc = r.list[0].description;
+                        window.yufangDetail.causePid = r.list[0].FAILURELIST;
+                        return obj.func.getFailureDesc({//措施请求
+                            bm: window.yufangDetail.REMEDY,
+                            maxORGID : window.lgInfo.ORGID,
+                            caozuo : 'REMEDY',
+                            PARENT : r.list[0].FAILURELIST
+                        });
+                    }).then((r)=>{//措施请求成功回调
+                        window.yufangDetail.remedyDesc = r.list[0].description;
+                        window.yufangDetail.remedyPid = r.list[0].FAILURELIST;
+                    }).catch((e)=>{
+                        if(!('nextFetch' in e)){
+                            Toast.show(e.errmsg, function(){});
+                        }
+                    })
+                },
+                getFailureDesc:function(paramsdata){//请求故障描述信息
+                    return new Promise((resolve,reject)=>{
+                        if(paramsdata.bm != ""){//判断是否要发起请求
+                            fetch({
+                                url: '/guzhang/gzquery',
+                                data:paramsdata,
+                                dataType:'text',
+                                success:function(rsp){
+                                    let rspJson = $.JSON.parse(rsp.trim());
+                                    resolve(rspJson);
+                                },
+                                error:function(rsp){
+                                    reject(rsp);
+                                }
+                            })
+                        }else{//不发起请求直接reject
+                            reject({nextFetch:false});
+                        }
+                    });
+                }
+            }
+        }
+        //测试Promise机制--start
+        // window.yufangDetail.PROBLEM = "ATJITP0301";
+        // window.yufangDetail.CAUSE = "ATJITC0301";
+        // window.yufangDetail.REMEDY = "ATJITR0301";
+        //测试Promise机制--end
+        window.yufangDetail.failureDesc = "";//故障描述，仅用于页面显示
+        window.yufangDetail.failurePid = "";
+        window.yufangDetail.problemDesc = "";//问题描述，仅用于页面显示
+        window.yufangDetail.problemPid = "";
+        window.yufangDetail.causeDesc = "";//原因描述，仅用于页面显示
+        window.yufangDetail.causePid = "";
+        window.yufangDetail.remedyDesc = "";//措施描述，仅用于页面显示
+        window.yufangDetail.remedyPid = "";
+
+        $.each(window.yufangDetail.woactivity,function(i,e){
+            e.description_longdescription= config.serverBaseUrl+'interface'+e. description_longdescription;
+            
+        });
+        obj.func.failureInit();//故障信息初始化
+        obj.yfDetailData = window.yufangDetail ;   
+        obj.yfDetailData.woactivity = window.yufangDetail.woactivity;
+        this.$vm = $el.render(obj);
+    }
+
+    detached(){
+        this.$vm && this.$vm.destroy();
+    }
+}
+</script>
+<style type="less">
+[readonly]{  pointer-events:none; }
+.yf-footer{
+    height: 45px;
+    padding: 0 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    aui-button{
+        flex: 1;
+        margin: 0 5px;
+    }
+}
+aui-yufangdetail{
+@defaultborder:1px solid #ddd;
+@blueborder:1px solid #428bca;
+.edit{
+    border:0;
+    border-bottom:@defaultborder;
+    height: 30px;
+    margin-right: 5px;
+    padding-right: 5px;
+}
+    input[type='text']{
+        margin-right: 5px;
+    }
+    .flex-vcenter{
+        display: flex;
+        align-items: center;
+        padding: 5px;
+    }
+    .datetime-area{
+        box-sizing: border-box;
+        .edit;
+        display: flex;
+        align-items: center;
+        input[type='text']{
+            width: 90%;
+            border: 0;
+            padding-left:5px; 
+            font-size: 14px;
+        }
+    }
+    
+    .lbtext{
+        text-align: left;
+        color: #8E8E93;
+    }
+    .check-area{
+        margin: 5px 10px 5px 5px;
+        border:@defaultborder;
+        .check-item-title{
+            
+            padding: 10px 10px 0 10px;
+            display: flex;
+            align-items: center;
+            font{
+                font-size: 14px;
+                color: #428bca;
+            }
+        }
+        .check-detail{
+            width: 100%;
+            text-align: center;
+            img{
+                width: 94%;
+                height: 180px;
+                margin: 10px 0;
+            }
+            border-bottom: @defaultborder;
+        }
+        .check-edit{
+            .flex-vcenter;
+            .measure-edit{
+                border:0;
+                width: 90%;
+                font-size: 14px;
+                padding-left:5px; 
+                height: 30px;
+                margin-right: 5px;
+                padding-right: 5px;
+            }
+            .mesure-choose{
+                height: 30px;
+                margin-right: 5px;
+                padding-right: 5px;
+                display: flex;
+                align-items: center;
+                input[type='text']{
+                    width: 90%;
+                    border: 0;
+                    padding-left:5px; 
+                    font-size: 14px;
+                }
+            }
+        }
+    }
+    .yf-baseInfo{
+        padding: 5px 0;
+        border-bottom: @blueborder;
+        .baseLine{
+            .flex-vcenter;
+            .label-left{
+                width: 40px;
+                .lbtext;
+            }
+            
+        }
+    }
+    .yf-bottomInfo{
+        padding: 5px 0;
+        border-top: @blueborder;
+        .linkLine{
+            .flex-vcenter;
+            .link-left{
+                width: 40px;
+                text-align: left;
+                color: #428bca;
+                text-decoration: underline;
+            }
+        }
+    }
+
+}
+</style>

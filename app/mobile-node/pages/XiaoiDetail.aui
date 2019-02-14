@@ -1,0 +1,301 @@
+<ui>
+    <div class="XiaoiDetail">
+       <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>移动小i</aui-text>
+                </caption-area>
+                <right-area>
+                   
+                </right-area>
+            </aui-titlebar>
+        </aui-header>
+        <aui-tabbar class="tabbar tabbar-line tabbar-line-width70 animated" style="display:none">
+            <tabbar-cell v-bind:class="{active:tabIndex==0}" v-on:click="func.tabChange(0)">
+                <label class="tab-label">表单信息</label>
+            </tabbar-cell>
+            <tabbar-cell v-bind:class="{active:tabIndex==1}" v-on:click="func.tabChange(1)">
+                <label class="tab-label">详细信息</label>
+            </tabbar-cell>
+        </aui-tabbar>
+        <aui-scroller class="content">
+            <div class="page1 " v-bind:class="{curr:tabIndex==0}">
+                <div v-for="item in data.list">
+                    <aui-action class="list-cell active" v-bind:href="'#toggle'+$index" type="toggle">
+                        <a class="toogle-title">
+                            {{item.title}}<i class="icon auicon icon-arrowright"></i>
+                        </a>
+                    </aui-action>
+                    <div class="toggle1-line"></div>
+                    <div v-bind:id="'toggle'+$index" action-target class="active toggle-box">
+                        <div class="box1" v-for="innerItem in item.newList">
+                            <div class="label-top">{{innerItem.name}}</div>
+                            <div class="label-content" v-if="innerItem.type=='input'">{{innerItem.value}}</div>
+                            <div class="label-content" v-elseif="innerItem.type=='webview'" style="display: flex;justify-content: flex-end;">
+                                <div class="webviewBt" v-on:click="func.openWebview">点击查看</div>
+                            </div>
+                            <div class="label-content" v-elseif="innerItem.type=='files'">
+                                <ul class="attach-list">
+                                    <li v-for="fileItem in innerItem.files" v-filter="func.addAttachIcon" v-on:click="func.openAttach(fileItem.href,fileItem.text)">
+                                        <img v-bind:src="fileItem.icon" class="attach-icon"></img>
+                                        <div class="attach-text">{{fileItem.text}}</div>
+                                    </li>
+                                </ul>
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            <div class="page2"  v-bind:class="{curr:tabIndex==1}">
+                <div class="padding10" v-html="data.webview">
+                   
+                </div>
+            </div>
+        </aui-scroller>
+    </div>
+</ui>
+<script>
+    import '@auicomp/list/List.aui';
+
+    import fetch from "@libs/fetch";
+    import common from '@libs/common';
+    import { router } from '@auicomp/action/Action.aui';
+    import Selectsheet from '@comm/components/Selectsheet.aui';
+    // import Action from '@auicomp/action/Action.aui';
+    import '@auicomp/tabbar/Tabbar.aui';
+    import { Base64 } from "js-base64";
+    
+
+    export default class XiaoiDetail {
+
+        static get tag() {
+            return 'XiaoiDetail';
+        }
+        created() {
+            var self = this;
+            const obj = this.$obj = {
+                tabIndex:0,
+                data:{},
+                buttonSav:'',
+                buttonFow:'',
+                content:'',
+                func:{
+                    openWebview(){
+                        obj.tabIndex = 1;
+                    },
+                    tabChange(index){
+                        obj.tabIndex = index;
+                    },
+                    openSelect(){
+                        Selectsheet.show({
+                            list: obj.data.selInfo.map(function(item){
+                                return item.selText
+                            }),
+                            func:function(index){
+                                obj.content = obj.data.selInfo[index].selValue;
+                            }
+                        });
+                    },
+                    openShenPi(){
+                         Selectsheet.show({
+                            list: obj.data.butInfo.map(function(item){
+                                return item.butText
+                            }),
+                            func:function(index){
+                                self.doNext(obj.data.butInfo[index].butText,obj.data.butInfo[index].butValue)
+                            }
+                        });
+                    },
+                    addAttachIcon(index,item){
+                        let name = item.text;
+                        let houzui = name.substring(name.lastIndexOf(".") + 1, name.length).toLowerCase();;
+                        let imgType = "jpg,bmp,pcx,tiff,gif,jpeg,tga,exif,fpx,svg,psd,cdr,pcd,dxf,ufo,eps,al,png,hdri,raw,wmf,lic,emf,";
+                        let imgstr;
+                        if (houzui == "pdf") {
+                            imgstr = './assets/imgs/filetype/pdf.png';
+                        } else if (houzui == "doc" || houzui == "docx") {
+                            imgstr = './assets/imgs/filetype/word.png';
+                        } else if (houzui == "txt") {
+                            imgstr = './assets/imgs/filetype/txt.png';
+                        } else if (houzui == "xls" || houzui == "xlsx") {
+                            imgstr = './assets/imgs/filetype/excel.png';
+                        } else if (imgType.indexOf(houzui + ",") > -1) {
+                            imgstr = './assets/imgs/filetype/picture.png';
+                        } else if (houzui == "rar" || houzui == "zip") {
+                            imgstr = './assets/imgs/filetype/zip.png';
+                        } else {
+                            imgstr = './assets/imgs/filetype/unknow.png';
+                        }
+                        item.icon = imgstr;
+                    },
+                    openAttach(url,name){
+                        url = common.oaUrl+"/GetAttachment?url="+Base64.encode(url.replace(/&amp;/g,'&'));
+                        common.openAttach(url,name);
+                    }
+                }
+            }
+            this.onload();
+        }
+        detached(){
+            this.$vm && this.$vm.destroy();
+        }
+        onload(){
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : common.oaUrl+'/detail',
+                data: {
+                    pageid:router.getQueryObj().pageid,
+                },
+                type: 'post',
+                success: function(infos){
+                    console.log(JSON.stringify(infos));
+                    infos.list.forEach(function(item){
+                        item.newList = [];
+                        item.listsmall.forEach(function(innerItem,index){
+                            if(index%2==0){
+                                item.newList[index/2] = {};
+                                item.newList[index/2].name = innerItem.value
+                            }else{
+                                item.newList[Math.floor(index/2)].value = innerItem.value
+                                item.newList[Math.floor(index/2)].type = innerItem.type
+                                if(innerItem.type == 'files'){
+                                    item.newList[Math.floor(index/2)].files = innerItem.filearr
+                                }
+                                if(innerItem.type == 'webview'){
+                                    infos.webview = Base64.decode(innerItem.value)
+                                }
+                            }
+                        })
+                    });
+                    self.$obj.data = infos;
+                    self.$vm = $(self.$el).render(self.$obj);
+                    $(".tabbar").css("display","block");
+                }
+            });
+        }
+    }
+</script>
+<style type='less'>
+@import url('../assets/less/theme/default/common.less');
+.XiaoiDetail{
+    .tabbar{
+         position: absolute;
+        top: 45px;
+    }
+    .content{
+        position: absolute;
+        top: 85px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        background: white;
+        .page1,.page2{
+            display: none;
+            width: 100%;
+            margin-bottom: 15px;
+            .list-cell{
+                border-top: 0;
+                .toogle-title{
+                    color:#428bca !important;
+                }
+            }
+            .toggle1-line{
+                height: 1px;
+                background: #A0C8E8;
+                margin: 0px 15px 0px 15px;
+            }
+            .toggle-box{
+                border: 1px solid #AAAAAA;
+                margin: 0px 15px 0px 15px;
+                margin-top: 5px;
+                // display: flex;
+                // flex-direction: column;
+                .box1{
+                    padding: 8px 10px 8px 10px;
+                    border-bottom: 1px solid @border-color;
+                    .label-content{
+                        margin-top:5px;
+                        text-align: right;
+                        color: #2E9BF2;
+                        .attach-list{
+                            li{
+                                display: flex;
+                                flex-direction: row;
+                                align-items: center;
+                                border-bottom: 1px solid @border-color;
+                                padding: 5px 0;
+                                .attach-icon{
+                                    width: 35px;
+                                    margin-right: 5px;
+                                }
+                                &:last-child{
+                                    border:0;
+                                }
+                                &:active{
+                                    background: #eee;
+                                }
+                            }
+                        }
+                    }
+                    .sp-text{
+                         border-top: 1px solid @border-color;
+                         margin-top: 8px;
+                        padding-top: 8px;
+                    }
+                    .sp-info{
+                        text-align:right;
+                        color:red;
+                    }
+                }
+                .opinions-title{
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    padding:8px 10px 8px 10px;
+                    border-bottom: 1px solid @border-color;
+                    .opinions-text{
+                        flex:1;
+                    }
+                    .auicon{
+                        font-size:24px;
+                    }
+                }
+                .opinions-textarea{
+                     width: 100%;
+                    padding: 8px 10px 8px 10px;
+                    .textarea-box{
+                        width: 100%;
+                        border: 1px solid @border-color;
+                        border-radius: 4px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: stretch;
+                        textarea{
+                            border:0;
+                            padding: 0;
+                            margin: 5px;
+                        }
+                    }
+                }
+               
+            }  
+            .webviewBt{
+                color: white;
+                background: #428bca;
+                padding: 5px;
+            } 
+        }
+        .curr{
+            display: block;
+        }
+    }
+}
+
+
+</style>

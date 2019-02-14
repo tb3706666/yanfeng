@@ -1,0 +1,284 @@
+<ui>
+    <aui-header>
+        <aui-titlebar id="tubiao">
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+                <aui-text>我的idea</aui-text>
+            </caption-area>
+            <right-area v-on:click="func.charts()" v-if="hidericon">
+                <a>
+                    <i class="icon auicon icon-chartbar"></i>
+                </a>
+            </right-area>
+            </aui-titlebar>
+
+        <aui-tabbar class="tabbar tabbar-line animated">
+            <tabbar-cell class="active" v-on:click="func.idea(1)">
+                <label class="tab-label">待处理</label>
+            </tabbar-cell>
+            <tabbar-cell  v-on:click="func.idea(2)">
+                <label class="tab-label">我的</label>
+            </tabbar-cell>
+            <tabbar-cell v-on:click="func.idea(3)">
+                <label class="tab-label">进行中</label>
+            </tabbar-cell>
+            <tabbar-cell v-on:click="func.idea(4)">
+                <label class="tab-label">已完成</label>
+            </tabbar-cell>
+            <tabbar-cell v-on:click="func.idea(5)">
+                <label class="tab-label">我负责</label>
+            </tabbar-cell>
+        </aui-tabbar>
+    </aui-header>
+
+    
+    <aui-refresher class="search-refresher-idea content "  style="position: absolute; top: 90px; right: 0px; bottom: 0px;left: 0px;padding: 10px;" v-on:pulldown="func.scorllDown"  v-on:pullup="func.scorllUp" auto>
+        
+        <aui-list style="text-align:left;" id="idea1">
+            <list-cell class="grid" v-for="item in listData" v-on:click="func.toDetail(item.href)">
+                <grid-cell class="flex-1 padded" style="font-size:16px;">
+                    {{item.caption}}<br>
+                    <p style="color:#ccc;font-size:12px;">{{item.sndcaption}}</p>
+                </grid-cell>
+            </list-cell>
+        </aui-list>
+
+        <div v-if="!hasData" style="text-align:center;padding:10px;color:#ddd;">没有更多数据</div>
+        <img src="./assets/imgs/nodata.png" style="width:100%;" v-if="!noimg">
+    </aui-refresher>
+</ui>
+
+
+
+<script>
+
+import Refresher from '@auicomp/refresher/Refresher.aui';
+import Action from '@auicomp/action/Action.aui';
+import fetch from '@comm/utils/xfetch';
+import { router } from '@auicomp/action/Action.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+export default class MyIdea{
+    
+    static get tag(){
+        return 'myidea';
+    }
+
+    created(){
+        const $el = $(this.$el);
+        Action.listener($el.find('tabbar-cell').attr('type', 'control'));
+        auiLoading.show();
+        fetch({
+            appId: 'iexpress',
+            url : 'http://IEXPRESS/myidea/getbi.jsp',
+            dataType:"text",
+            success: function(rsp){
+                // //增加bi统计图权限判断
+                if($.parseJSON(rsp).biYn=='1'){
+                    obj.hidericon=true;
+                }else{
+                    obj.hidericon=true;
+                }
+                auiLoading.hide();
+            },
+            error: function(rs){
+                auiLoading.hide();
+                Toast.show(rs.errmsg);
+            }
+        });
+        const obj = this.$obj = {
+            listData:[],
+            hasData:true,
+            noimg:true,
+            hidericon:true,
+            pagenum:"1",
+            pagenum1:"1",
+            pagenum2:"1",
+            pagenum3:"1",
+            pagenum4:"1",
+            pagenum5:"1",
+            pageid:"1",
+            func:{
+                charts:function(){
+                    router.go("/bydepartment");
+                },
+                init:function(pageid,cb){
+                    obj.listData.splice(0,obj.listData.length);
+                    auiLoading.show();
+                    fetch({
+                        appId: 'iexpress',
+                        url : 'http://IEXPRESS/myidea/mywaitdeal.jsp',
+                        data: {
+                            pagenum:1,
+                            pageid:pageid
+                        },
+                        dataType:"text",
+                        success:function(rsp){
+                            if(pageid=="1"){
+                                obj.pagenum1=$.JSON.parse(rsp.trim()).nextpage;
+                            }
+                            if(pageid=="2"){
+                                obj.pagenum2=$.JSON.parse(rsp.trim()).nextpage;
+                            }
+                            if(pageid=="3"){
+                                obj.pagenum3=$.JSON.parse(rsp.trim()).nextpage;
+                            }
+                            if(pageid=="4"){
+                                obj.pagenum4=$.JSON.parse(rsp.trim()).nextpage;
+                            }
+                            if(pageid=="5"){
+                                obj.pagenum5=$.JSON.parse(rsp.trim()).nextpage;
+                            }
+                            cb&cb(rsp);
+                            auiLoading.hide();
+                        },
+                        error: function(rsp){
+                            auiLoading.hide();
+                            Toast.show(rsp.errmsg, function(){
+                            });
+                        }
+                    });
+                },
+                nextPage:function(pageid,cb){
+                    fetch({
+                        appId: 'iexpress',
+                        url : 'http://IEXPRESS/myidea/mywaitdeal.jsp',
+                        data: {
+                            pagenum:obj.pagenum,
+                            pageid:pageid
+                        },
+                        dataType:"text",
+                        success:function(rsp){
+                            if(pageid=="1"){
+                                obj.pagenum1=$.JSON.parse(rsp.trim()).nextpage;
+                            }
+                            if(pageid=="2"){
+                                obj.pagenum2=$.JSON.parse(rsp.trim()).nextpage;
+                            }
+                            if(pageid=="3"){
+                                obj.pagenum3=$.JSON.parse(rsp.trim()).nextpage;
+                            }
+                            if(pageid=="4"){
+                                obj.pagenum4=$.JSON.parse(rsp.trim()).nextpage;
+                            }
+                            if(pageid=="5"){
+                                obj.pagenum5=$.JSON.parse(rsp.trim()).nextpage;
+                            }
+                            cb&cb(rsp);
+                            auiLoading.hide();
+                        },
+                        error: function(rsp){
+                            auiLoading.hide();
+                            Toast.show(rsp.errmsg, function(){
+                            });
+                        }
+                    });
+                },
+                scorllDown:function(e, $refresh){
+                    obj.hasData=true;
+                    obj.noimg=true;
+                    obj.listData.splice(0,obj.listData.length);
+                    obj.func.init(obj.pageid,function(rsp){
+                        if($.JSON.parse(rsp.trim()).list.length > 0){
+                            var jsons=$.JSON.parse(rsp.trim()).list;
+                            $.each(jsons,function(e,e1){
+                                obj.listData.push(e1);
+                            });
+                            $refresh.refresh();
+                        }else{
+                            obj.noimg=false;
+                            Toast.show('未查询到数据', function(){
+                                return $refresh.end();
+                            });
+                        }
+                    });
+                },
+                scorllUp:function(e, $refresh){
+                    if(obj.pageid=="1"){
+                        obj.pagenum=obj.pagenum1;
+                    }
+                    if(obj.pageid=="2"){
+                        obj.pagenum=obj.pagenum2;
+                    }
+                    if(obj.pageid=="3"){
+                        obj.pagenum=obj.pagenum3;
+                    }
+                    if(obj.pageid=="4"){
+                        obj.pagenum=obj.pagenum4;
+                    }
+                    if(obj.pageid=="5"){
+                        obj.pagenum=obj.pagenum5;
+                    }
+                    if(obj.pagenum!=""){
+                        obj.func.nextPage(obj.pageid,function(rsp){
+                            if($.JSON.parse(rsp.trim()).list.length > 0){
+                                var jsons=$.JSON.parse(rsp.trim()).list;
+                                $.each(jsons,function(e,e1){
+                                    obj.listData.push(e1);
+                                });
+                                $refresh.refresh();
+                            }else{
+                                Toast.show('未查询到数据', function(){
+                                });
+                            }
+                        });
+                    }else{
+                        obj.hasData = false;
+                        return $refresh.end();
+                    }
+                },
+                idea:function(id){
+                    if(id==1){
+                        obj.pageid="1";
+                    }
+                    if(id==2){
+                        obj.pageid="2";
+                    }
+                    if(id==3){
+                        obj.pageid="3";
+                    }
+                    if(id==4){
+                        obj.pageid="4";
+                    }
+                    if(id==5){
+                        obj.pageid="5";
+                    }
+                    document.querySelector('.search-refresher-idea').component.refresher.triggerDownScroll();
+                },
+                toDetail:function(hrefs){
+                    var id=hrefs.split("'");
+                    router.go("/mydeal_detail?id="+id[1]);
+                }
+            }
+        };
+       
+        this.$vm = $(this.$el).render(obj);
+    }
+
+}
+
+
+</script>
+
+<style type="less">
+[type="toggle"].active .icon-arrowdown::before,
+[type="control"].active .icon-arrowdown::before{
+    content: '\e694';
+}
+
+   tabbar-cell.active{
+        .home:before{
+        content: '\E6E5';
+        }
+        .add:before{
+            content: '\E718';
+        }
+        .me:before{
+            content: '\E713';
+        }
+    }
+</style>
+
+

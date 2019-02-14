@@ -1,0 +1,312 @@
+<ui>
+    <div class="Personnel">
+       <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>详情 Detail</aui-text>
+                </caption-area>
+                <right-area>
+                   
+                </right-area>
+            </aui-titlebar>
+        </aui-header>
+        <aui-tabbar class="tabbar tabbar-line tabbar-line-width70 animated" v-show="isAjaxed">
+                <tabbar-cell v-bind:class="{active:tabIndex==0}" v-on:click="func.tabChange(0)">
+                    <label class="tab-label">基本信息</label>
+                </tabbar-cell>
+                <tabbar-cell v-bind:class="{active:tabIndex==1}" v-on:click="func.tabChange(1)">
+                    <label class="tab-label">账户信息</label>
+                </tabbar-cell>
+                <tabbar-cell v-bind:class="{active:tabIndex==2}" v-on:click="func.tabChange(2)">
+                    <label class="tab-label">年假记录</label>
+                </tabbar-cell>
+                <tabbar-cell v-bind:class="{active:tabIndex==3}" v-on:click="func.tabChange(3)">
+                    <label class="tab-label">异常考勤</label>
+                </tabbar-cell>
+            </aui-tabbar>
+        <aui-scroller class="content" v-show="isAjaxed">
+            <div class="page" v-bind:class="{curr:tabIndex==0}">
+                <div class="box1" v-for="item in infos.base">
+                    <div class="label-top">{{item.key}}</div>
+                    <div class="label-content">{{item.value}}</div>
+                </div>
+            </div>
+            <div class="page" v-bind:class="{curr:tabIndex==1}">
+                <div class="row" v-on:click="func.toggle1">
+                    <div class="text-box">
+                        公积金信息
+                    </div>
+                    <i class="icon auicon icon-arrowright" v-bind:class="{'icon-arrowright':!toggleFlag1,'icon-arrowdown':toggleFlag1}"></i>
+                </div>
+                <div class="cardInfo" v-show="toggleFlag1">
+                    <div class="box1">
+                        <div class="label-top">{{infos.sc[0].key}}</div>
+                        <div class="label-content">{{infos.sc[0].value}}</div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">{{infos.sc[1].key}}</div>
+                        <div class="label-content">{{infos.sc[1].value}}</div>
+                    </div>
+                </div>
+                <div class="row" v-on:click="func.toggle2">
+                    <div class="text-box">
+                        工资卡信息
+                    </div>
+                    <i class="icon auicon icon-arrowright" v-bind:class="{'icon-arrowright':!toggleFlag2,'icon-arrowdown':toggleFlag2}"></i>
+                </div>
+                <div class="cardInfo" v-show="toggleFlag2">
+                    <div class="box1">
+                        <div class="label-top">{{infos.sc[2].key}}</div>
+                        <div class="label-content">{{infos.sc[2].value}}</div>
+                    </div>
+                    <div class="box1">
+                        <div class="label-top">{{infos.sc[3].key}}</div>
+                        <div class="label-content">{{infos.sc[3].value}}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="page" v-bind:class="{curr:tabIndex==2}">
+                <div v-for="item in infos.sd">
+                    <div class="box1" >
+                        <div class="label-top">{{item.nd}}</div>
+                        <div class="label-content">{{item.countnd}}</div>
+                    </div>
+                    <div class="box1" >
+                        <div class="label-top">{{item.fl}}</div>
+                        <div class="label-content">{{item.a2}}</div>
+                    </div>
+                    <div class="box1" >
+                        <div class="label-top">{{item.bnfl}}</div>
+                        <div class="label-content">{{item.countbnfl}}</div>
+                    </div>
+                    <div class="box1" >
+                        <div class="label-top">{{item.tz}}</div>
+                        <div class="label-content">{{item.a3}}</div>
+                    </div>
+                    <div class="box1" >
+                        <div class="label-top">{{item.ysynj}}</div>
+                        <div class="label-content">{{item.a4}}</div>
+                    </div>
+                    <div class="box1" >
+                        <div class="label-top">{{item.synj}}</div>
+                        <div class="label-content">{{item.a5}}</div>
+                    </div>
+                    <div class="box1" >
+                        <div class="label-top">{{item.syz}}</div>
+                        <div class="label-content">{{item.countsyz}}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="page" v-bind:class="{curr:tabIndex==3}">
+                <div class="nokaoqing" v-if="!hasKapqin">
+                    没有异常考勤!
+                </div>
+                <div v-else>
+                    <div v-for="item  in infos.kaoqin" v-filter="func.addtoggleFlag">
+                        <div class="row"  v-on:click="func.toggleKaoqin($index)">
+                            <div class="text-box">{{item.G1__0_TERM}}</div>
+                            <i class="icon auicon icon-arrowright" v-bind:class="{'icon-arrowright':!item.toggleFlag,'icon-arrowdown':item.toggleFlag}"></i>
+                        </div>
+                         <div class="cardInfo" v-show="item.toggleFlag">
+                            <div class="box1">
+                                <div class="label-top">数据更新时间</div>
+                                <div class="label-content">{{item.G1__0_SYSTEM_TIME }}</div>
+                            </div>
+                            <div class="box1">
+                                <div class="label-top">工号</div>
+                                <div class="label-content">{{item.G1__0_BADGE }}</div>
+                            </div>
+                            <div class="box1">
+                                <div class="label-top">姓名</div>
+                                <div class="label-content">{{item.G1__0_NAME }}</div>
+                            </div>
+                            <div class="box1">
+                                <div class="label-top">日期</div>
+                                <div class="label-content">{{item.G1__0_TERM }}</div>
+                            </div>
+                            <div class="box1">
+                                <div class="label-top">类型</div>
+                                <div class="label-content">{{item.G1__0_TYPE_NAME }}</div>
+                            </div>
+                            <div class="box1">
+                                <div class="label-top">缺卡开始时间</div>
+                                <div class="label-content">{{item.G1__0_FTIME }}</div>
+                            </div>
+                             <div class="box1">
+                                <div class="label-top">缺卡结束时间</div>
+                                <div class="label-content">{{item.G1__0_TTIME }}</div>
+                            </div>
+                            <div class="box1">
+                                <div class="label-top">当天缺卡长度合计（小时）</div>
+                                <div class="label-content">{{item.G1__0_LOST_WORKHOURS }}</div>
+                            </div>
+                            <div class="box1">
+                                <div class="label-top">计划工作开始时间</div>
+                                <div class="label-content">{{item.G1__0_DATAFROM }}</div>
+                            </div>
+                            <div class="box1">
+                                <div class="label-top">计划工作结束时间</div>
+                                <div class="label-content">{{item.G1__0_DATATO }}</div>
+                            </div>
+                            <div class="box1">
+                                <div class="label-top">实际打卡开始时间</div>
+                                <div class="label-content">{{item.G1__0_ACTUAL_START_TIME }}</div>
+                            </div>
+                            <div class="box1">
+                                <div class="label-top">实际打卡结束时间</div>
+                                <div class="label-content">{{item.G1__0_ACTUAL_END_TIME }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div v-html="infos.toast"></div>
+            </div>
+        </aui-scroller>
+    </div>
+</ui>
+<script>
+    import commLang from '@lang/comm';
+
+    import fetch from "@libs/xfetch";
+    import common from '@libs/common';
+    import { router } from '@auicomp/action/Action.aui';
+    import Selectsheet from '@comm/components/Selectsheet.aui';
+    import Action from '@auicomp/action/Action.aui';
+    import '@auicomp/tabbar/Tabbar.aui';
+
+    export default class Personnel {
+
+        static get tag() {
+            return 'Personnel';
+        }
+        created() {
+            const obj = this.$obj = {
+                isAjaxed:false,
+                tabIndex:0,
+                toggleFlag1:true,
+                toggleFlag2:true,
+                hasKapqin:false,
+                infos:{
+                    sd:[],
+                    base:[],
+                    sc: [],
+                    toast:"",
+                    kaoqin:[]
+                },
+                func:{
+                    toggle(){
+                        obj.toggleFlag = !obj.toggleFlag;
+                    }, 
+                    tabChange(index){
+                        obj.tabIndex = index;
+                    },
+                    toggle1:function(){
+                        obj.toggleFlag1 = !obj.toggleFlag1;
+                    },
+                    toggle2:function(){
+                        obj.toggleFlag2 = !obj.toggleFlag2;
+                    },
+                    toggleKaoqin(index){
+                         obj.infos.kaoqin[index].toggleFlag = !obj.infos.kaoqin[index].toggleFlag;
+                    },
+                    addtoggleFlag:function(index,item){
+                        item.toggleFlag = false;
+                    },
+                }
+            }
+            this.$vm = $(this.$el).render(this.$obj);
+            this.loadData();
+        }
+        detached(){
+            this.$vm && this.$vm.destroy();
+        }
+        loadData(){
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : common.hrUrl+'/personnel.jsp',
+                data: {
+                },
+                type: 'get',
+                success: function(infos){
+                    self.$obj.isAjaxed = true;
+                    self.$obj.infos.sd = infos.sd;
+                    self.$obj.infos.base = infos.base;
+                    self.$obj.infos.sc = infos.sc;
+                    self.$obj.infos.kaoqin = infos.kaoqin;
+                    self.$obj.infos.toast = infos.toast;
+                    if(infos.kaoqin.length>0){
+                         self.$obj.hasKapqin=true;
+                    }else{
+                         self.$obj.hasKapqin=false;
+                    }
+                   console.log(JSON.stringify(infos))
+                }
+            });
+        }
+    }
+</script>
+<style type='less'>
+@import url('../../assets/less/theme/default/common.less');
+.Personnel{
+    width: 100%;
+    height: 100%;
+    .tabbar{
+        position: absolute;
+        top: 45px;
+    }
+    .content{
+        position: absolute;
+        top: 85px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        .page{
+            display: none;
+            width: 100%;
+            padding: 0px 10px 0px 10px;
+            .box1{
+                padding: 8px 10px 8px 10px;
+                border-bottom: 1px solid @border-color;
+                .label-content{
+                    margin-top:5px;
+                    text-align: right;
+                    color: #2E9BF2;
+                    
+                }
+            }
+            .row{
+                display:flex;
+                flex-direction: row;
+                align-items: center; 
+                padding:10px;
+                border-bottom: 1px solid @border-color;
+                .text-box{
+                    flex:1;
+                }
+                .icon-arrowright{
+                    font-size: 20px;
+                    margin-left: 10px;
+                }
+                .icon-arrowdown{
+                    font-size: 20px;
+                    margin-left: 10px;
+                }
+                &:active{
+                    background: #eee;
+                }
+            }
+            .nokaoqing{
+               color:red; 
+            }
+        }
+        .curr{
+            display: block;
+        }
+    }
+}
+
+</style>

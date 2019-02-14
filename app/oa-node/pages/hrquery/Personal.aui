@@ -1,0 +1,234 @@
+<ui>
+    <div class="Personal">
+       <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>{{data.title[lan]}}</aui-text>
+                </caption-area>
+                <right-area>
+                   
+                </right-area>
+            </aui-titlebar>
+        </aui-header>
+        <aui-scroller class="content" v-show="ajaxed">
+            <div class="userInfo">
+                <img class="image" v-bind:src="'https://ae-hrbs.adient.com'+infos.listData1.imageurl">
+                <div class="name">{{infos.listData1.username}}</div>
+            </div>
+            <div class="row" v-on:click="func.toggle">
+                <i class="icon auicon icon-rdouser"></i>
+                <div class="text-box">
+                    <div>报销银行卡  Reimburse card</div>
+                    <div class="card_no">{{infos.listData.card_no}}</div>
+                </div>
+                <i class="icon auicon icon-arrowright" v-bind:class="{'icon-arrowright':!toggleFlag,'icon-arrowdown':toggleFlag}"></i>
+            </div>
+            <div class="cardInfo" v-show="toggleFlag">
+                <div class="item">
+                    <div class="left"></div>
+                    <div class="right">
+                        <div class="card-name">银行卡号  Card Number</div>
+                        <div class="info">{{infos.listData.card_no}}</div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="left"></div>
+                    <div class="right">
+                        <div class="card-name">开户名  Account Name</div>
+                        <div class="info">{{infos.listData.card_name}}</div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="left"></div>
+                    <div class="right">
+                        <div class="card-name">联行号  Bank Number</div>
+                        <div class="info">{{infos.listData.bank_no}}</div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="left"></div>
+                    <div class="right">
+                        <div class="card-name">开户行  Bank Name</div>
+                        <div class="info">{{infos.listData.bankname}}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" v-on:click="func.gotoPersonnel">
+                <i class="icon auicon icon-rdouser"></i>
+                <div class="text-box">
+                    本人人事信息  Staff information query
+                </div>
+                <i class="icon auicon icon-arrowright"></i>
+            </div>
+            <div class="row" v-on:click="func.gotoQuery">
+                <i class="icon auicon icon-rdouser"></i>
+                <div class="text-box">
+                    打卡时间查询  Record time query
+                </div>
+                <i class="icon auicon icon-arrowright"></i>
+            </div>
+        </aui-scroller>
+    </div>
+</ui>
+<script>
+    import commLang from '@lang/comm';
+
+    import fetch from "@libs/fetch";
+    import common from '@libs/common';
+    import { router } from '@auicomp/action/Action.aui';
+    import Selectsheet from '@comm/components/Selectsheet.aui';
+    import Action from '@auicomp/action/Action.aui';
+    import '@auicomp/datetime/DateTime.aui';
+
+    export default class Personal {
+
+        static get tag() {
+            return 'Personal';
+        }
+        created() {
+            const obj = this.$obj = {
+                lan:localStorage.getItem("lan"),
+                data:commLang.personal,
+                toggleFlag:false,
+                ajaxed:false,
+                infos:{
+                    listData1: {
+                        username: "",
+                        empcode: "",
+                        imageurl: ""
+                    },
+                    listData: {
+                        mobile_type: "",
+                        bankname: "",
+                        mobile_free: "",
+                        car_free: "",
+                        bank_no: "",
+                        mobile_limit: "",
+                        card_no: "",
+                        card_name: ""
+                    }
+                },
+                func:{
+                    toggle:function(){
+                        obj.toggleFlag = !obj.toggleFlag;
+                    },
+                    gotoQuery:function(){
+                         location.href = '#/RecordQuery';
+                    },
+                    gotoPersonnel:function(){
+                         location.href = '#/Personnel';
+                    }
+                }
+            }
+            this.$vm = $(this.$el).render(this.$obj);
+            this.loadData();
+        }
+        detached(){
+            this.$vm && this.$vm.destroy();
+        }
+        loadData(){
+            let self = this;
+            fetch({
+                appId: common.appId,
+                url : common.hrUrl+'/getQingjianew',
+                data: {
+                    name:localStorage.getItem("username"),
+                },
+                type: 'post',
+                success: function(infos){
+                    self.$obj.ajaxed = true;
+                    self.$obj.infos = infos;
+                    localStorage.setItem("empcode", infos.listData1.empcode);
+                    console.log(JSON.stringify(infos))
+                }
+            });
+        }
+    }
+</script>
+<style type='less'>
+@import url('../../assets/less/theme/default/common.less');
+.Personal{
+    width: 100%;
+    height: 100%;
+    .content{
+        position: absolute;
+        top: 44px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        .userInfo{
+            display:flex;
+            flex-direction: row;
+            align-items: center;
+            padding:5px 10px;
+            border-bottom: 1px solid @border-color;
+            .image{
+                width: 80px;
+                height: 80px;
+                margin-right: 20px;
+            }
+        }
+        .row{
+            display:flex;
+            flex-direction: row;
+            align-items: center; 
+            padding:10px;
+            border-bottom: 1px solid @border-color;
+            .icon-rdouser{
+                font-size: 26px;
+                margin-right: 10px;
+                color:#383F4C
+            }
+            .text-box{
+                flex:1;
+            }
+            .card_no{
+                font-size: @fts-small;
+                color:@ftc-gray;
+                margin-top:3px; 
+            }
+            .icon-arrowright{
+                font-size: 20px;
+                margin-left: 10px;
+            }
+            .icon-arrowdown{
+                font-size: 20px;
+                margin-left: 10px;
+            }
+            &:active{
+                 background: #eee;
+            }
+        }
+        .cardInfo{
+            margin-left: 4px;
+            .item{
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                border-bottom: 1px solid @border-color;
+                .left{
+                    width: 4px;
+                    background: #5FC12F;
+                    height: 55px;
+                }
+                .right{
+                    flex:1;
+                    .card-name{
+                        margin-left:60px;
+                    }
+                    .info{
+                        font-size: @fts-small;
+                        color:@ftc-gray;
+                        margin-left:70px;
+                        margin-top:3px; 
+                    }
+                }
+            }
+        }
+    }
+}
+
+</style>

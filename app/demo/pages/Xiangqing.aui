@@ -1,0 +1,609 @@
+<ui>
+<div >
+<aui-header>
+    <aui-titlebar>
+        <left-area>
+            <aui-action type="back"><i class="icon auicon icon-arrowleft-fill"></i></aui-action>
+        </left-area>
+        <caption-area>
+            <aui-text>Idea详情</aui-text>
+        </caption-area>
+    </aui-titlebar>
+</aui-header>
+<aui-list >
+    <list-cell id="xiangqing">
+        <a href="#togglename3">P1-S1</a><a>/</a><a href="#togglename4">P1-S2</a><a>/</a><a href="#togglename5">P1-S3</a><a>/</a><a href="#togglename6">P2</a><a>/</a><a href="#togglename7">P3</a>
+    </list-cell>
+</aui-list>
+<aui-scroller id="auiscroller" class="content" style="position: absolute; top: 90px; right: 0px; bottom: 0px;left: 0px;text-align: center;border-top:0;">
+    
+    <div v-for="item in data.detail">
+        <div v-if="item.type=='fromInfo'" style="text-align:left;">
+            <div class="title"><span>{{item.title}}</span></div>
+            <div v-for="lists in item.list" class="contents">
+                <div v-if="lists.type=='text'" class="contents2">
+                    <div class="div1">{{lists.name}}</div>
+                    <div class="div2">{{lists.value}}</div>
+                </div>
+
+                <div v-if="lists.type=='file'" class="contents2">
+                    <div class="div1">{{lists.name}}</div>
+                    <div class="div2">
+                        <div v-for="files in lists.fileList" >
+                            {{files.fileName}}
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="lists.type=='author'" class="contents2">
+                    <div class="div1">{{lists.name}}</div>
+                    <div class="div2" >
+                        <div v-for="authors in lists.authorList" class="author">
+                            <div style="border-bottom:1px solid #ccc"><p style="margin:5px 0px;">{{authors.caption}}</p></div>
+                            <div><p>贡献比（%）{{authors.info1}}</p></div>
+                            <div><p>后期开发{{authors.info2}}</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="item.type=='Innovation'" style="text-align:left;">
+            <div class="title"><span>{{item.title}}</span></div>
+            <div v-for="infos in item.info" class="contents">
+                <div v-if="infos.isbold" class="contents2">
+                    <div style="font-weight:bold">{{infos.name}}</div>
+                    <div>{{infos.value}}</div>
+                </div>
+                <div v-else class="contents2">
+                    <div class="div1">{{infos.name}}</div>
+                    <div class="div2">{{infos.value}}</div>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="item.type=='Phase-Step'" style="text-align:left;">
+            <div class="title"><span>{{item.title}}</span></div>
+            <div v-for="infolist in item.info" >
+                <div v-if="infolist.type=='slider'" style="margin:5px 15px;">
+                    <div class="title2">{{infolist.title}}</div>
+                    <div class="title2_right" >
+                        <div style="display:inline-block;">{{infolist.user}}</div>
+                        <div style="display:inline-block;color:#8FC04D;">{{infolist.state}}</div>
+                        <div>{{infolist.slider}}</div>
+                    </div>
+                </div>
+                <div v-if="infolist.type=='suggest'" class="contents">
+                    <div class="contents2">
+                        <div class="div1">建议</div>
+                        <div class="div2">{{infolist.suggest}}</div>
+                    </div>
+                </div>
+                <div v-if="infolist.type=='userAndSuggest'" style="margin:5px 15px;">
+                    <div class="div1" style="color:#ccc;">{{infolist.user}}</div>
+                    <div class="div2">{{infolist.time}}</div>
+                    <div class="div1">建议</div>
+                    <div class="div2">{{infolist.suggest}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</aui-scroller>
+</div>
+</ui>
+
+
+<script>
+import '@auicomp/grid/Grid.aui';
+import '@auicomp/text/Text.aui';
+import '@auicomp/list/List.aui';
+import '@auicomp/action/Action.aui';
+import '@auicomp/scroller/Scroller.aui';
+import '@auicomp/titlebar/Titlebar.aui';
+import '@auicomp/datetime/DateTime.aui';
+import '@auiutil/mobiscroll3/css/mobiscroll.javascript.min.css';
+import mobiscroll from '@auiutil/mobiscroll3/js/mobiscroll.javascript.min';
+import fetch from '@comm/utils/xfetch';
+import Alert from '@auicomp/alert/Alert.aui';
+import { router } from '@auicomp/action/Action.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+
+export default class Xiangqing{
+    static get tag(){
+        return 'xiang';
+    }
+
+    created() {
+        const obj = this.$obj = {
+            data:{
+    "detail": [
+        {
+            "list": [
+                {
+                    "name": "编号",
+                    "type": "text",
+                    "value": "201412GX002"
+                },
+                {
+                    "name": "标题",
+                    "type": "text",
+                    "value": "可更换面套"
+                },
+                {
+                    "name": "概念背景",
+                    "type": "text",
+                    "value": "2012-08已提出,用于YFV E-Bee概念车,现阶段在做应用于量产座椅的概念优化。"
+                },
+                {
+                    "name": "概念方案",
+                    "type": "text",
+                    "value": "  1、坐垫靠背同时考虑可更换。2、坐垫靠背分为“底布”和“更换部分”，底布材质为绒布，可更换部分在分型部位添加射出勾，绒布与射出勾两部分可粘连，来控制面套的造型。3、靠背和坐垫边缘用拉链连接。详情请见附件。"
+                },
+                {
+                    "name": "优势",
+                    "type": "text",
+                    "value": " 1、便利性：消费者可灵活自行轻松拆换、清洗。2、安全性：原厂设计，考虑安全性影响因素（侧气囊弱化线设计问题）3、个性化：拆卸部分设计、材质多样化。"
+                },
+                {
+                    "name": "标签",
+                    "type": "text",
+                    "value": "面套"
+                },
+                {
+                    "name": "上传",
+                    "type": "text",
+                    "value": ""
+                },
+                {
+                    "fileList": [
+                        {
+                            "fileHref": "http://IEXPRESS/wh/app/downloadfile?fileName=1431408167807_%E6%95%B4%E6%A4%85%E5%AE%9E%E7%89%A9%E5%9B%BE%E7%89%87-20141201-1.jpg",
+                            "fileName": "整椅实物图片-20141201-1.jpg"
+                        },
+                        {
+                            "fileHref": "http://IEXPRESS/wh/app/downloadfile?fileName=1431408168399_%E5%9D%90%E5%9E%AB%E5%AE%9E%E7%89%A9%E5%9B%BE%E7%89%87-20141201-1.jpg",
+                            "fileName": "坐垫实物图片-20141201-1.jpg"
+                        },
+                        {
+                            "fileHref": "http://IEXPRESS/wh/app/downloadfile?fileName=1431408199521_%E5%8F%AF%E6%9B%B4%E6%8D%A2%E9%9D%A2%E5%A5%97%E7%BB%93%E6%9E%84%E6%96%B9%E6%A1%88-20141201-1.png",
+                            "fileName": "可更换面套结构方案-20141201-1.png"
+                        }
+                    ],
+                    "name": "附件",
+                    "type": "file"
+                },
+                {
+                    "name": "分类",
+                    "type": "text",
+                    "value": " 个性化定制"
+                },
+                {
+                    "name": "类型",
+                    "type": "text",
+                    "value": "Idea"
+                },
+                {
+                    "name": "保密",
+                    "type": "text",
+                    "value": "         否   "
+                },
+                {
+                    "authorList": [
+                        {
+                            "caption": "赵旭楠|设计室（创新）",
+                            "info1": "20",
+                            "info2": ""
+                        },
+                        {
+                            "caption": "陈丽华|面套设计室(JV+I...",
+                            "info1": "40",
+                            "info2": ""
+                        },
+                        {
+                            "caption": "朱祥华|工业设计室",
+                            "info1": "40",
+                            "info2": ""
+                        }
+                    ],
+                    "name": "作者",
+                    "type": "author"
+                }
+            ],
+            "title": "创新idea提交",
+            "type": "fromInfo"
+        },
+        {
+            "info": [
+                {
+                    "name": "负责人",
+                    "value": "赵旭楠"
+                },
+                {
+                    "isbold": true,
+                    "name": "创新概念库及公司专利库中是否有类似概念",
+                    "value": ""
+                }
+            ],
+            "title": "Innovation初步审核（查重）",
+            "type": "Innovation"
+        },
+        {
+            "info": [
+                {
+                    "slider": "85.00",
+                    "state": "已评估",
+                    "title": "1.是否清晰的描述了该概念的应用范围及使用情景",
+                    "type": "slider",
+                    "user": "评估人:   张寅"
+                },
+                {
+                    "suggest": "该概念满足消费者对各个性化的需求，同时满足面套拆换的便利性和安全性。提供新的商业机会：售前设计+售后服务。",
+                    "type": "suggest"
+                },
+                {
+                    "slider": "50.00",
+                    "state": "已评估",
+                    "title": "2.建议方案是否可以解决所描述的问题",
+                    "type": "slider",
+                    "user": "评估人:   赵旭楠"
+                },
+                {
+                    "suggest": "该方案已初步验证，可以实现面套更换。",
+                    "type": "suggest"
+                },
+                {
+                    "slider": "69.00",
+                    "state": "已评估",
+                    "title": "3.市场和公司内部对该问题或类似问题的对标信息",
+                    "type": "slider",
+                    "user": "评估人:   左家乐"
+                },
+                {
+                    "suggest":"市场：竞争对手已具有该概念设计（丰田纺织、雷诺）。YFJC:2012年YFV,E-Bee概念车，采用可更换面套概念。",
+                    "type": "suggest"
+                },
+                {
+                    "slider": "72.00",
+                    "state": "已评估",
+                    "title": "4.不是简单的设计优化，具有一定挑战性，分析该项目的挑战性。",
+                    "type": "slider",
+                    "user": "评估人:   陈雅萍"
+                },
+                {
+                    "suggest": "针对传统面套设计，开发新的方案设计。",
+                    "type": "suggest"
+                },
+                {
+                    "slider": "69.00",
+                    "state": "已评估",
+                    "title": "5.创新概念库中是否有相同或类似概念",
+                    "type": "slider",
+                    "user": "评估人:   郭丽蓉"
+                },
+                {
+                    "suggest": "概念库中无类似概念及解决方案",
+                    "type": "suggest"
+                },
+                {
+                    "suggest": "该概念价值较高，可以帮助公司开发新的业务领域。",
+                    "time": "2014-12-18 17:39",
+                    "type": "userAndSuggest",
+                    "user": "毛爱华  同意"
+                }
+            ],
+            "title": "Phase 1 – Step 1 签发-方案合理性",
+            "type": "Phase-Step"
+        },
+        {
+            "info": [
+                {
+                    "slider": "100.00",
+                    "state": "已评估",
+                    "title": "1.从公司战略发展角度对该概念评估（可以迅速准确切入市场并且获得竞争力，是否属于新的商业模式，能否给公司带来重大发展）",
+                    "type": "slider",
+                    "user": "评估人:   张寅"
+                },
+                {
+                    "suggest": "“制造业服务化” ，是未来制造业发展的主流方向，YFJC于2014年建立了售后启动工作组，可更换面套满足YFJC新产品的要求，并且为售后市场提供新的商业机会，从售前设计到售后服务。",
+                    "type": "suggest"
+                },
+                {
+                    "slider": "73.00",
+                    "state": "已评估",
+                    "title": "2.评估是否属于延锋江森定义的创新范围（YFJC创新范围包括新产品、新工艺、新材料应用）",
+                    "type": "slider",
+                    "user": "评估人:   左家乐"
+                },
+                {
+                    "suggest": "YFJC技术创新范围为新产品、新工艺、新材料应用，可更换面套满足创新范围中新产品的应用。",
+                    "type": "suggest"
+                },
+                {
+                    "slider": "76.00",
+                    "state": "已评估",
+                    "title": "3.创新性评估建议（满足创新概念的四个特点之一：快速、新的、大的增长、不确定性）",
+                    "type": "slider",
+                    "user": "评估人:   陈雅萍"
+                },
+                {
+                    "suggest": "可更换面套多材质、多造型、多风格，方便用户按照自己的个性喜好挑选，存在后装市场山寨该创新概念的风险，建议走个性化高端定制路线或者高质量安全的儿童市场，从而规避山寨问题。",
+                    "type": "suggest"
+                },
+                {
+                    "suggest": "开发周期2个月内，属于短期概念可行性分析。",
+                    "time": "2015-02-13 09:55",
+                    "type": "userAndSuggest",
+                    "user": "毛爱华  同意"
+                }
+            ],
+            "title": "Phase 1 – Step 2 签发-挖掘概念潜在价值",
+            "type": "Phase-Step"
+        },
+        {
+            "title": "Phase 1 – Step 3 签发-跨部门综合评定",
+            "type": "Phase1-Step3"
+        },
+        {
+            "info": [
+                {
+                    "slider": "77.00",
+                    "state": "已评估",
+                    "title": "1.详细对标分析报告",
+                    "type": "slider",
+                    "user": "评估人:   孙国臣"
+                },
+                {
+                    "suggest": "市场上已有相关产品，可否考虑在拆装上做到更加的便利，以及成本，精致工艺上等有更加多的市场竞争力。",
+                    "type": "suggest"
+                },
+                {
+                    "slider": "75.00",
+                    "state": "已评估",
+                    "title": "2.价值分析（优势）",
+                    "type": "slider",
+                    "user": "评估人:   陆传华"
+                },
+                {
+                    "suggest": "可以提供消费者个性化、定制化的价值",
+                    "type": "suggest"
+                },
+                {
+                    "slider": "86.00",
+                    "state": "已评估",
+                    "title": "3.项目开发计划(附件形式上传)",
+                    "type": "slider",
+                    "user": "评估人:   赵旭楠"
+                },
+                {
+                    "suggest": "见附件",
+                    "type": "suggest"
+                },
+                {
+                    "slider": "17.00",
+                    "state": "已评估",
+                    "title": "4.项目市场风险分析",
+                    "type": "slider",
+                    "user": "评估人:   赵旭楠"
+                },
+                {
+                    "suggest": "见附件",
+                    "type": "suggest"
+                },
+                {
+                    "slider": "86.00",
+                    "state": "已评估",
+                    "title": "5.技术可行性分析（更新）",
+                    "type": "slider",
+                    "user": "评估人:   赵旭楠"
+                },
+                {
+                    "suggest": "见附件",
+                    "type": "suggest"
+                },
+                {
+                    "suggest": "针对RISK再下一阶段重点关注。",
+                    "time": "2015-05-05 15:34",
+                    "type": "userAndSuggest",
+                    "user": "毛爱华  同意"
+                }
+            ],
+            "title": "Phase 2 签发-概念可行性",
+            "type": "Phase-Step"
+        },
+        {
+            "info": [
+                {
+                    "slider": "58.00",
+                    "state": "已评估",
+                    "title": "1.完成专利交底书",
+                    "type": "slider",
+                    "user": "评估人:   赵旭楠"
+                },
+                {
+                    "suggest": "专利交底书已完成，经专利检索，已有类似专利。经专利背景调查，国家知识产权局检索中心的对此２项专利检索报告其检索结果为：所有的专利权不具备创造性，可以基本忽略此２项专利。后续将针对可更换面套，单面其他情况、双面更换的方案，优化专利。",
+                    "type": "suggest"
+                },
+                {
+                    "slider": "84.00",
+                    "state": "已评估",
+                    "title": "2.现状分析",
+                    "type": "slider",
+                    "user": "评估人:   赵旭楠"
+                },
+                {
+                    "suggest": "通用售后接受可更换面套概念，即将推广，目前正在做试验分析阶段。",
+                    "type": "suggest"
+                },
+                {
+                    "slider": "84.00",
+                    "state": "已评估",
+                    "title": "3.技术方案评估",
+                    "type": "slider",
+                    "user": "评估人:   赵旭楠"
+                },
+                {
+                    "suggest": "详情请见附件",
+                    "type": "suggest"
+                },
+                {
+                    "slider": "76.00",
+                    "state": "已评估",
+                    "title": "4.制造可行性评估",
+                    "type": "slider",
+                    "user": "评估人:   赵旭楠"
+                },
+                {
+                    "suggest": "拉链对齐缝制工艺要求高，方案为：拉链生产时将眼刀的位置用不同颜色的缝线缝入拉链边缘，便于后续生产定位。",
+                    "type": "suggest"
+                },
+                {
+                    "slider": "73.00",
+                    "state": "已评估",
+                    "title": "5.成本核算",
+                    "type": "slider",
+                    "user": "评估人:   赵旭楠"
+                },
+                {
+                    "suggest": "经costing基于GT英朗车型核算，可更换面套，相对于原面套成本增长1/3。",
+                    "type": "suggest"
+                },
+                {
+                    "slider": "85.00",
+                    "state": "已评估",
+                    "title": "6.商业价值评估",
+                    "type": "slider",
+                    "user": "评估人:   赵旭楠"
+                },
+                {
+                    "suggest": "1、对于终端消费者：操作方便，安全，选择空间大，可满足个性化需求。不必额外购买座椅套，提升面套更换的可能性。2、对YFJC:提升了产品功能，扩展YFJC业务范围。",
+                    "type": "suggest"
+                },
+                {
+                    "slider": "90.00",
+                    "state": "已评估",
+                    "title": "7.项目开发预算",
+                    "type": "slider",
+                    "user": "评估人:   赵旭楠"
+                },
+                {
+                    "suggest": "GEBT中，TRIM方面为可更换面套的项目预算。",
+                    "type": "suggest"
+                },
+                {
+                    "slider": "86.00",
+                    "state": "已评估",
+                    "title": "8.详细项目开发计划",
+                    "type": "slider",
+                    "user": "评估人:   赵旭楠"
+                },
+                {
+                    "suggest": "项目已处于试验阶段（气囊点爆、耐久试验、面料阻燃），详细开发计划见附件。",
+                    "type": "suggest"
+                },
+                {
+                    "slider": "55.00",
+                    "state": "已评估",
+                    "title": "9.ok to sell",
+                    "type": "slider",
+                    "user": "评估人:   赵旭楠"
+                },
+                {
+                    "suggest": "同意",
+                    "type": "suggest"
+                },
+                {
+                    "suggest": "降本分析，专利分析",
+                    "time": "2015-05-06 09:38",
+                    "type": "userAndSuggest",
+                    "user": "陶惠家  同意"
+                }
+            ],
+            "title": "Phase 3 签发-概念适用性",
+            "type": "Phase-Step"
+        }
+    ]
+},             
+            func:{
+            }
+        };
+        this.$vm = $(this.$el).render(this.$obj);
+        //this.loadData();
+    }
+}
+
+
+</script>
+
+<style type="less">
+@display:inline-block;
+    #xiangqing{
+        width: 100%;
+        position: absolute;
+        top: 45px;
+        left: 0;
+        right: 0;
+        a{
+            display: @display;
+            margin-right: -57px;
+            color: #8FC04D;
+            font-size: 16px;
+            font-weight: bold;
+        }
+    }
+
+    aui-xiang{
+        .title{
+            text-align: left;
+            height: 30px;
+            line-height: 30px;
+            background: #8FC04D;
+            color: white;
+            span{
+                margin-left: 5px
+            }
+        }
+        .div1{
+            color: #D3998F;
+            display: @display;
+            width: 24%;
+            text-align: left;
+        }
+        .div2{
+            display: @display;
+            color: black;
+            text-align: left;
+            width: 74%;
+        }
+        .title2{
+            display: @display;
+            font-size: 12px;
+            font-weight: bold;
+            width:64%;
+        }
+        .title2_right{
+            display: @display;
+            font-size: 12px;
+            width:34%;
+        }
+        .contents{
+            margin: 0px 15px;
+            border-bottom: 1px solid #ccc;
+        }
+        .contents2{
+            margin: 5px 0px;
+        }
+        .author{
+            border: 1px solid;
+            margin: 5px 0px;
+            div{
+                margin: 10px 5px;
+            }
+        }
+
+    }
+
+
+</style>

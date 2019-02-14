@@ -1,0 +1,75 @@
+<ui>
+<div id="introdetail">
+   <aui-header>
+        <aui-titlebar>
+            <left-area>
+                <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+            </left-area>
+            <caption-area>
+            <!-- 介绍/M分享/活动详情 -->
+                <aui-text>详情</aui-text>
+            </caption-area>
+        </aui-titlebar>
+    </aui-header>
+
+
+     <aui-scroller id="xq" class="content dakacont" style="position: absolute; top: 45px; right: 0px; bottom: 0px;left: 0px;text-align: center;border-top:0;">
+       
+    </aui-scroller>
+    </div>
+</ui>
+
+<script>
+import fetch from '@comm/utils/xfetch';
+import { router } from '@auicomp/action/Action.aui';
+import './Frame.aui';
+import '@auicomp/list/List.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import Toast from '@auicomp/toast/Toast.aui';
+import { Base64 } from 'js-base64';
+export default class Detail{
+    static get tag(){
+        return 'detail';
+    }
+
+    
+    created () {
+        var contents=router.getQueryObj().content;
+
+        var result=Base64.decode(contents);
+        $("#xq").append(result);
+        $(this.$el).find("a").each(function(){
+            $(this).removeAttr('href');
+        });
+        $(this.$el).find("img").each(function(){
+            var imgSrc=$(this).attr("src");
+            var imgThis = $(this);
+            fetch({
+                appId:'iexpress',
+                url:imgSrc,
+                dataType:'text',
+                success:function(rsp){
+                    imgThis.attr("src",rsp);
+                    imgThis.css("width","100%");
+                }
+            })
+            
+        });
+
+        const obj = this.$obj ={
+            func:{
+            }
+        };
+        this.$vm = $(this.$el).render(obj);
+        
+    }
+    
+}
+
+</script>
+
+<style>
+    .hdimg{
+        width:100%;
+    }
+</style>

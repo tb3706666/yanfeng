@@ -1,0 +1,167 @@
+<ui>
+    <div class="History">
+       <aui-header>
+            <aui-titlebar>
+                <left-area>
+                    <aui-action type="back"><i class="icon auicon icon-arrowleft"></i></aui-action>
+                </left-area>
+                <caption-area>
+                    <aui-text>选择子节点</aui-text>
+                </caption-area>
+                <right-area>
+                    <a v-on:click="func.HistoryPeople">
+                        <i class="icon auicon icon-rdook"></i>
+                    </a>
+                </right-area>
+            </aui-titlebar>
+        </aui-header>
+        <aui-scroller  class="scroll aui-refresher-History">
+            <div class="border1 margin5 padding-lr10">
+                <div class="border-bt1 padding-tb10">选择回退节点  Chose node to return</div>
+                <div class="fd-row align-c padding-tb10" v-on:click="func.selectNode">
+                    <div class="flex1 ">{{selectName}}</div>
+                    <i class="icon auicon icon-arrowright"></i>
+                </div>
+            </div>
+        </aui-refresher>
+    </div>
+</ui>
+<script>
+    import '@auicomp/refresher/Refresher.aui';
+    import '@auicomp/list/List.aui';
+    import fetch from "@libs/xfetch";
+    import common from '@libs/common';
+    import { router } from '@auicomp/action/Action.aui';
+    import 'magic-check/css/magic-check.min.css';
+    import Selectsheet from '@comm/components/Selectsheet.aui';
+
+    export default class History {
+
+        static get tag() {
+            return 'History';
+        }
+        created() {
+            var self = this;
+            const obj = this.$obj = {
+                HistoryPeople:"",
+                selectName:"",
+                selectValue:"",
+                select:[],
+                func:{
+                    HistoryPeople(){
+                        self.doSubmit();
+                    },
+                    selectNode(){
+                        Selectsheet.show({
+                            list: obj.select.map(function(item){
+                                return item.selText
+                            }),
+                            func:function(index){
+                                obj.selectName = obj.select[index].selText;
+                                obj.selectValue = obj.select[index].selValue;
+                            }
+                        });
+                   }
+                }
+            }
+            this.$vm = $(this.$el).render(this.$obj);
+            this.onload();
+        }
+        detached(){
+            this.$vm && this.$vm.destroy();
+        }
+        onload(){
+            let self = this;
+            var prePageData = document.querySelector(router.getQueryObj().page).component.$obj.data;
+            fetch({
+                appId: common.appId,
+                url : common.hrUrl+'/qingjiahistory.jsp',
+                data: {
+                    flowid:prePageData.flowid,
+                    instanceId:prePageData.instanceId,
+                    nodeid:router.getQueryObj().flag.split(",")[0]
+                },
+                type: 'post',
+                success: function(infos){
+                    console.log(JSON.stringify(infos));
+                    self.$obj.select = infos.selInfo;
+                    self.$obj.selectName = infos.selInfo[0].selText;
+                    self.$obj.selectValue = infos.selInfo[0].selValue;
+                }
+            });
+        }
+        doSubmit(){
+            let self = this;
+            var prePageData = document.querySelector(router.getQueryObj().page).component.$obj;
+            if(this.$obj.selectValue == "0"){
+                common.alert("还未选择节点!Please choose a node!");
+            } else {
+                var jData = "{\"HisId\":\""+ this.$obj.selectValue +"\",\"TaskId\":\""+ prePageData.data.taskId +"\",\"Remark\":\""+ prePageData.content +"\",\"StartTime\":\""+ prePageData.data.startTime +"\",\"FlowId\":\""+ prePageData.data.flowid +"\",\"FuncName\":\"wf.RuntimeHandler.ReturnAnyBack\"}{:ky->f" + prePageData.data.jPack;
+                fetch({
+                    appId: common.appId,
+                    url : common.hrUrl+'/qingjiasubmit.jsp',
+                    data: [{
+                        type:0,
+                        name:'jsonData',
+                        value:jData
+                        }
+                    ],
+                    type: 'post',
+                    success: function(dataInfo){
+                        if(dataInfo.flag == "success"){
+                            common.alert("操作成功!Successful Done!",function(){
+                                document.querySelector('aui-refresher').component.refresher.triggerDownScroll();
+                                history.go(-2);
+                            });
+                        } else {
+                             common.alert("操作失败!Fail Done!");
+                        }
+                    }
+                });
+            }
+        }
+    }
+</script>
+<style type='less'>
+@import url('../../assets/less/theme/default/common.less');
+.History{
+    .search-box{
+        width: 100%;
+        padding: 5px;
+        .subjectarea{
+                width:100%;
+                border: 1px solid @border-color;
+                border-radius: 4px;
+                .subject{
+                    border: 0;
+                    width:100%;
+                    padding:10px;
+                    font-size: fts-normal;
+                    -webkit-appearance: textfield;    
+                }
+            }
+            input::-webkit-search-decoration,
+            input::-webkit-search-cancel-button {
+            display: none;
+            }
+    }
+    
+    .aui-refresher-History{
+        position:absolute;
+        top:44px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        .list{
+            .list-item{
+                padding: 8px;
+            }
+        }
+    }
+    label:before,label:after{
+        box-sizing:border-box;
+    }
+
+}
+
+</style>

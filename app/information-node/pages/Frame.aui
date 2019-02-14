@@ -1,0 +1,50 @@
+<ui>
+    <aui-page transition="slide"></aui-page>
+</ui>
+
+
+<script>
+import router from '../routers';
+import '@auifont/iconfont.css';
+
+export default class Frame{
+    
+    static get tag(){
+        return 'frame';
+    }
+
+    created(){
+        // 通过hash值来判断首次加载的路由
+        const hash = (location.hash||'/').replace('#', '');
+        router.go(hash,true);
+    }
+}
+
+</script>
+
+<style type="less">
+
+/* 引用皮肤 */
+@import url('~@theme/common.less');
+
+#app, aui-frame{
+    display: block;
+    height: 100%;
+}
+
+.demo-note {
+    background: #fff75d;
+    margin: 10px 0px;
+    padding: 10px;
+    color: #7b7b7b;
+    text-align: center;
+    text-shadow: none;
+    font-size: 14px;
+}
+
+aui-titlebar .icon{
+    color: @color;/* 使用皮肤中的变量 */
+}
+</style>
+
+

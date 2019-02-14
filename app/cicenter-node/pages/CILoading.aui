@@ -1,0 +1,121 @@
+<ui>
+<img class="loadimg" src="./assets/imgs/loading.png">
+</ui>
+
+
+<script>
+import '@auicomp/scroller/Scroller.aui';
+import Alert from '@auicomp/alert/Alert.aui';
+
+import fetch from '@comm/utils/nfetch';
+import { router } from '@auicomp/action/Action.aui';
+import auiLoading from '@auicomp/loading/Loading.aui';
+import './Frame.aui';
+import config from '@libs/config';
+
+var curHash;
+
+export default class CILoading{
+    static get tag(){
+        return 'ciloading';
+    }
+    
+    created(){
+        let self = this;
+        var logincout=[];
+        window.userInfo = {
+            loginId:'awan1315',
+            password:'ad1'
+        };
+        self.login();
+        fetch.plusready(function(){
+            appnest.config.getUserInfo({//获取用户信息
+                success:function(r){
+                    window.userInfo = r;
+                    self.login();
+                },
+                fail:function(r){
+                    Alert.show({
+                        content: '获取平台用户信息失败，请联系管理员',
+                        doOk: function(){
+                            appnest.navigation.closeWindow();
+                        }
+                    });
+                }
+            });
+        });
+    }
+    login(){
+        let self = this;
+        auiLoading.show();
+        window.hasLogin = false;//添加登陆成功标志
+        fetch({
+            appId: 'ci',
+            url : '/submitLogin',
+            data: {
+                username: window.userInfo.loginId,
+                password: window.userInfo.password,
+            },
+            success: function(rsp){
+                if(rsp.result=='success'){
+                    window.hasLogin = true;//添加登陆成功标志
+                    var loginjson={name:rsp.name,pingjiangFlag:rsp.pingjiangFlag,daibanNum:rsp.daibanNum,otherNum:rsp.otherNum};
+                    window.logininfo=loginjson;
+                    self.getCookie();
+                }else{
+                    Alert.show({
+                        content: '用户名或密码错误',
+                        doOk: function(){
+                            appnest.navigation.closeWindow();
+                        }
+                    });
+                }
+                auiLoading.hide();
+            },
+            error: function(rs){
+                Alert.show({
+                    content: rs.errmsg,
+                    doOk: function(){
+                        appnest.navigation.closeWindow();
+                    }
+                });
+            }
+        });
+    }
+    getCookie(){
+        fetch({
+            url: '/getcookie',
+            method:'get',
+            hideLoading: true,
+            success: function(data) {
+                if(window.appnest){
+                    data.cookie.split(';').forEach(item=>{
+                        console.log(item.split('=')[0].trim()+"<<>>"+item.split('=')[1]);
+                            appnest.http.setCookie({
+                                url:config.domain,
+                                cookie:{
+                                name:item.split('=')[0].trim(),
+                                value:item.split('=')[1],
+                                expiresAt: (new Date()).getTime() + 24*60*60*1000,
+                                }
+                            });
+                    });
+                    console.log('设置cookie成功')
+                }
+                $('#app').html('<aui-frame></aui-frame>');
+                
+            },
+            error: function(rs) {
+                appnest.navigation.closeWindow();
+            }
+        }) 
+    }
+}
+</script>
+
+<style>
+.loadimg{
+    width: 100%;
+    height: 100%;
+}
+</style>
