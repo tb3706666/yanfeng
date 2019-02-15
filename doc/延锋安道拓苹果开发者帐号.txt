@@ -1,4 +1,0 @@
-登录地址:https://idmsa.apple.com/IDMSWebAuth/login?&appIdKey=891bd3417a7776362562d2197f89480a8547b108fd934911bcbea0110d07f757&path=//membercenter/index.action
-applied:yfjcmobile@sina.com
- 
-password:Summer2016
